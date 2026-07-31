@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Exam - {{ test.title }}</title>
+    <style>
+        body { background-color: #0b0d26; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; user-select: none; overflow-x: hidden; }
+
+        /* Top Bar */
+        .top-bar { background: #10143a; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .top-bar-left h2 { margin: 0; color: #ffc107; font-size: 18px; text-transform: uppercase; }
+        .top-bar-left span { color: #ccc; font-size: 11px; }
+        .timer-box { font-size: 18px; font-weight: bold; color: #00ff00; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px; border: 1px solid #00ff00; }
+
+        /* Timer Pulse Animation for last 1 minute */
+        @keyframes pulseAlert {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 76, 76, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 76, 76, 0); }
+        }
+
+        .main-layout { display: flex; position: relative; height: calc(100vh - 65px); }
+
+        /* Left Side: Question Area */
+        .question-section { flex: 3; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 60px; }
+
+        .question-box { background: rgba(0, 198, 255, 0.05); border: 2px solid #00c6ff; border-radius: 15px; padding: 20px; margin-bottom: 25px; box-shadow: 0 0 15px rgba(0,198,255,0.2); }
+        .q-header { font-size: 16px; color: #ffc107; margin-bottom: 10px; font-weight: bold; }
+        .q-text { font-size: 18px; color: white; line-height: 1.5; }
+
+        .options-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .option-label { display: flex; align-items: center; background: #10143a; padding: 12px 20px; border-radius: 50px; border: 2px solid #333; cursor: pointer; transition: 0.3s; font-size: 16px; position: relative; }
+        .option-label:hover { border-color: #ffc107; }
+        .option-label input { position: absolute; opacity: 0; cursor: pointer; }
+        .option-label.selected { border-color: #ffc107; background: linear-gradient(to right, #ff9800, #ffc107); color: black; font-weight: bold; box-shadow: 0 0 15px rgba(255,193,7,0.5); }
+
+        /* Action Buttons */
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; color: white; text-transform: uppercase; text-align: center; }
+        .btn-prev { background: linear-gradient(145deg, #555, #333); }
+        .btn-save { background: linear-gradient(145deg, #008CBA, #005f7a); }
+        .btn-clear { background: linear-gradient(145deg, #f44336, #ba2d24); }
+        .btn-review { background: linear-gradient(145deg, #9c27b0, #6a1b9a); }
+
+        /* Right Side: Palette Area */
+        .palette-section { flex: 1; background: #050714; border-left: 2px solid #ffc107; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; transition: 0.3s ease-in-out; }
+        .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; font-size: 11px; color: #ccc; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .status-box { width: 16px; height: 16px; border-radius: 3px; display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; font-size: 10px; }
+        .bg-not-visited { background: #e0e0e0; }
+        .bg-not-answered { background: #ff4c4c; color: white; }
+        .bg-answered { background: #00ff00; }
+        .bg-marked { background: #a200ff; color: white; }
+        .number-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .num-btn { width: 100%; aspect-ratio: 1; border: none; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-submit-final { margin-top: 20px; padding: 15px; background: linear-gradient(to right, #555, #777); color: white; border: 1px solid #444; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; text-transform: uppercase; }
+
+        /* Mobile Adjustments */
+        .overlay { display: none; }
+        .trophy-slider-btn { display: none; }
+
+        @media (max-width: 768px) {
+            .question-section { padding: 15px; padding-bottom: 60px; }
+            .question-box { padding: 15px; margin-bottom: 15px; }
+            .q-text { font-size: 15px; }
+            .option-label { font-size: 13px; padding: 10px 15px; }
+
+            .trophy-slider-btn {
+                display: flex; align-items: center; justify-content: center; gap: 5px;
+                position: fixed; top: 40%; right: 0; background: #0b0d26; color: #ffc107;
+                border: 2px solid #00c6ff; border-right: none; padding: 12px 10px 12px 15px;
+                border-radius: 50px 0 0 50px; font-size: 20px; font-weight: bold;
+                cursor: pointer; z-index: 1000; box-shadow: -4px 0 15px rgba(0,198,255,0.4);
+            }
+            .palette-section { position: fixed; top: 0; right: -100%; width: 260px; height: 100vh; z-index: 1001; box-shadow: -5px 0 20px rgba(0,0,0,0.9); }
+            .palette-section.open { right: 0; }
+            .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
+            .overlay.open { display: block; }
+            .close-palette-btn { background: transparent; color: white; border: none; font-size: 24px; text-align: right; cursor: pointer; margin-bottom: 10px; }
+        }
+        @media (min-width: 769px) { .close-palette-btn { display: none; } }
+
+        /* Bottom Sheet */
+        .bottom-sheet-toggle {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            background: #10143a; color: #ffc107; border: 1px solid #ffc107; border-bottom: none;
+            padding: 8px 30px; border-radius: 15px 15px 0 0; cursor: pointer; z-index: 1000;
+            font-weight: bold; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 5px;
+        }
+        .bottom-sheet {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh;
+            background: #0b0d26; border-top: 3px solid #ffc107; border-radius: 20px 20px 0 0;
+            z-index: 2005; transition: 0.4s ease-in-out; display: flex; flex-direction: column;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.9);
+        }
+        .bottom-sheet.open { bottom: 0; }
+        .sheet-header { padding: 15px 20px; background: #10143a; border-radius: 20px 20px 0 0; border-bottom: 1px solid #444; font-weight: bold; color: #ffc107; display: flex; justify-content: space-between; align-items: center; }
+        .sheet-content { padding: 15px; overflow-y: auto; flex: 1; }
+
+        .review-card { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #444; cursor: pointer; }
+        .review-card.answered-card { border-left-color: #00ff00; }
+        .review-card.marked-card { border-left-color: #a200ff; }
+        .review-card:hover { background: rgba(255,255,255,0.1); }
+        .review-opt { display: inline-block; padding: 6px 12px; margin: 4px 4px 0 0; border-radius: 20px; background: #000; font-size: 11px; color: #ccc; border: 1px solid #333; }
+        .review-opt.selected-opt { border: 2px dotted #00c6ff; color: #00c6ff; font-weight: bold; background: rgba(0, 198, 255, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <h2>{{ test.title }} <span style="font-size:12px; color:#00c6ff;">(By: {{ coaching_name|upper }})</span></h2>
+            <span>🧑‍🎓 {{ student_display_name|upper }} | Code: {{ test.test_code }}
+                | <span id="liveCountBadge" onclick="openLiveModal()" style="background: rgba(0, 198, 255, 0.1); border: 1px solid #00c6ff; color: #00c6ff; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-left: 5px; box-shadow: 0 0 5px rgba(0,198,255,0.3);">👥 Live: <span id="liveCountNumber">...</span></span>
+            </span>
+        </div>
+        <div class="timer-box" id="timer">--:--</div>
+    </div>
+
+    <form id="examForm" method="POST" style="display: none;">
+        {% csrf_token %}
+        <div id="hiddenInputsContainer"></div>
+    </form>
+
+    <div class="main-layout">
+        <div class="question-section">
+            <div class="question-box">
+                <div class="q-header" id="questionHeader">Question 1</div>
+                <div class="q-text" id="questionText">Loading...</div>
+            </div>
+
+            <div class="options-box">
+                <label class="option-label" id="label_A" onclick="selectOption('A')">
+                    <input type="radio" name="current_q" value="A" id="radio_A"> <span id="text_A">A.</span>
+                </label>
+                <label class="option-label" id="label_B" onclick="selectOption('B')">
+                    <input type="radio" name="current_q" value="B" id="radio_B"> <span id="text_B">B.</span>
+                </label>
+                <label class="option-label" id="label_C" onclick="selectOption('C')">
+                    <input type="radio" name="current_q" value="C" id="radio_C"> <span id="text_C">C.</span>
+                </label>
+                <label class="option-label" id="label_D" onclick="selectOption('D')">
+                    <input type="radio" name="current_q" value="D" id="radio_D"> <span id="text_D">D.</span>
+                </label>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-prev" onclick="moveToPrevious()" id="btnPrev">Previous</button>
+                <button type="button" class="btn btn-clear" onclick="clearResponse()">Clear Response</button>
+                <button type="button" class="btn btn-review" onclick="markForReview()">Mark for Review</button>
+                <button type="button" class="btn btn-save" onclick="saveAndNext()">Save & Next</button>
+            </div>
+        </div>
+
+        <div class="overlay" id="mobileOverlay" onclick="togglePalette()"></div>
+        <button class="trophy-slider-btn" onclick="togglePalette()"><span>⟨</span> 🏆</button>
+
+        <div class="palette-section" id="paletteSection">
+            <button class="close-palette-btn" onclick="togglePalette()">✖</button>
+            <div style="text-align: center; color: #ffc107; font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                🧑‍🎓 {{ student_display_name|upper }}
+            </div>
+            <div class="legend-grid">
+                <div class="legend-item"><div class="status-box bg-answered" id="count_answered">0</div> Answered</div>
+                <div class="legend-item"><div class="status-box bg-not-answered" id="count_not_answered">0</div> Not Ans</div>
+                <div class="legend-item"><div class="status-box bg-not-visited" id="count_not_visited">0</div> Not Visited</div>
+                <div class="legend-item"><div class="status-box bg-marked" id="count_marked">0</div> Marked</div>
+            </div>
+            <div style="background: #10143a; padding: 8px; text-align: center; margin-bottom: 10px; border-radius: 5px;">Question Palette</div>
+            <div class="number-grid" id="paletteGrid"></div>
+
+            <button type="button" class="btn-submit-final" onclick="submitExamManually()">Auto-Submits at End</button>
+        </div>
+    </div>
+
+    <button class="bottom-sheet-toggle" onclick="toggleBottomSheet()">
+        <span>🔼</span> Full Test Review
+    </button>
+
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-header">
+            <span>📋 All Questions Overview</span>
+            <button onclick="toggleBottomSheet()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">✖</button>
+        </div>
+        <div class="sheet-content" id="sheetContent"></div>
+    </div>
+
+    <div id="liveStudentsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#10143a; width:90%; max-width:400px; border-radius:10px; border:1px solid #00c6ff; overflow:hidden; box-shadow: 0 10px 25px rgba(0,198,255,0.2);">
+
+            <div style="background:#0b0d26; padding:15px; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:#ffc107; margin:0; font-size:16px;">👥 Live Students (<span id="modalLiveCount">0</span>)</h3>
+                <button onclick="closeLiveModal()" style="background:none; border:none; color:#ff4c4c; font-size:20px; font-weight:bold; cursor:pointer; padding:0;">✖</button>
+            </div>
+
+            <div id="liveStudentsList" style="padding:15px; max-height:60vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <p style="color:#ccc; text-align:center; font-size:14px;">Fetching live data...</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let isSafeExit = false;
+
+        const TEST_ID = "{{ test.id }}";
+        const STATE_KEY = "kbc_state_" + TEST_ID;
+        const INDEX_KEY = "kbc_index_" + TEST_ID;
+        const ENDTIME_KEY = "kbc_endtime_" + TEST_ID;
+        const SHUFFLE_KEY = "kbc_shuffle_" + TEST_ID; // 🚀 नया शफल की
+
+        // 1. ओरिजिनल सवाल लोड करें
+        let questions = [
+            {% for q in questions %}
+            {
+                id: {{ q.id }},
+                text: `{{ q.question_text|escapejs }}`,
+                options: { 'A': `{{ q.option_a|escapejs }}`, 'B': `{{ q.option_b|escapejs }}`, 'C': `{{ q.option_c|escapejs }}`, 'D': `{{ q.option_d|escapejs }}` },
+                status: 'not_visited', selected: null
+            },
+            {% endfor %}
+        ];
+
+        // 🚀 2. स्मार्ट शफलिंग लॉजिक
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        let savedShuffle = localStorage.getItem(SHUFFLE_KEY);
+        if (savedShuffle) {
+            // अगर पहले से शफल हुआ था, तो उसी क्रम में लगाएं (रिफ्रेश सपोर्ट)
+            let savedIds = JSON.parse(savedShuffle);
+            let orderedQuestions = [];
+            savedIds.forEach(id => {
+                let q = questions.find(q => q.id === id);
+                if (q) orderedQuestions.push(q);
+            });
+            // सुरक्षा जांच: अगर कोई सवाल छूट गया तो फिर से शफल कर दें
+            if (orderedQuestions.length === questions.length) {
+                questions = orderedQuestions;
+            } else {
+                shuffleArray(questions);
+                localStorage.setItem(SHUFFLE_KEY, JSON.stringify(questions.map(q => q.id)));
+            }
+        } else {
+            // पहली बार लोड होने पर शफल करें और सेव करें
+            shuffleArray(questions);
+            localStorage.setItem(SHUFFLE_KEY, JSON.stringify(questions.map(q => q.id)));
+        }
+
+        // 🚀 3. शफल होने के बाद, सवालों को नया 1, 2, 3 इंडेक्स दें ताकि बच्चे को सीधा क्रम दिखे
+        questions.forEach((q, i) => {
+            q.index = i + 1;
+        });
+
+        // 4. पुराने सेव किए गए जवाब (स्टेट) वापस लाएं
+        let savedState = localStorage.getItem(STATE_KEY);
+        if (savedState) {
+            let parsedState = JSON.parse(savedState);
+            questions.forEach((q, i) => {
+                if (parsedState[i]) {
+                    q.status = parsedState[i].status;
+                    q.selected = parsedState[i].selected;
+                }
+            });
+        }
+
+        let savedIndex = localStorage.getItem(INDEX_KEY);
+        let currentIndex = savedIndex ? parseInt(savedIndex) : 0;
+
+        function saveLocalState() {
+            let stateToSave = questions.map(q => ({ status: q.status, selected: q.selected }));
+            localStorage.setItem(STATE_KEY, JSON.stringify(stateToSave));
+            localStorage.setItem(INDEX_KEY, currentIndex);
+        }
+
+        function togglePalette() {
+            document.getElementById('paletteSection').classList.toggle('open');
+            document.getElementById('mobileOverlay').classList.toggle('open');
+        }
+
+        function toggleBottomSheet() {
+            let sheet = document.getElementById('bottomSheet');
+            sheet.classList.toggle('open');
+            if(sheet.classList.contains('open')) populateBottomSheet();
+        }
+
+        function populateBottomSheet() {
+            let content = document.getElementById('sheetContent');
+            content.innerHTML = '';
+
+            // फुल रिव्यू भी अब शफल्ड क्रम में ही दिखेगा!
+            questions.forEach((q, i) => {
+                let card = document.createElement('div');
+                card.className = 'review-card';
+
+                if(q.status === 'answered') card.classList.add('answered-card');
+                if(q.status === 'marked') card.classList.add('marked-card');
+
+                card.onclick = () => {
+                    currentIndex = i;
+                    renderQuestion(currentIndex);
+                    toggleBottomSheet();
+                };
+
+                let qText = document.createElement('div');
+                qText.innerHTML = `<span style="color:#ffc107;">Q${q.index}:</span> ${q.text}`;
+                qText.style.marginBottom = '8px';
+                qText.style.fontSize = '14px';
+                card.appendChild(qText);
+
+                let optsDiv = document.createElement('div');
+                ['A', 'B', 'C', 'D'].forEach(opt => {
+                    let span = document.createElement('span');
+                    span.className = 'review-opt';
+                    if (q.selected === opt) span.classList.add('selected-opt');
+
+                    let text = q.options[opt];
+                    if(text.length > 15) text = text.substring(0, 15) + '...';
+                    span.innerText = `${opt}. ${text}`;
+
+                    optsDiv.appendChild(span);
+                });
+                card.appendChild(optsDiv);
+                content.appendChild(card);
+            });
+        }
+
+        let touchStartX = 0; let touchEndX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, false);
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 60) { document.getElementById('paletteSection').classList.add('open'); document.getElementById('mobileOverlay').classList.add('open'); }
+            if (touchEndX > touchStartX + 60) { document.getElementById('paletteSection').classList.remove('open'); document.getElementById('mobileOverlay').classList.remove('open'); }
+        }
+
+        function renderQuestion(index) {
+            let q = questions[index];
+            if(q.status === 'not_visited') q.status = 'not_answered';
+
+            document.getElementById('questionHeader').innerText = "Question " + q.index;
+            document.getElementById('questionText').innerText = q.text;
+
+            ['A', 'B', 'C', 'D'].forEach(opt => {
+                document.getElementById('text_' + opt).innerText = opt + ". " + q.options[opt];
+                document.getElementById('radio_' + opt).checked = false;
+                document.getElementById('label_' + opt).classList.remove('selected');
+            });
+
+            if(q.selected) {
+                document.getElementById('radio_' + q.selected).checked = true;
+                document.getElementById('label_' + q.selected).classList.add('selected');
+            }
+
+            document.getElementById('btnPrev').style.opacity = (index === 0) ? "0.3" : "1";
+            document.getElementById('btnPrev').style.pointerEvents = (index === 0) ? "none" : "auto";
+
+            updatePalette();
+            saveLocalState();
+        }
+
+        function selectOption(opt) {
+            ['A', 'B', 'C', 'D'].forEach(o => document.getElementById('label_' + o).classList.remove('selected'));
+            document.getElementById('label_' + opt).classList.add('selected');
+            document.getElementById('radio_' + opt).checked = true;
+
+            questions[currentIndex].selected = opt;
+            saveLocalState();
+        }
+
+        function getSelectedOption() {
+            let options = document.getElementsByName('current_q');
+            for(let i=0; i<options.length; i++) if(options[i].checked) return options[i].value;
+            return null;
+        }
+
+        function moveToPrevious() {
+            if(currentIndex > 0) {
+                currentIndex--;
+                renderQuestion(currentIndex);
+            }
+        }
+
+        function saveAndNext() {
+            let selected = getSelectedOption();
+            questions[currentIndex].selected = selected;
+            questions[currentIndex].status = selected ? 'answered' : 'not_answered';
+            moveToNext();
+        }
+
+        function clearResponse() {
+            questions[currentIndex].selected = null;
+            questions[currentIndex].status = 'not_answered';
+            renderQuestion(currentIndex);
+        }
+
+        function markForReview() {
+            questions[currentIndex].selected = getSelectedOption();
+            questions[currentIndex].status = 'marked';
+            moveToNext();
+        }
+
+        function moveToNext() {
+            if(currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderQuestion(currentIndex);
+            } else {
+                saveLocalState();
+                updatePalette();
+                if (window.innerWidth <= 768) { togglePalette(); }
+            }
+        }
+
+        function updatePalette() {
+            let grid = document.getElementById('paletteGrid');
+            grid.innerHTML = '';
+            let counts = { 'not_visited': 0, 'not_answered': 0, 'answered': 0, 'marked': 0 };
+
+            questions.forEach((q, i) => {
+                counts[q.status]++;
+                let btn = document.createElement('button');
+                btn.innerText = q.index;
+                btn.className = 'num-btn';
+
+                if(q.status === 'not_visited') btn.classList.add('bg-not-visited');
+                if(q.status === 'not_answered') btn.classList.add('bg-not-answered');
+                if(q.status === 'answered') btn.classList.add('bg-answered');
+                if(q.status === 'marked') btn.classList.add('bg-marked');
+
+                if(i === currentIndex) {
+                    btn.style.border = "2px solid #00c6ff";
+                    btn.style.boxShadow = "0 0 10px #00c6ff";
+                }
+
+                btn.onclick = () => {
+                    currentIndex = i;
+                    renderQuestion(currentIndex);
+                    if (window.innerWidth <= 768) { togglePalette(); }
+                };
+                grid.appendChild(btn);
+            });
+
+            ['not_visited', 'not_answered', 'answered', 'marked'].forEach(status => {
+                document.getElementById('count_' + status).innerText = counts[status];
+            });
+        }
+
+        function submitExam() {
+            isSafeExit = true;
+
+            localStorage.removeItem(STATE_KEY);
+            localStorage.removeItem(INDEX_KEY);
+            localStorage.removeItem(ENDTIME_KEY);
+            localStorage.removeItem(SHUFFLE_KEY); // टेस्ट पूरा होने पर शफल की डिलीट करें
+
+            let form = document.getElementById('examForm');
+            let container = document.getElementById('hiddenInputsContainer');
+            container.innerHTML = '';
+            questions.forEach(q => {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'question_' + q.id;  // 🚀 बैकएंड को हमेशा ओरिजिनल ID जाएगी!
+                input.value = q.selected ? q.selected : '';
+                container.appendChild(input);
+            });
+            form.submit();
+        }
+
+        function submitExamManually() {
+            alert("⚠️ परीक्षा का समय अभी समाप्त नहीं हुआ है!\n\nआप समय से पहले टेस्ट सबमिट नहीं कर सकते। कृपया तब तक अपने उत्तरों को दोबारा चेक (Review) करें।\n\nसमय (Timer) 00:00 होने पर आपका टेस्ट एक साथ अपने-आप (Auto-Submit) जमा हो जाएगा।");
+        }
+
+        let isStrictTimer = {{ is_strict|yesno:"true,false" }};
+        let timeInSeconds;
+        let nowTime = new Date().getTime();
+
+        if (isStrictTimer) {
+            timeInSeconds = parseInt("{{ remaining_seconds }}");
+        } else {
+            let savedEndTime = localStorage.getItem(ENDTIME_KEY);
+            if (savedEndTime && parseInt(savedEndTime) > nowTime) {
+                timeInSeconds = Math.floor((parseInt(savedEndTime) - nowTime) / 1000);
+            } else {
+                timeInSeconds = {{ test.total_time }} * 60;
+                let newEndTime = nowTime + (timeInSeconds * 1000);
+                localStorage.setItem(ENDTIME_KEY, newEndTime);
+            }
+        }
+
+        let timerElement = document.getElementById('timer');
+        let timerInterval = setInterval(function() {
+            let m = Math.floor(timeInSeconds / 60);
+            let s = timeInSeconds % 60;
+            timerElement.textContent = (m<10?'0'+m:m) + ':' + (s<10?'0'+s:s);
+
+            if(timeInSeconds <= 60) {
+                timerElement.style.color = "#ff4c4c";
+                timerElement.style.borderColor = "#ff4c4c";
+                timerElement.style.animation = "pulseAlert 1s infinite";
+            }
+
+            if (timeInSeconds <= 0) {
+                clearInterval(timerInterval);
+                submitExam();
+            }
+            timeInSeconds--;
+        }, 1000);
+
+        function fetchLiveStudents() {
+            fetch(`/api/live-students/{{ test.id }}/`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('liveCountNumber').innerText = data.count;
+                    document.getElementById('modalLiveCount').innerText = data.count;
+
+                    let listHtml = '';
+                    data.students.forEach(student => {
+                        let upperName = student.name.toUpperCase();
+                        listHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:5px; border:1px solid #333;">
+                                <span style="color:#fff; font-size:14px; font-weight:bold;">🧑‍🎓 ${upperName}</span>
+                                <span style="color:${student.color}; font-size:12px; font-weight:bold;">${student.status}</span>
+                            </div>
+                        `;
+                    });
+
+                    if (data.students.length === 0) {
+                        listHtml = `<p style="color:#ccc; text-align:center; font-size:14px;">You are the first one here!</p>`;
+                    }
+
+                    document.getElementById('liveStudentsList').innerHTML = listHtml;
+                })
+                .catch(err => console.log('Live fetch error:', err));
+        }
+
+        function openLiveModal() {
+            document.getElementById('liveStudentsModal').style.display = 'flex';
+            fetchLiveStudents();
+        }
+
+        function closeLiveModal() {
+            document.getElementById('liveStudentsModal').style.display = 'none';
+        }
+
+        setTimeout(fetchLiveStudents, 1000);
+        setInterval(fetchLiveStudents, 10000);
+
+        renderQuestion(currentIndex);
+
+        (function () {
+            window.history.pushState(null, null, window.location.href);
+
+            window.addEventListener('popstate', function (event) {
+                let leave = confirm("⚠️ चेतावनी:\n\nक्या आप वाकई परीक्षा छोड़ना चाहते हैं?\nयदि आप पीछे जाते हैं, तो आपका टेस्ट अधूरा रह सकता है और डेटा खो सकता है।\n\nपरीक्षा जारी रखने के लिए 'Cancel' दबाएं।");
+
+                if (!leave) {
+                    window.history.pushState(null, null, window.location.href);
+                } else {
+                    isSafeExit = true;
+                    window.location.href = "{% url 'home' %}";
+                }
+            });
+
+            window.addEventListener('beforeunload', function (e) {
+                if (!isSafeExit) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

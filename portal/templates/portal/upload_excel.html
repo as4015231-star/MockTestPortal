@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Excel - KBC Portal</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 35px; border-radius: 15px; box-shadow: 0 0 25px rgba(255, 193, 7, 0.3); width: 450px; border: 1px solid #ffc107; text-align: center; }
+        h2 { color: #ffc107; margin-bottom: 5px; text-transform: uppercase; }
+        p { color: #ccc; margin-bottom: 25px; }
+        .file-input { margin: 20px 0; padding: 10px; width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px dashed #ffc107; color: white; cursor: pointer; }
+        .btn { width: 100%; padding: 14px; background: linear-gradient(to right, #00c6ff, #0072ff); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; }
+        .btn:hover { background: linear-gradient(to right, #0072ff, #00c6ff); }
+        .back-link { display: inline-block; margin-top: 20px; color: #ffc107; text-decoration: none; font-weight: bold; }
+        .format-info { background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 5px; font-size: 13px; text-align: left; margin-bottom: 20px; border: 1px solid rgba(255, 193, 7, 0.3); line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload Questions</h2>
+        <p>Test: <strong style="color: white;">{{ test.title }}</strong> ({{ test.test_code }})</p>
+
+        <div class="format-info">
+            <strong style="color:#ffc107;">Excel Format (A to G):</strong><br>
+            <b>A:</b> Question <br>
+            <b>B:</b> Opt A | <b>C:</b> Opt B | <b>D:</b> Opt C | <b>E:</b> Opt D <br>
+            <b>F:</b> Correct Ans (A/B/C/D) <br>
+            <b>G:</b> Explanation (Optional)
+            <br><br><i style="color: #ff4c4c;">Note: Row 1 is reserved for headings. Data should start from Row 2.</i>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="excel_file" accept=".xlsx" class="file-input" required>
+            <button type="submit" class="btn">Upload Excel File</button>
+        </form>
+
+        <a href="{% url 'teacher_dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </div>
+</body>
+</html>

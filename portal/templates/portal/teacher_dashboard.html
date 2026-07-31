@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KBC Portal - Teacher Dashboard</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
+        .header { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; }
+        .header h1 { color: #ffc107; margin: 0; text-transform: uppercase; }
+        .container { padding: 40px; max-width: 1000px; margin: auto; }
+        .test-card { background: rgba(255,255,255,0.05); border: 1px solid #ffc107; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
+        .test-info { flex: 1; min-width: 250px; }
+        .test-info h3 { color: #ffc107; margin-top: 0; font-size: 22px; }
+        .test-info p { color: #ccc; margin: 8px 0; font-size: 15px; }
+        .badge { padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-left: 10px; }
+        .badge.draft { background: #ff4c4c; color: white; }
+        .badge.published { background: #00ff00; color: black; }
+        .btn { padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; color: black; cursor: pointer; border: none; font-size: 14px; text-align: center; display: inline-block; }
+        .btn-upload { background: linear-gradient(to right, #00c6ff, #0072ff); color: white; }
+        .btn-preview { background: #a200ff; color: white; }
+        .btn-publish { background: linear-gradient(to right, #ffc107, #ff9800); }
+        .btn-delete { background: #ff4c4c; color: white; }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+        .messages p { padding: 10px; border-radius: 5px; font-weight: bold; }
+        .success { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; }
+        .error { background: rgba(255, 0, 0, 0.2); color: #ff4c4c; border: 1px solid #ff4c4c; }
+
+        /* Form CSS */
+        .create-form { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px dashed #00c6ff; margin-bottom: 30px; }
+        .form-inputs { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; align-items: flex-start; }
+        .form-inputs input { background: rgba(255,255,255,0.1); border: 1px solid #ffc107; color: white; padding: 10px; border-radius: 5px; outline: none; }
+        .form-inputs input::placeholder { color: #aaa; }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        /* 🔴 Live Monitor Button Animation */
+        @keyframes pulseLive {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 122, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 122, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 122, 0); }
+        }
+        .btn-live {
+            background: linear-gradient(90deg, #ff007a, #a200ff);
+            color: white !important;
+            animation: pulseLive 2s infinite;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        /* 🚀 Sidebar & Hamburger Menu Styles */
+        .menu-btn { font-size: 28px; background: none; border: none; color: #ffc107; cursor: pointer; margin-right: 15px; padding: 0; display: flex; align-items: center; }
+        .menu-btn:hover { color: #fff; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
+        .sidebar { position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; background: #10143a; z-index: 1001; transition: 0.3s ease-in-out; border-right: 2px solid #ffc107; box-shadow: 5px 0 15px rgba(0,0,0,0.8); overflow-y: auto; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 20px; background: #0b0d26; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header h2 { color: #ffc107; margin: 0; font-size: 18px; text-transform: uppercase; }
+        .close-sidebar { background: none; border: none; color: #ff4c4c; font-size: 24px; cursor: pointer; font-weight: bold; }
+
+        /* Sidebar Links */
+        .sidebar-menu { padding: 20px 15px; list-style: none; margin: 0; }
+        .sidebar-menu li { margin-bottom: 15px; }
+        .menu-link { display: block; padding: 15px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; border-left: 4px solid #00c6ff; cursor: pointer; transition: 0.2s; font-size: 15px; }
+        .menu-link:hover { background: rgba(0,198,255,0.1); border-left-color: #ffc107; transform: translateX(5px); }
+    </style>
+</head>
+<body>
+
+    <!-- 🚀 Sidebar HTML -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="teacherSidebar">
+        <div class="sidebar-header">
+            <h2>⚙️ Quick Tools</h2>
+            <button class="close-sidebar" onclick="toggleSidebar()">✖</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{% url 'choose_questions' %}" class="menu-link">📚 Choose & Add Questions</a>
+            </li>
+            <li>
+                <a href="#" class="menu-link">➕ Add Single Question</a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" style="border-left-color: #00ff00;">📊 View Test Reports</a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" style="border-left-color: #ff4c4c;">⚙️ Dashboard Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Header Update with Hamburger Menu -->
+    <div class="header">
+        <div style="display: flex; align-items: center;">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h1>Teacher Dashboard</h1>
+        </div>
+        <div>
+            <span style="margin-right: 20px; color: #ffc107;">Teacher: {{ user.full_name }}</span>
+            <a href="{% url 'logout' %}" style="color: #ff4c4c; text-decoration: none; font-weight: bold;">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="{{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Create Form -->
+        <div class="create-form">
+            <h3 style="color: #00c6ff; margin: 0;">➕ Create New Mock Test</h3>
+            <form method="POST" class="form-inputs">
+                {% csrf_token %}
+                <input type="hidden" name="create_test" value="1">
+                <input type="text" name="title" value="{{ form_data.title|default:'' }}" placeholder="Test Title" required style="width: 220px; margin-top: 18px;">
+                <input type="text" name="test_code" value="{{ form_data.test_code|default:'' }}" placeholder="Test Code" required style="width: 150px; margin-top: 18px;">
+                <input type="number" name="total_time" value="{{ form_data.total_time|default:'' }}" placeholder="Time (Mins)" required style="width: 100px; margin-top: 18px;">
+                <input type="number" step="0.01" name="correct_marks" value="{{ form_data.correct_marks|default:'4.00' }}" placeholder="Correct (+)" required style="width: 100px; margin-top: 18px;">
+                <input type="number" step="0.01" name="negative_marks" value="{{ form_data.negative_marks|default:'1.00' }}" placeholder="Negative (-)" required style="width: 110px; margin-top: 18px;">
+                <div style="display: flex; flex-direction: column;">
+                    <label style="font-size: 12px; color: #ccc; margin-bottom: 4px;">Start Time (Optional)</label>
+                    <input type="datetime-local" name="scheduled_time" value="{{ form_data.scheduled_time|default:'' }}" style="width: 190px;">
+                </div>
+                <button type="submit" class="btn btn-upload" style="margin-top: 18px;">Create Test</button>
+            </form>
+        </div>
+
+        <h2>Your Mock Tests</h2>
+
+        {% for test in tests %}
+        <div class="test-card">
+            <div class="test-info">
+                <!-- Title and Live Button side-by-side -->
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
+                    <h3 style="margin: 0;">{{ test.title }} <span class="badge {% if test.status == 'DRAFT' %}draft{% else %}published{% endif %}">{{ test.status }}</span></h3>
+
+                    <!-- NEW LIVE MONITOR BUTTON -->
+                    <a href="{% url 'live_test_monitor' test.id %}" class="btn btn-live">🔴 Live Control Room</a>
+                </div>
+
+                <p style="margin-top: 5px;"><strong>Test Code:</strong> <span style="color: white;">{{ test.test_code }}</span></p>
+                <p><strong>Time:</strong> {{ test.total_time }} mins | <strong>Marks:</strong> +{{ test.correct_marks }} / -{{ test.negative_marks }}</p>
+
+                {% if test.scheduled_time %}
+                <p><strong>Scheduled For:</strong> <span style="color: #00c6ff;">{{ test.scheduled_time|date:"d M Y, h:i A" }}</span></p>
+                {% else %}
+                <p><strong>Scheduled For:</strong> <span style="color: #ccc;">Flexible (Anytime)</span></p>
+                {% endif %}
+
+                <p><strong>Questions Uploaded:</strong> <span style="color: #00ff00; font-weight: bold;">{{ test.questions.count }}</span></p>
+            </div>
+
+            <div class="actions">
+                <!-- फुल अपडेट और क्लोन फॉर्म (+Ve Marks के साथ) -->
+                <form method="POST" action="{% url 'edit_schedule' test.id %}" style="display: flex; gap: 8px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 5px; border: 1px solid #444; margin-bottom: 10px; width: 100%; flex-wrap: wrap;">
+                    {% csrf_token %}
+                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                        <label style="font-size: 11px; color: #ccc;">Code:</label>
+                        <input type="text" name="new_test_code" value="{{ test.test_code }}" required style="width: 70px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                        <label style="font-size: 11px; color: #ccc;">Title:</label>
+                        <input type="text" name="new_title" value="{{ test.title }}" required style="width: 120px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                        <label style="font-size: 11px; color: #ccc;">Time (Min):</label>
+                        <input type="number" name="new_total_time" value="{{ test.total_time }}" required style="width: 60px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                        <label style="font-size: 11px; color: #ccc;">+Ve Marks:</label>
+                        <input type="number" step="0.01" name="new_correct_marks" value="{{ test.correct_marks }}" required style="width: 60px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                        <label style="font-size: 11px; color: #ccc;">-Ve Marks:</label>
+                        <input type="number" step="0.01" name="new_negative_marks" value="{{ test.negative_marks }}" required style="width: 60px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1;">
+                        <label style="font-size: 11px; color: #ccc;">Schedule Date/Time:</label>
+                        <input type="datetime-local" name="new_scheduled_time" value="{{ test.scheduled_time|date:'Y-m-d\TH:i' }}" style="padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107; width: 100%;">
+                    </div>
+
+                    <button type="submit" style="background: #00c6ff; color: black; border: none; padding: 6px 15px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 12px; height: 30px; align-self: flex-end;">Copy & Update</button>
+                </form>
+
+                <!-- नया हाइब्रिड वर्कफ़्लो (सिर्फ ड्राफ्ट टेस्ट के लिए) -->
+                {% if test.status == 'DRAFT' %}
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; width: 100%; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                    <a href="{% url 'upload_excel' test.id %}" class="btn" style="background: #28a745; color: white;">📥 Upload Own Excel</a>
+                    <!-- URL में ?test_id=... भेज रहे हैं ताकि बैंक में ये टेस्ट पहले से सेलेक्टेड मिले! -->
+                    <a href="{% url 'choose_questions' %}?test_id={{ test.id }}" class="btn" style="background: #17a2b8; color: white;">📚 Add from Global Bank</a>
+                </div>
+                {% endif %}
+
+                <!-- पुराने बटन्स (Preview, Publish, Delete) -->
+                {% if test.questions.count > 0 %}
+                <a href="{% url 'preview_test' test.id %}" class="btn btn-preview">👀 Preview & Edit</a>
+                {% endif %}
+
+                <a href="{% url 'toggle_publish_status' test.id %}" class="btn btn-publish">Change Status</a>
+
+                {% if test.questions.count > 0 %}
+                <a href="{% url 'delete_questions' test.id %}" class="btn btn-delete" onclick="return confirm('क्या आप वाकई सारे प्रश्न डिलीट करना चाहते हैं?');">Delete All Qs</a>
+                {% endif %}
+
+                <!-- पूरा टेस्ट डिलीट करने का बटन -->
+                <a href="{% url 'delete_test' test.id %}" class="btn" style="background: #ff4c4c; color: white;" onclick="return confirm('चेतावनी: क्या आप वाकई इस पूरे टेस्ट को डिलीट करना चाहते हैं? इससे जुड़े सारे प्रश्न भी हमेशा के लिए डिलीट हो जाएंगे!');">🗑️ Delete Test</a>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #ff4c4c;">You haven't created any tests yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- 🚀 JS for Sidebar Toggle -->
+    <script>
+        function toggleSidebar() {
+            let sidebar = document.getElementById('teacherSidebar');
+            let overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('open');
+                overlay.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

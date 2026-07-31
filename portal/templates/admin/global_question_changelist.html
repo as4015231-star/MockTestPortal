@@ -1,0 +1,11 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    <!-- यह हमारा कस्टम हरा बटन है जो "ADD GLOBAL QUESTION BANK" के बगल में दिखेगा -->
+    <li>
+        <a href="upload-excel/" class="addlink" style="background-color: #28a745; color: white;">
+            📥 Upload Excel
+        </a>
+    </li>
+    {{ block.super }}
+{% endblock %}

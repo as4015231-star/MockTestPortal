@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #0b0d26; color: white; font-family: sans-serif; margin: 0; padding: 0; }
+        .header { background: #10143a; padding: 15px; text-align: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; }
+        .header h2 { color: #ffc107; margin: 0; font-size: 20px; }
+        .header p { color: #ccc; margin: 5px 0 0; font-size: 14px; }
+
+        .container { padding: 15px; max-width: 800px; margin: auto; text-align: center; }
+        .score-box { background: linear-gradient(145deg, #1a1e4a, #10143a); border: 2px solid #00c6ff; border-radius: 15px; padding: 20px; box-shadow: 0 0 20px rgba(0, 198, 255, 0.2); }
+        .score-box h1 { font-size: 45px; color: #00ff00; margin: 10px 0; text-shadow: 0 0 10px rgba(0,255,0,0.5); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .stat-card { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; border: 1px solid #444; }
+        .stat-card h3 { margin: 0; font-size: 20px; }
+
+        .btn { display: inline-block; background: linear-gradient(to right, #00c6ff, #0072ff); color: white; padding: 15px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 16px; margin-top: 25px; box-shadow: 0 5px 15px rgba(0,198,255,0.4); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>🎉 Test Submitted!</h2>
+        <p>🧑‍🎓 {{ student_display_name }} | Conducted By: <span style="color:#ffc107;">{{ coaching_name }}</span></p>
+    </div>
+    <div class="container">
+        <div class="score-box">
+            <h3 style="color:#00c6ff; margin:0;">Total Score</h3>
+            <h1>{{ total_score }}</h1>
+            <div class="stats-grid">
+                <div class="stat-card" style="border-color:#00c6ff;"><h3 style="color:#00c6ff;">{{ total_questions }}</h3><small>Total Qs</small></div>
+                <div class="stat-card" style="border-color:#00ff00;"><h3 style="color:#00ff00;">{{ correct_answers }}</h3><small>Correct</small></div>
+                <div class="stat-card" style="border-color:#ff4c4c;"><h3 style="color:#ff4c4c;">{{ wrong_answers }}</h3><small>Wrong</small></div>
+                <div class="stat-card" style="border-color:#aaa;"><h3 style="color:#aaa;">{{ unattempted }}</h3><small>Skipped</small></div>
+            </div>
+        </div>
+        <!-- यह बटन आपको Scoreboard पर ले जाएगा -->
+        <a href="{% url 'test_scoreboard' test.id %}" class="btn">📊 Show Scoreboard</a>
+    </div>
+
+    <script>
+        // 🚀 BACK BUTTON PREVENTION ON RESULT PAGE
+        (function () {
+            // वर्तमान पेज को ब्राउज़र हिस्ट्री में आगे पुश कर दें
+            window.history.pushState(null, null, window.location.href);
+
+            // जब भी यूजर बैक बटन (<) दबाएगा, उसे वापस इसी पेज पर धकेल दिया जाएगा
+            window.addEventListener('popstate', function (event) {
+                window.history.pushState(null, null, window.location.href);
+                // आप चाहें तो चेतावनी भी दिखा सकते हैं (अभी यह साइलेंटली बैक बटन को रोक देगा)
+            });
+        })();
+    </script>
+</body>
+</html>

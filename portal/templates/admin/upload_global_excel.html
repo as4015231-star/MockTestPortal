@@ -1,0 +1,41 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 650px;">
+    <h2 style="color: #417690; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-top: 0;">📥 Excel से प्रश्न अपलोड करें</h2>
+
+    <!-- 🚀 नया फीचर: नई कैटेगरी बनाने के शॉर्टकट बटन -->
+    <div style="background: #f8f9fa; border: 1px solid #ddd; padding: 15px; margin-bottom: 25px; border-radius: 5px;">
+        <p style="margin-top:0; color:#444; font-weight:bold; font-size: 14px;">अगर ड्रॉपडाउन में आपकी Class या Subject नहीं है, तो यहाँ से तुरंत बनाएँ:</p>
+
+        <a href="{% url 'admin:portal_questioncategory_add' %}" target="_blank" style="background:#28a745; color:white; padding:8px 15px; text-decoration:none; border-radius:4px; font-size:13px; margin-right:10px; display:inline-block;">
+            ➕ Add New Category (Class)
+        </a>
+        <a href="{% url 'admin:portal_questionsubcategory_add' %}" target="_blank" style="background:#17a2b8; color:white; padding:8px 15px; text-decoration:none; border-radius:4px; font-size:13px; display:inline-block;">
+            ➕ Add New Sub-Category (Subject)
+        </a>
+
+        <a href="{% url 'admin:portal_questionchapter_add' %}" target="_blank" style="background:#ffc107; color:black; padding:8px 15px; text-decoration:none; border-radius:4px; font-size:13px; display:inline-block; margin-top:10px;">
+    ➕ Add New Chapter
+        </a>
+
+        <p style="margin-bottom:0; font-size:12px; color:#888; margin-top:10px; font-style:italic;">
+            (नया बनाने के बाद, इस पेज को एक बार रिफ्रेश (F5) कर लें ताकि वे लिस्ट में आ जाएं)
+        </p>
+    </div>
+
+    <p style="color: #ff4c4c; font-size: 13px;"><b>Excel Format:</b> Col 1: Question, Col 2-5: Options (A,B,C,D), Col 6: Correct Answer (A/B/C/D), Col 7: Explanation (Optional). <i>Row 1 में Header होना चाहिए।</i></p>
+
+    <form method="POST" enctype="multipart/form-data" style="margin-top: 20px; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 5px;">
+        {% csrf_token %}
+        <div style="line-height: 2.2;">
+            {{ form.as_p }}
+        </div>
+
+        <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee;">
+            <button type="submit" style="background: #417690; color: white; padding: 10px 25px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 14px;">📤 Upload Questions</button>
+            <a href=".." style="margin-left: 20px; color: #cc3434; text-decoration: none; font-weight: bold;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

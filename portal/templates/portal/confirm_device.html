@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alert - Already Logged In</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .alert-box { background: linear-gradient(145deg, #10143a, #0b0d26); border: 2px solid #ff4c4c; border-radius: 12px; padding: 30px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 10px 25px rgba(255, 76, 76, 0.2); }
+        .alert-icon { font-size: 50px; margin-bottom: 15px; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        h2 { color: #ff4c4c; margin-top: 0; text-transform: uppercase; font-size: 20px; }
+        p { color: #ccc; font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+        .btn-container { display: flex; flex-direction: column; gap: 12px; }
+        .btn-opt { padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; text-align: center; text-transform: uppercase; transition: 0.2s; width: 100%; box-sizing: border-box; }
+        .btn-remain { background: #333; color: white; border: 1px solid #555; }
+        .btn-remain:hover { background: #444; }
+        .btn-kickout { background: linear-gradient(to right, #ff4c4c, #cc0000); color: white; box-shadow: 0 4px 15px rgba(255, 76, 76, 0.4); }
+        .btn-kickout:hover { transform: scale(1.02); }
+    </style>
+</head>
+<body>
+
+    <div class="alert-box">
+        <div class="alert-icon">⚠️</div>
+        <h2>Already Logged In!</h2>
+        <p>नमस्कार <b>{{ target_user.full_name }}</b>,<br>आपका यह अकाउंट पहले से ही किसी अन्य डिवाइस या ब्राउज़र में लॉगिन है। सुरक्षा कारणों से एक समय पर केवल एक ही डिवाइस एक्टिव रह सकता है।</p>
+
+        <form method="POST" class="btn-container">
+            {% csrf_token %}
+
+            <button type="submit" name="action" value="remain" class="btn-opt btn-remain">
+                🛑 Remain logged in into previous device
+            </button>
+
+            <button type="submit" name="action" value="kickout" class="btn-opt btn-kickout">
+                🔄 Log out from previous device & login here
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

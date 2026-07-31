@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KBC Mock Test - Dashboard</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
+        .header { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; }
+        .header h1 { color: #ffc107; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .display-name { font-size: 18px; font-weight: bold; background: rgba(255, 193, 7, 0.1); padding: 8px 15px; border-radius: 5px; border: 1px solid #ffc107; }
+        .logout-btn { background-color: #ff4c4c; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .logout-btn:hover { background-color: #ff1c1c; }
+        .main-content { padding: 40px; text-align: center; }
+        .welcome-box { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 10px; border: 1px dashed #ffc107; display: inline-block; max-width: 500px; width: 100%; }
+
+        /* नए फॉर्म के लिए CSS */
+        .test-input { padding: 12px; border-radius: 5px; border: 1px solid #ffc107; background: rgba(255,255,255,0.05); color: white; width: 60%; font-size: 16px; text-transform: uppercase; outline: none; }
+        .test-input:focus { background: rgba(255, 255, 255, 0.1); }
+        .start-btn { background: linear-gradient(to right, #00c6ff, #0072ff); color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .start-btn:hover { background: linear-gradient(to right, #0072ff, #00c6ff); box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
+        .msg-box { color: #ffc107; background: rgba(255,193,7,0.1); padding: 10px; border-radius: 5px; border: 1px solid #ffc107; margin-bottom: 10px; font-size: 14px; }
+        .error-msg { color: #ff4c4c; background: rgba(255,76,76,0.1); border-color: #ff4c4c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Mock Test Portal</h1>
+        <div class="user-info">
+            {% if user.is_authenticated %}
+                <div class="display-name">ID: {{ user.student_profile.display_name }}</div>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" style="color: #ffc107;">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-box">
+            <h2 style="color: #ffc107; margin-top: 0;">Welcome, {{ user.full_name }}!</h2>
+
+            <!-- एरर या सफलता के मैसेज यहाँ दिखेंगे -->
+            {% if messages %}
+                <div style="margin: 15px 0;">
+                    {% for message in messages %}
+                        <p class="msg-box {% if message.tags == 'error' %}error-msg{% endif %}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">Ready for your test? Enter the Test Code below:</p>
+
+            <!-- टेस्ट शुरू करने का फॉर्म -->
+            <form action="{% url 'start_test' %}" method="POST" style="display: flex; gap: 10px; justify-content: center;">
+                {% csrf_token %}
+                <input type="text" name="test_code" placeholder="Enter Test Code" required class="test-input">
+                <button type="submit" class="start-btn">Start Exam</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

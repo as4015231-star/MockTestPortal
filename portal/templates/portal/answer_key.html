@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- PDF & JPG Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { background: #020111; color: white; font-family: sans-serif; padding: 20px 10px; text-align: center; }
+        .page-title { color: white; font-size: 22px; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* 📜 Certificate UI Design */
+        .cert-box {
+            background: #0b0d26;
+            border: 3px solid #ffc107;
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin: 0 auto 30px auto;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.2);
+        }
+        /* Corners Styling */
+        .cert-box::before { content: ""; position: absolute; top: 15px; left: 15px; width: 40px; height: 40px; border-top: 4px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 5px 0 0 0; }
+        .cert-box::after { content: ""; position: absolute; bottom: 15px; right: 15px; width: 40px; height: 40px; border-bottom: 4px solid #ffc107; border-right: 4px solid #ffc107; border-radius: 0 0 5px 0; }
+
+        .c-title { color: #ffc107; font-size: 28px; letter-spacing: 3px; font-weight: 900; margin: 0 0 15px 0; }
+        .c-sub { color: #ccc; font-size: 14px; font-style: italic; margin-bottom: 20px; }
+        .c-name { color: #00ff00; font-size: 38px; text-transform: uppercase; font-weight: 900; text-shadow: 0 0 15px rgba(0,255,0,0.6); margin: 0 0 20px 0; }
+        .c-desc { color: #aaa; font-size: 14px; margin-bottom: 10px; }
+        .c-test { color: #00c6ff; font-size: 24px; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; }
+        .c-medal { font-size: 60px; filter: drop-shadow(0 0 15px rgba(255,193,7,0.8)); margin-bottom: 20px; }
+
+        .c-footer { border-top: 1px dashed #555; padding-top: 15px; width: 80%; margin: auto; }
+        .c-footer p { margin: 0 0 5px 0; font-size: 12px; color: #ccc; font-weight: bold; }
+        .c-footer h3 { margin: 0; color: #ffc107; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Buttons */
+        .btn { display: block; width: 80%; max-width: 300px; margin: 15px auto; padding: 18px; border-radius: 30px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn-jpg { background: linear-gradient(to right, #ffc107, #ff9800); color: black; box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4); }
+        .btn-pdf { background: linear-gradient(to right, #00c6ff, #0072ff); color: white; box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4); }
+        .btn:active { transform: scale(0.95); }
+
+        /* Answer Key Hidden Section (Only for PDF) */
+        .ans-section { text-align: left; background: #0b0d26; padding: 20px; margin-top: 40px; display: none; }
+        .q-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #00c6ff; }
+        .correct-ans { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; }
+
+        .teacher-box { background: rgba(255,255,255,0.05); border: 2px dashed #00c6ff; padding: 30px; border-radius: 15px; margin: 0 auto 30px auto; max-width: 400px; }
+    </style>
+</head>
+<body>
+
+    <h2 class="page-title">
+        {% if request.user.role == 'STUDENT' %}
+            🏆 Your Certificate & Answer Key
+        {% else %}
+            📝 Answer Key Dashboard
+        {% endif %}
+    </h2>
+
+    {% if request.user.role == 'STUDENT' and student_attempt %}
+        <!-- 🚀 Certificate Box (Only for Students) -->
+        <div id="cert-node" class="cert-box">
+            <h2 class="c-title">
+                {% if student_attempt.rank == 1 %}CHAMPION{% else %}ACHIEVER{% endif %}
+            </h2>
+            <p class="c-sub">This certificate is proudly presented to</p>
+
+            <!-- 🚀 Dynamic Student Name -->
+            <h1 class="c-name">{{ student_attempt.student.user.full_name|upper }}</h1>
+
+            <!-- 🚀 Dynamic Rank -->
+            <p class="c-desc">For securing <strong style="color:white;">Rank {{ student_attempt.rank }}</strong> in the mock test</p>
+            <h3 class="c-test">"{{ test.title }}"</h3>
+
+            <!-- 🚀 Dynamic Medal -->
+            <div class="c-medal">
+                {% if student_attempt.rank == 1 %}🥇{% elif student_attempt.rank == 2 %}🥈{% elif student_attempt.rank == 3 %}🥉{% else %}🎖️{% endif %}
+            </div>
+
+            <div class="c-footer">
+                <p>Conducted By</p>
+                <h3>{{ coaching_name }}</h3>
+            </div>
+        </div>
+
+        <!-- Download Image Button (For Students) -->
+        <button onclick="downloadJPG()" class="btn btn-jpg">📥 Status Certificate (JPG)</button>
+
+    {% elif request.user.role == 'TEACHER' %}
+        <!-- 🚀 Teacher Message Box -->
+        <div class="teacher-box">
+            <h3 style="color: #00c6ff; margin-top: 0;">👨‍🏫 Teacher Access</h3>
+            <p style="color: #ccc; font-size: 14px; margin-bottom: 0;">You can download the full answer key PDF below. (Personalized certificates are only generated in student accounts based on their ranks).</p>
+        </div>
+    {% endif %}
+
+    <!-- 📄 Download PDF Button (For Both) -->
+    <button onclick="downloadPDF()" class="btn btn-pdf">📄 Download Answer Key (PDF)</button>
+
+
+    <div style="margin-top: 30px;">
+        <a href="{% if request.user.role == 'TEACHER' %}{% url 'teacher_dashboard' %}{% else %}{% url 'home' %}{% endif %}" style="color: #ccc; text-decoration: underline; margin-top: 20px; display: inline-block; font-size: 16px;">
+        🏠 Back to Home Page</a>
+    </div>
+
+    <!-- Hidden Answer Key Content for PDF -->
+    <div id="pdf-node" class="ans-section">
+        <h2 style="color:#ffc107; text-align:center;">{{ test.title }} - Answer Key</h2>
+        <p style="text-align:center; color:#ccc;">Conducted By: {{ coaching_name }}</p>
+        <hr style="border-color:#444; margin-bottom:20px;">
+
+        {% for q in questions %}
+        <div class="q-card">
+            <h4 style="margin-top:0; color:white;">Q{{ forloop.counter }}: {{ q.question_text }}</h4>
+            <div style="color:#ccc; font-size:14px; margin-bottom:10px;">
+                <p style="margin:4px 0;">A. {{ q.option_a }}</p>
+                <p style="margin:4px 0;">B. {{ q.option_b }}</p>
+                <p style="margin:4px 0;">C. {{ q.option_c }}</p>
+                <p style="margin:4px 0;">D. {{ q.option_d }}</p>
+            </div>
+            <div class="correct-ans">✓ Correct Answer: Option {{ q.correct_answer }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // 📸 Download Certificate as Image for WhatsApp Status
+        function downloadJPG() {
+            var node = document.getElementById('cert-node');
+            html2canvas(node, { scale: 3, backgroundColor: '#020111' }).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = 'My_Certificate_{{ test.test_code }}.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 1.0);
+                link.click();
+            });
+        }
+
+        // 📄 Download Answer Key as PDF
+        function downloadPDF() {
+            var node = document.getElementById('pdf-node');
+            node.style.display = 'block'; // Show temporarily for PDF creation
+
+            var opt = {
+                margin: 10,
+                filename: 'AnswerKey_{{ test.test_code }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(node).save().then(() => {
+                node.style.display = 'none'; // Hide again
+            });
+        }
+    </script>
+</body>
+</html>

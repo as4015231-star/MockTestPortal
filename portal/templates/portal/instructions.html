@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Instructions - {{ test.title }}</title>
+    <style>
+        body { background-color: #f4f6f8; color: #333; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
+        .header { background: #10143a; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ffc107; color: white; }
+        .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #10143a; text-transform: uppercase; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .rules-list { font-size: 16px; line-height: 1.8; margin-bottom: 30px; }
+        .highlight { font-weight: bold; color: #d32f2f; }
+
+        /* Waiting Lounge Styling */
+        .timer-box { text-align: center; background: #e3f2fd; padding: 20px; border-radius: 8px; border: 2px dashed #1565c0; margin-bottom: 25px; }
+        .countdown { font-size: 32px; font-weight: bold; color: #d32f2f; margin-top: 10px; letter-spacing: 2px; }
+        .scheduled-time-text { font-size: 16px; color: #1565c0; font-weight: bold; margin-bottom: 5px; }
+
+        .action-area { text-align: center; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        .terms { font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .terms input { transform: scale(1.5); cursor: pointer; }
+
+        .start-btn { background: #4caf50; color: white; border: none; padding: 15px 40px; border-radius: 5px; font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3); }
+        .start-btn:disabled { background: #ccc; color: #666; cursor: not-allowed; box-shadow: none; }
+        .start-btn:hover:not(:disabled) { background: #388e3c; transform: scale(1.02); }
+
+        /* Live Badge Mobile Adjustment */
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 10px; padding: 15px 20px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="margin: 0; color: #ffc107;">{{ test.title }}</h2>
+        <div style="font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+            <span>🧑‍🎓 Candidate: {{ request.user.full_name|upper }}</span>
+            <!-- 🚀 Live Count Badge Added Here -->
+            <span id="liveCountBadge" onclick="openLiveModal()" style="background: rgba(0, 198, 255, 0.2); border: 1px solid #00c6ff; color: #00c6ff; padding: 4px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 8px rgba(0,198,255,0.4);">
+                👥 Live Waiting: <span id="liveCountNumber">...</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Please read the instructions carefully</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="background: #ffcdd2; color: #d32f2f; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; border-left: 5px solid #d32f2f;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if is_early %}
+        <div class="timer-box" id="waitingLounge">
+            <div class="scheduled-time-text">📅 यह टेस्ट {{ formatted_time }} पर शुरू होगा</div>
+            <div style="font-size: 14px; color: #555;">Test will auto-start in:</div>
+            <div class="countdown" id="countdownTimer">Loading timer...</div>
+        </div>
+        {% endif %}
+
+        <ul class="rules-list">
+            <li>Total duration of this test is <strong>{{ test.total_time }} minutes</strong>.</li>
+            <li>The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.</li>
+            <li>For every correct answer, you will be awarded <span style="color: green; font-weight: bold;">+{{ test.correct_marks }} marks</span>.</li>
+            <li>There is a negative marking. For every wrong answer, <span class="highlight">-{{ test.negative_marks }} mark(s)</span> will be deducted.</li>
+            <li>You can navigate between questions using the Question Palette on the right side of the screen.</li>
+        </ul>
+
+        <form method="POST" class="action-area" id="instructionForm">
+            {% csrf_token %}
+            <label class="terms">
+                <input type="checkbox" id="agreeCheck" onchange="checkConditions()">
+                I have read and understood the instructions. I am ready to begin.
+            </label>
+            <button type="submit" id="startBtn" class="start-btn" disabled>I am ready to begin</button>
+        </form>
+    </div>
+
+    <!-- 🚀 Live Students Modal (Same as Test Page) -->
+    <div id="liveStudentsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#10143a; width:90%; max-width:400px; border-radius:10px; border:1px solid #00c6ff; overflow:hidden; box-shadow: 0 10px 25px rgba(0,198,255,0.2);">
+            <div style="background:#0b0d26; padding:15px; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:#ffc107; margin:0; font-size:16px;">👥 Live Students (<span id="modalLiveCount">0</span>)</h3>
+                <button type="button" onclick="closeLiveModal()" style="background:none; border:none; color:#ff4c4c; font-size:20px; font-weight:bold; cursor:pointer; padding:0;">✖</button>
+            </div>
+            <div id="liveStudentsList" style="padding:15px; max-height:60vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <p style="color:#ccc; text-align:center; font-size:14px;">Fetching live data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isSafeExit = false;
+
+        const startBtn = document.getElementById('startBtn');
+        const agreeCheck = document.getElementById('agreeCheck');
+        const timerBox = document.getElementById('waitingLounge');
+        const countdownTimer = document.getElementById('countdownTimer');
+        const actionForm = document.getElementById('instructionForm');
+
+        actionForm.addEventListener('submit', function() {
+            isSafeExit = true;
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (!isSafeExit) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        const isEarly = "{{ is_early }}" === "True";
+        const scheduledTimeStr = "{{ test.scheduled_time|date:'c' }}";
+
+        let isTimeReached = !isEarly;
+
+        function checkConditions() {
+            if (agreeCheck.checked && isTimeReached) {
+                startBtn.disabled = false;
+                startBtn.style.backgroundColor = "#4caf50";
+            } else {
+                startBtn.disabled = true;
+                startBtn.style.backgroundColor = "#ccc";
+            }
+        }
+
+        if (isEarly && scheduledTimeStr && scheduledTimeStr !== "None") {
+            const testStartTime = new Date(scheduledTimeStr).getTime();
+
+            const interval = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = testStartTime - now;
+
+                if (distance <= 0) {
+                    clearInterval(interval);
+                    isTimeReached = true;
+
+                    countdownTimer.innerHTML = "Starting Test...";
+                    countdownTimer.style.color = "#4caf50";
+                    agreeCheck.checked = true;
+                    isSafeExit = true;
+
+                    actionForm.submit();
+                } else {
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    countdownTimer.innerHTML =
+                        (hours < 10 ? "0" + hours : hours) + ":" +
+                        (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                        (seconds < 10 ? "0" + seconds : seconds);
+                }
+            }, 1000);
+        }
+
+        // 🚀 --- LIVE STUDENTS FETCH LOGIC ---
+        function fetchLiveStudents() {
+            fetch(`/api/live-students/{{ test.id }}/`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('liveCountNumber').innerText = data.count;
+                    document.getElementById('modalLiveCount').innerText = data.count;
+
+                    let listHtml = '';
+                    data.students.forEach(student => {
+                        let upperName = student.name.toUpperCase();
+                        listHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#10143a; padding:10px 15px; border-radius:5px; border:1px solid #333;">
+                                <span style="color:#fff; font-size:14px; font-weight:bold;">🧑‍🎓 ${upperName}</span>
+                                <span style="color:${student.color}; font-size:12px; font-weight:bold;">${student.status}</span>
+                            </div>
+                        `;
+                    });
+
+                    if (data.students.length === 0) {
+                        listHtml = `<p style="color:#ccc; text-align:center; font-size:14px;">You are the first one here!</p>`;
+                    }
+
+                    document.getElementById('liveStudentsList').innerHTML = listHtml;
+                })
+                .catch(err => console.log('Live fetch error:', err));
+        }
+
+        function openLiveModal() {
+            document.getElementById('liveStudentsModal').style.display = 'flex';
+            fetchLiveStudents();
+        }
+
+        function closeLiveModal() {
+            document.getElementById('liveStudentsModal').style.display = 'none';
+        }
+
+        // Fetch live count initially, then every 10 seconds
+        setTimeout(fetchLiveStudents, 1000);
+        setInterval(fetchLiveStudents, 10000);
+    </script>
+</body>
+</html>

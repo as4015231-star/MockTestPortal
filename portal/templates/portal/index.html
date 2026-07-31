@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Test Portal</title>
+    <!-- Bootstrap CSS (डिज़ाइन के लिए) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- नेविगेशन बार और डॉटेड मेन्यू -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand ms-3 fw-bold" href="#">Amit Kulshrestha</a>
+  </div>
+</nav>
+
+<!-- साइड मेन्यू (Offcanvas) -->
+<div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasMenu">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">मेनू</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="navbar-nav fs-5">
+      <li class="nav-item mb-2"><a class="nav-link" href="#">टीचर लॉग इन</a></li>
+      <li class="nav-item mb-2"><a class="nav-link" href="#">फ्री मॉक टेस्ट</a></li>
+      <li class="nav-item mb-2"><a class="nav-link" href="#">सब्जेक्टिव टेस्ट</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- बीच का लॉगिन फॉर्म -->
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px; border-radius: 15px;">
+        <h4 class="text-center mb-4 text-primary">मॉक टेस्ट लॉगिन</h4>
+        <!-- एरर मैसेज दिखाने के लिए -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-bold">कोचिंग कोड या नाम</label>
+                <input type="text" name="coaching_code" class="form-control" placeholder="उदा. RAM123" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">यूजरनेम (नाम / मोबाइल)</label>
+                <input type="text" name="username" class="form-control" placeholder="अपना नाम डालें" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">टेस्ट पासवर्ड</label>
+                <input type="password" name="test_password" class="form-control" placeholder="पासवर्ड डालें" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fs-5">प्रोसीड (Proceed)</button>
+        </form>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
