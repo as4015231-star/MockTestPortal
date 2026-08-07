@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Wallet - KBC Portal</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; padding-bottom: 10px; margin-bottom: 30px; }
+        .header h1 { color: #ffc107; margin: 0; }
+        .back-btn { background: #333; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; }
+
+        .container { display: flex; gap: 30px; flex-wrap: wrap; }
+        .left-panel { flex: 1; min-width: 300px; }
+        .right-panel { flex: 2; min-width: 400px; }
+
+        /* Cards */
+        .card { background: rgba(255,255,255,0.05); border: 1px solid #ffc107; border-radius: 10px; padding: 25px; margin-bottom: 20px; text-align: center; }
+        .balance-text { font-size: 40px; color: #00ff00; font-weight: bold; margin: 10px 0; }
+
+        /* Form */
+        .add-money-form { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .add-money-form input { padding: 10px; border-radius: 5px; border: 1px solid #00ff00; background: transparent; color: white; font-size: 16px; width: 120px; text-align: center; }
+        .add-money-form button { background: #00ff00; color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        /* Table */
+        .history-table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.5); }
+        .history-table th, .history-table td { padding: 15px; border-bottom: 1px solid #333; text-align: left; }
+        .history-table th { color: #ffc107; background: rgba(255,193,7,0.1); }
+        .credit { color: #00ff00; font-weight: bold; }
+        .debit { color: #ff4c4c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>My Passbook & Wallet</h1>
+        <a href="{% url 'home' %}" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background: rgba(0,255,0,0.1); border: 1px solid #00ff00; color: #00ff00; padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: center;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container">
+        <!-- Left Panel: Balance & Subscriptions -->
+        <div class="left-panel">
+            <div class="card">
+                <h3 style="margin: 0; color: #ccc;">Current Balance</h3>
+                <div class="balance-text">₹{{ balance }}</div>
+
+                <form action="{% url 'add_money' %}" method="POST" class="add-money-form">
+                    {% csrf_token %}
+                    <input type="number" name="amount" min="10" placeholder="₹ Amount" required>
+                    <button type="submit">+ Add Money</button>
+                </form>
+            </div>
+
+            {% if is_student %}
+            <div class="card" style="border-color: #00c6ff; text-align: left;">
+                <h3 style="margin-top: 0; color: #00c6ff;">📅 Subscription Status</h3>
+                <p>Status: <strong style="color: {% if plan_status == 'Expired' %}#ff4c4c{% else %}#00ff00{% endif %};">{{ plan_status }}</strong></p>
+                {% if expiry_date %}
+                    <p>Valid Till: <strong style="color: white;">{{ expiry_date|date:"d M Y, h:i A" }}</strong></p>
+                {% else %}
+                    <p style="color: #ff4c4c; font-size: 14px;">Please recharge your subscription to continue giving tests.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- 🚀 NEW: Withdrawal Form (पैसे निकालने का फॉर्म) -->
+            <!-- 🚀 NEW: Withdrawal Form (पैसे निकालने का फॉर्म) -->
+            <div class="card" style="border-color: #ff9800; text-align: left;">
+                <h3 style="margin-top: 0; color: #ff9800;">💸 Withdraw Money</h3>
+                <!-- यहाँ ₹100 कर दिया गया है -->
+                <p style="font-size: 13px; color: #ccc; margin-bottom: 15px;">Minimum withdrawal amount is ₹100. Processing time: 24-48 Hrs.</p>
+
+                <form action="{% url 'request_withdrawal' %}" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+                    {% csrf_token %}
+
+                    <!-- यहाँ min="100" और placeholder में ₹100 कर दिया गया है -->
+                    <input type="number" name="amount" min="100" max="{{ balance }}" placeholder="Amount (Min ₹100)" required
+                           style="padding: 10px; border-radius: 5px; border: 1px solid #ff9800; background: rgba(0,0,0,0.5); color: white;">
+
+                    <!-- ... बाकी का फॉर्म (ड्रॉपडाउन और इनपुट्स) वैसा ही रहेगा ... -->
+                    <!-- Dropdown (onchange इवेंट के साथ) -->
+                    <select name="payment_method" id="pay_method" onchange="togglePaymentFields()" required
+                            style="padding: 10px; border-radius: 5px; border: 1px solid #ff9800; background: rgba(0,0,0,0.5); color: white;">
+                        <option value="UPI">UPI ID (PhonePe/GPay)</option>
+                        <option value="BANK">Bank Account (A/c + IFSC)</option>
+                    </select>
+
+                    <!-- UPI वाला बॉक्स -->
+                    <div id="upi_box" style="display: block;">
+                        <input type="text" name="upi_id" id="upi_input" placeholder="Enter UPI ID (e.g. 999@ybl)"
+                               style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ff9800; background: rgba(0,0,0,0.5); color: white; box-sizing: border-box;">
+                    </div>
+
+                    <!-- Bank Account वाले 2 बॉक्स (शुरुआत में छुपे रहेंगे) -->
+                    <div id="bank_box" style="display: none; flex-direction: column; gap: 10px;">
+                        <input type="text" name="account_number" id="acc_input" placeholder="Enter Account Number"
+                               style="padding: 10px; border-radius: 5px; border: 1px solid #ff9800; background: rgba(0,0,0,0.5); color: white;">
+
+                        <input type="text" name="ifsc_code" id="ifsc_input" placeholder="Enter IFSC Code"
+                               style="padding: 10px; border-radius: 5px; border: 1px solid #ff9800; background: rgba(0,0,0,0.5); color: white; text-transform: uppercase;">
+                    </div>
+
+                    <button type="submit" style="background: linear-gradient(90deg, #ffc107, #ff9800); color: black; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 5px;">
+                        Submit Request
+                    </button>
+                </form>
+
+                <!-- 🚀 JS: ड्रॉपडाउन बदलने पर बॉक्स छुपाने/दिखाने का लॉजिक -->
+                <script>
+                    function togglePaymentFields() {
+                        var method = document.getElementById("pay_method").value;
+                        var upiBox = document.getElementById("upi_box");
+                        var bankBox = document.getElementById("bank_box");
+
+                        if(method === "BANK") {
+                            bankBox.style.display = "flex";
+                            upiBox.style.display = "none";
+                            document.getElementById("acc_input").required = true;
+                            document.getElementById("ifsc_input").required = true;
+                            document.getElementById("upi_input").required = false;
+                        } else {
+                            bankBox.style.display = "none";
+                            upiBox.style.display = "block";
+                            document.getElementById("acc_input").required = false;
+                            document.getElementById("ifsc_input").required = false;
+                            document.getElementById("upi_input").required = true;
+                        }
+                    }
+                    // पेज लोड होते ही एक बार फंक्शन चला दें
+                    togglePaymentFields();
+                </script>
+            </div>
+        </div>
+
+        <!-- Right Panel: Transaction History -->
+        <div class="right-panel">
+            <h2 style="color: #ffc107; margin-top: 0;">📜 Transaction History</h2>
+            <div style="max-height: 500px; overflow-y: auto; border: 1px solid #333; border-radius: 10px;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in transactions %}
+                        <tr>
+                            <td style="font-size: 13px; color: #aaa;">{{ txn.created_at|date:"d M Y, h:i A" }}</td>
+                            <td>{{ txn.description }}</td>
+                            <td>
+                                {% if txn.transaction_type == 'CREDIT' %}
+                                    <span class="credit">+ CREDIT</span>
+                                {% else %}
+                                    <span class="debit">- DEBIT</span>
+                                {% endif %}
+                            </td>
+                            <td class="{% if txn.transaction_type == 'CREDIT' %}credit{% else %}debit{% endif %}">
+                                ₹{{ txn.amount }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #888; padding: 30px;">No transactions found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

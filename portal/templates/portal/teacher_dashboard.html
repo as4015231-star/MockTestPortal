@@ -2,235 +2,357 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KBC Portal - Teacher Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ request.user.teacher_profile.coaching_name|default:"Teacher Dashboard" }} - Portal</title>
     <style>
-        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
-        .header { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; }
-        .header h1 { color: #ffc107; margin: 0; text-transform: uppercase; }
-        .container { padding: 40px; max-width: 1000px; margin: auto; }
-        .test-card { background: rgba(255,255,255,0.05); border: 1px solid #ffc107; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; }
-        .test-info { flex: 1; min-width: 250px; }
-        .test-info h3 { color: #ffc107; margin-top: 0; font-size: 22px; }
-        .test-info p { color: #ccc; margin: 8px 0; font-size: 15px; }
-        .badge { padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-left: 10px; }
-        .badge.draft { background: #ff4c4c; color: white; }
-        .badge.published { background: #00ff00; color: black; }
-        .btn { padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; color: black; cursor: pointer; border: none; font-size: 14px; text-align: center; display: inline-block; }
-        .btn-upload { background: linear-gradient(to right, #00c6ff, #0072ff); color: white; }
-        .btn-preview { background: #a200ff; color: white; }
-        .btn-publish { background: linear-gradient(to right, #ffc107, #ff9800); }
-        .btn-delete { background: #ff4c4c; color: white; }
-        .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
-        .messages p { padding: 10px; border-radius: 5px; font-weight: bold; }
-        .success { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; }
-        .error { background: rgba(255, 0, 0, 0.2); color: #ff4c4c; border: 1px solid #ff4c4c; }
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
-        /* Form CSS */
-        .create-form { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px dashed #00c6ff; margin-bottom: 30px; }
-        .form-inputs { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; align-items: flex-start; }
-        .form-inputs input { background: rgba(255,255,255,0.1); border: 1px solid #ffc107; color: white; padding: 10px; border-radius: 5px; outline: none; }
-        .form-inputs input::placeholder { color: #aaa; }
+        .header {
+            position: sticky; top: 0; z-index: 999;
+            background: rgba(11, 13, 38, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid rgba(255, 193, 7, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .coaching-brand { text-align: center; flex-grow: 1; }
+        .coaching-brand h1 {
+            margin: 0; font-size: 26px; text-transform: uppercase; font-weight: 900; letter-spacing: 1.5px;
+            background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 15px rgba(255, 193, 7, 0.3);
+        }
+        .coaching-brand p { margin: 2px 0 0 0; font-size: 11px; color: #00c6ff; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; }
+
+        .profile-menu-container { position: relative; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #00c6ff, #0072ff); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; border: 2px solid #ffc107; box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); transition: 0.3s; color: white; }
+        .avatar:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 193, 7, 0.8); }
+
+        .profile-dropdown { position: absolute; top: 60px; right: 0; background: #10143a; border: 1px solid #00c6ff; border-radius: 10px; width: 220px; box-shadow: 0 10px 25px rgba(0,0,0,0.9); display: none; flex-direction: column; overflow: hidden; animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .dropdown-header { padding: 15px; background: rgba(255,255,255,0.05); text-align: center; border-bottom: 1px solid #333; }
+        .dropdown-header strong { display: block; font-size: 16px; color: #ffc107; }
+        .dropdown-header span { font-size: 12px; color: #ccc; }
+
+        .profile-dropdown a { padding: 12px 15px; color: white; text-decoration: none; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.02); transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .profile-dropdown a:hover { background: rgba(0, 198, 255, 0.1); padding-left: 20px; color: #00c6ff; }
+        .profile-dropdown a.logout-btn:hover { background: rgba(255, 76, 76, 0.1); color: #ff4c4c; }
+
+        .container { padding: 30px; max-width: 1000px; margin: auto; }
+
+        .test-card { position: relative; background: rgba(255,255,255,0.05); border: 1px solid #ffc107; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
+        .test-info h3 { color: #ffc107; margin-top: 0; font-size: 18px; display: inline-block; }
+        .test-info p { color: #ccc; margin: 8px 0; font-size: 14px; }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; vertical-align: middle; margin-left: 8px; cursor: pointer; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ff4c4c; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        input:checked + .slider { background-color: #00ff00; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        .switch-wrapper { display: flex; align-items: center; text-decoration: none; }
+        .status-text { font-size: 12px; font-weight: bold; margin-left: 6px; text-transform: uppercase; }
+
+        .card-top-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; align-items: center; }
+        .btn-preview-top { background: #a200ff; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 10px rgba(162, 0, 255, 0.4); transition: 0.3s; }
+        .btn-preview-top:hover { background: #8a00d8; transform: scale(1.05); }
+        .btn-delete-top { background: #ff4c4c; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 76, 76, 0.4); transition: 0.3s; cursor: pointer;}
+        .btn-delete-top:hover { background: #d32f2f; transform: scale(1.1); }
+
+        .btn-live { background: linear-gradient(90deg, #ff007a, #a200ff); color: white !important; padding: 5px 12px; font-size: 11px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block; margin-left: 10px; }
+        .btn { padding: 10px; border-radius: 5px; text-decoration: none; font-weight: bold; color: black; cursor: pointer; border: none; font-size: 13px; text-align: center; display: inline-block; }
+
+        .create-form { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px dashed #00c6ff; margin-bottom: 30px; transition: 0.3s; }
+        .create-form-header { color: #00c6ff; margin: 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 18px; user-select: none; }
+        .form-inputs { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .form-inputs input { background: rgba(255,255,255,0.1); border: 1px solid #ffc107; color: white; padding: 10px; border-radius: 5px; outline: none; box-sizing: border-box; }
         input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
-        /* 🔴 Live Monitor Button Animation */
-        @keyframes pulseLive {
-            0% { box-shadow: 0 0 0 0 rgba(255, 0, 122, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 0, 122, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 0, 122, 0); }
-        }
-        .btn-live {
-            background: linear-gradient(90deg, #ff007a, #a200ff);
-            color: white !important;
-            animation: pulseLive 2s infinite;
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-
-        /* 🚀 Sidebar & Hamburger Menu Styles */
-        .menu-btn { font-size: 28px; background: none; border: none; color: #ffc107; cursor: pointer; margin-right: 15px; padding: 0; display: flex; align-items: center; }
-        .menu-btn:hover { color: #fff; }
+        .menu-btn { font-size: 28px; background: none; border: none; color: #ffc107; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
-        .sidebar { position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; background: #10143a; z-index: 1001; transition: 0.3s ease-in-out; border-right: 2px solid #ffc107; box-shadow: 5px 0 15px rgba(0,0,0,0.8); overflow-y: auto; }
+        .sidebar { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: #10143a; z-index: 1001; transition: 0.3s; border-right: 2px solid #ffc107; }
         .sidebar.open { left: 0; }
-        .sidebar-header { padding: 20px; background: #0b0d26; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
-        .sidebar-header h2 { color: #ffc107; margin: 0; font-size: 18px; text-transform: uppercase; }
-        .close-sidebar { background: none; border: none; color: #ff4c4c; font-size: 24px; cursor: pointer; font-weight: bold; }
+        .sidebar-header { padding: 15px; background: #0b0d26; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; }
+        .sidebar-menu { padding: 15px; list-style: none; margin: 0; }
+        .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #00c6ff; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
 
-        /* Sidebar Links */
-        .sidebar-menu { padding: 20px 15px; list-style: none; margin: 0; }
-        .sidebar-menu li { margin-bottom: 15px; }
-        .menu-link { display: block; padding: 15px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; border-left: 4px solid #00c6ff; cursor: pointer; transition: 0.2s; font-size: 15px; }
-        .menu-link:hover { background: rgba(0,198,255,0.1); border-left-color: #ffc107; transform: translateX(5px); }
+        /* Custom Modal Styles */
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 3000; display: none; justify-content: center; align-items: center; }
+        .custom-modal-box { background: #10143a; border: 1px solid #00c6ff; border-radius: 10px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: modalZoom 0.3s ease-out; }
+        @keyframes modalZoom { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .btn-modal { padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; transition: 0.3s; }
+        .btn-ok { background: #00c6ff; color: black; }
+        .btn-ok:hover { background: #0098cc; }
+        .btn-cancel { background: transparent; color: white; border: 1px solid #ccc; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+        .btn-danger { background: #ff4c4c; color: white; }
+        .btn-danger:hover { background: #d32f2f; }
+
+        @media (max-width: 768px) {
+            .header { padding: 10px 15px; }
+            .coaching-brand h1 { font-size: 18px; }
+            .coaching-brand p { font-size: 9px; }
+            .avatar { width: 35px; height: 35px; font-size: 16px; }
+            .menu-btn { font-size: 24px; }
+            .title-area { padding-right: 100px; }
+            .form-inputs input, .form-inputs div, .form-inputs button { width: 100% !important; margin-top: 5px !important; }
+            .actions form { flex-direction: column !important; }
+            .actions form div { width: 100% !important; }
+            .actions form input { width: 100% !important; }
+            .actions form button { width: 100% !important; align-self: stretch !important; margin-top: 10px; }
+            .hybrid-btns { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 🚀 Sidebar HTML -->
+    <!-- Sidebar HTML -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="teacherSidebar">
         <div class="sidebar-header">
-            <h2>⚙️ Quick Tools</h2>
-            <button class="close-sidebar" onclick="toggleSidebar()">✖</button>
+            <h2 style="color: #ffc107; margin: 0; font-size: 16px;">⚙️ QUICK TOOLS</h2>
+            <button onclick="toggleSidebar()" style="background: none; border: none; color: #ff4c4c; font-size: 20px; cursor: pointer;">✖</button>
         </div>
         <ul class="sidebar-menu">
-            <li>
-                <a href="{% url 'choose_questions' %}" class="menu-link">📚 Choose & Add Questions</a>
-            </li>
-            <li>
-                <a href="#" class="menu-link">➕ Add Single Question</a>
-            </li>
-            <li>
-                <a href="#" class="menu-link" style="border-left-color: #00ff00;">📊 View Test Reports</a>
-            </li>
-            <li>
-                <a href="#" class="menu-link" style="border-left-color: #ff4c4c;">⚙️ Dashboard Settings</a>
-            </li>
+            <li><a href="{% url 'choose_questions' %}" class="menu-link" style="border-left-color: #00c6ff;">📚 Choose & Add Questions</a></li>
+            <li><a href="#" class="menu-link" style="border-left-color: #888;">➕ Add Single Question</a></li>
+            <li><a href="#" class="menu-link" style="border-left-color: #00ff00;">📊 View Test Reports</a></li>
+            <li><a href="#" class="menu-link" style="border-left-color: #ff4c4c;">⚙️ Dashboard Settings</a></li>
         </ul>
     </div>
 
-    <!-- Header Update with Hamburger Menu -->
+    <!-- Header -->
     <div class="header">
-        <div style="display: flex; align-items: center;">
-            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-            <h1>Teacher Dashboard</h1>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="coaching-brand">
+            <h1>{{ request.user.teacher_profile.coaching_name|default:"TEACHER DASHBOARD" }}</h1>
+            <p>Online Test Portal</p>
         </div>
-        <div>
-            <span style="margin-right: 20px; color: #ffc107;">Teacher: {{ user.full_name }}</span>
-            <a href="{% url 'logout' %}" style="color: #ff4c4c; text-decoration: none; font-weight: bold;">Logout</a>
+        <div class="profile-menu-container">
+            <div class="avatar" onclick="toggleProfileMenu()" title="Open Profile Menu">
+                {{ user.full_name|make_list|first|upper|default:"T" }}
+            </div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="dropdown-header">
+                    <strong>{{ user.full_name }}</strong>
+                    <span>{{ request.user.teacher_profile.coaching_name|default:"Teacher" }}</span>
+                </div>
+                <a href="{% url 'wallet_dashboard' %}">💰 Wallet: ₹{{ request.user.teacher_profile.wallet_balance }}</a>
+                <a href="{% url 'profile' %}">👤 My Profile</a>
+                <a href="{% url 'logout' %}" class="logout-btn" style="color: #ff4c4c; border-top: 1px solid #333;">🚪 Logout</a>
+            </div>
         </div>
     </div>
 
     <div class="container">
-
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p class="{{ message.tags }}">{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <!-- Create Form -->
+        <!-- Create Test Form -->
         <div class="create-form">
-            <h3 style="color: #00c6ff; margin: 0;">➕ Create New Mock Test</h3>
-            <form method="POST" class="form-inputs">
-                {% csrf_token %}
-                <input type="hidden" name="create_test" value="1">
-                <input type="text" name="title" value="{{ form_data.title|default:'' }}" placeholder="Test Title" required style="width: 220px; margin-top: 18px;">
-                <input type="text" name="test_code" value="{{ form_data.test_code|default:'' }}" placeholder="Test Code" required style="width: 150px; margin-top: 18px;">
-                <input type="number" name="total_time" value="{{ form_data.total_time|default:'' }}" placeholder="Time (Mins)" required style="width: 100px; margin-top: 18px;">
-                <input type="number" step="0.01" name="correct_marks" value="{{ form_data.correct_marks|default:'4.00' }}" placeholder="Correct (+)" required style="width: 100px; margin-top: 18px;">
-                <input type="number" step="0.01" name="negative_marks" value="{{ form_data.negative_marks|default:'1.00' }}" placeholder="Negative (-)" required style="width: 110px; margin-top: 18px;">
-                <div style="display: flex; flex-direction: column;">
-                    <label style="font-size: 12px; color: #ccc; margin-bottom: 4px;">Start Time (Optional)</label>
-                    <input type="datetime-local" name="scheduled_time" value="{{ form_data.scheduled_time|default:'' }}" style="width: 190px;">
-                </div>
-                <button type="submit" class="btn btn-upload" style="margin-top: 18px;">Create Test</button>
-            </form>
+            <h3 class="create-form-header" onclick="toggleCreateForm()">
+                <span>➕ Create New Mock Test</span>
+                <span id="createFormArrow">▾</span>
+            </h3>
+            <div id="createFormContainer" style="display: none;">
+                <form method="POST" class="form-inputs">
+                    {% csrf_token %}
+                    <input type="hidden" name="create_test" value="1">
+                    <input type="text" name="title" placeholder="Test Title" required style="width: 30%;">
+                    <input type="text" name="test_code" placeholder="Test Code" required style="width: 20%;">
+                    <input type="number" name="total_time" placeholder="Time (Mins)" required style="width: 15%;">
+                    <input type="number" step="0.01" name="correct_marks" value="4.00" required style="width: 12%;">
+                    <input type="number" step="0.01" name="negative_marks" value="1.00" required style="width: 12%;">
+                    <div style="width: 30%;">
+                        <label style="font-size: 11px; color: #ccc;">Start Time (Optional)</label>
+                        <input type="datetime-local" name="scheduled_time" style="width: 100%;">
+                    </div>
+                    <button type="submit" class="btn" style="background: linear-gradient(to right, #00c6ff, #0072ff); color: white; width: 20%;">Create Test</button>
+                </form>
+            </div>
         </div>
 
         <h2>Your Mock Tests</h2>
-
         {% for test in tests %}
         <div class="test-card">
-            <div class="test-info">
-                <!-- Title and Live Button side-by-side -->
-                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
-                    <h3 style="margin: 0;">{{ test.title }} <span class="badge {% if test.status == 'DRAFT' %}draft{% else %}published{% endif %}">{{ test.status }}</span></h3>
 
-                    <!-- NEW LIVE MONITOR BUTTON -->
-                    <a href="{% url 'live_test_monitor' test.id %}" class="btn btn-live">🔴 Live Control Room</a>
+            <div class="card-top-actions">
+                {% if test.questions.count > 0 %}
+                <a href="{% url 'preview_test' test.id %}" class="btn-preview-top" title="Preview Test">👀 Preview</a>
+                {% endif %}
+                <a href="{% url 'delete_test' test.id %}" onclick="event.preventDefault(); showCustomConfirm('क्या आप वाकई इस टेस्ट को डिलीट करना चाहते हैं?', this.href);" class="btn-delete-top" title="Delete Test">✖</a>
+            </div>
+
+            <div class="test-info">
+                <div class="title-area" style="display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 12px; padding-right: 110px;">
+                    <h3 style="margin: 0;">{{ test.title }}</h3>
+
+                    <div class="switch-wrapper" onclick="checkTimeAndToggle(event, {{ test.id }}, '{{ test.status }}', '{{ test.scheduled_time|date:'c' }}', '{% url 'toggle_publish_status' test.id %}')" title="Click to change status">
+                        <label class="switch">
+                            <input type="checkbox" disabled {% if test.status == 'PUBLISHED' %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                        <span class="status-text" style="color: {% if test.status == 'PUBLISHED' %}#00ff00{% else %}#ff4c4c{% endif %}">{{ test.status }}</span>
+                    </div>
+
+                    <!-- 🚀 NEW: Dynamic Live Room / View Results logic -->
+                    {% if test.status == 'PUBLISHED' %}
+                        <a href="{% url 'live_test_monitor' test.id %}" class="btn-live">🔴 Live Room</a>
+                    {% else %}
+                        <!-- 🚀 Draft/Off mode sends teacher to the test_result page -->
+                        <a href="{% url 'test_scoreboard' test.id %}" class="btn-live" style="background: linear-gradient(90deg, #00c6ff, #0072ff); color: white !important; box-shadow: 0 4px 10px rgba(0, 198, 255, 0.4);">🏆 View Results</a>
+                    {% endif %}
                 </div>
 
-                <p style="margin-top: 5px;"><strong>Test Code:</strong> <span style="color: white;">{{ test.test_code }}</span></p>
-                <p><strong>Time:</strong> {{ test.total_time }} mins | <strong>Marks:</strong> +{{ test.correct_marks }} / -{{ test.negative_marks }}</p>
+                <p><strong>Code:</strong> {{ test.test_code }} | <strong>Time:</strong> {{ test.total_time }}m | <strong>Marks:</strong> +{{ test.correct_marks }}/-{{ test.negative_marks }}</p>
 
-                {% if test.scheduled_time %}
-                <p><strong>Scheduled For:</strong> <span style="color: #00c6ff;">{{ test.scheduled_time|date:"d M Y, h:i A" }}</span></p>
-                {% else %}
-                <p><strong>Scheduled For:</strong> <span style="color: #ccc;">Flexible (Anytime)</span></p>
-                {% endif %}
-
-                <p><strong>Questions Uploaded:</strong> <span style="color: #00ff00; font-weight: bold;">{{ test.questions.count }}</span></p>
+                <p>
+                    <strong>Q's Uploaded:</strong> <span style="color: #00ff00; font-size: 16px;">{{ test.questions.count }}</span>
+                    {% if test.questions.count > 0 %}
+                    <a href="{% url 'delete_questions' test.id %}" onclick="event.preventDefault(); showCustomConfirm('क्या आप इस टेस्ट के सभी प्रश्न डिलीट करना चाहते हैं?', this.href);" style="color: #ff4c4c; margin-left: 8px; text-decoration: none; font-size: 18px; vertical-align: middle; cursor: pointer;" title="Delete All Questions">
+                        🗑️
+                    </a>
+                    {% endif %}
+                </p>
             </div>
 
             <div class="actions">
-                <!-- फुल अपडेट और क्लोन फॉर्म (+Ve Marks के साथ) -->
-                <form method="POST" action="{% url 'edit_schedule' test.id %}" style="display: flex; gap: 8px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 5px; border: 1px solid #444; margin-bottom: 10px; width: 100%; flex-wrap: wrap;">
-                    {% csrf_token %}
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <label style="font-size: 11px; color: #ccc;">Code:</label>
-                        <input type="text" name="new_test_code" value="{{ test.test_code }}" required style="width: 70px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <label style="font-size: 11px; color: #ccc;">Title:</label>
-                        <input type="text" name="new_title" value="{{ test.title }}" required style="width: 120px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <label style="font-size: 11px; color: #ccc;">Time (Min):</label>
-                        <input type="number" name="new_total_time" value="{{ test.total_time }}" required style="width: 60px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <label style="font-size: 11px; color: #ccc;">+Ve Marks:</label>
-                        <input type="number" step="0.01" name="new_correct_marks" value="{{ test.correct_marks }}" required style="width: 60px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <label style="font-size: 11px; color: #ccc;">-Ve Marks:</label>
-                        <input type="number" step="0.01" name="new_negative_marks" value="{{ test.negative_marks }}" required style="width: 60px; padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107;">
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1;">
-                        <label style="font-size: 11px; color: #ccc;">Schedule Date/Time:</label>
-                        <input type="datetime-local" name="new_scheduled_time" value="{{ test.scheduled_time|date:'Y-m-d\TH:i' }}" style="padding: 5px; font-size: 12px; background: #000; color: white; border: 1px solid #ffc107; width: 100%;">
-                    </div>
-
-                    <button type="submit" style="background: #00c6ff; color: black; border: none; padding: 6px 15px; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 12px; height: 30px; align-self: flex-end;">Copy & Update</button>
-                </form>
-
-                <!-- नया हाइब्रिड वर्कफ़्लो (सिर्फ ड्राफ्ट टेस्ट के लिए) -->
                 {% if test.status == 'DRAFT' %}
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; width: 100%; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                    <a href="{% url 'upload_excel' test.id %}" class="btn" style="background: #28a745; color: white;">📥 Upload Own Excel</a>
-                    <!-- URL में ?test_id=... भेज रहे हैं ताकि बैंक में ये टेस्ट पहले से सेलेक्टेड मिले! -->
-                    <a href="{% url 'choose_questions' %}?test_id={{ test.id }}" class="btn" style="background: #17a2b8; color: white;">📚 Add from Global Bank</a>
+                <div class="hybrid-btns" style="display: flex; gap: 10px; width: 100%; padding-bottom: 15px; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <a href="{% url 'upload_excel' test.id %}" class="btn" style="background: #28a745; color: white; flex: 1;">📥 Upload Excel</a>
+                    <a href="{% url 'choose_questions' %}?test_id={{ test.id }}" class="btn" style="background: #17a2b8; color: white; flex: 1;">📚 Global Bank</a>
                 </div>
                 {% endif %}
 
-                <!-- पुराने बटन्स (Preview, Publish, Delete) -->
-                {% if test.questions.count > 0 %}
-                <a href="{% url 'preview_test' test.id %}" class="btn btn-preview">👀 Preview & Edit</a>
-                {% endif %}
+                <button type="button" onclick="toggleEditForm({{ test.id }})" style="background: rgba(0, 198, 255, 0.1); border: 1px dashed #00c6ff; color: #00c6ff; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; margin-bottom: 10px; font-weight: bold; text-align: center; font-size: 14px; transition: 0.3s;">
+                    ➕ Edit Details (Code, Time, Marks) ▾
+                </button>
 
-                <a href="{% url 'toggle_publish_status' test.id %}" class="btn btn-publish">Change Status</a>
-
-                {% if test.questions.count > 0 %}
-                <a href="{% url 'delete_questions' test.id %}" class="btn btn-delete" onclick="return confirm('क्या आप वाकई सारे प्रश्न डिलीट करना चाहते हैं?');">Delete All Qs</a>
-                {% endif %}
-
-                <!-- पूरा टेस्ट डिलीट करने का बटन -->
-                <a href="{% url 'delete_test' test.id %}" class="btn" style="background: #ff4c4c; color: white;" onclick="return confirm('चेतावनी: क्या आप वाकई इस पूरे टेस्ट को डिलीट करना चाहते हैं? इससे जुड़े सारे प्रश्न भी हमेशा के लिए डिलीट हो जाएंगे!');">🗑️ Delete Test</a>
+                <div id="edit-form-{{ test.id }}" style="display: none; width: 100%; transition: 0.3s;">
+                    <form method="POST" action="{% url 'edit_schedule' test.id %}" style="display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 5px; border: 1px solid #444; width: 100%; flex-wrap: wrap; margin-bottom: 15px; box-sizing: border-box;">
+                        {% csrf_token %}
+                        <div style="flex: 1; min-width: 80px;"><label style="font-size: 11px; color: #ccc;">Code:</label><input type="text" name="new_test_code" value="{{ test.test_code }}" required style="width:100%; padding: 5px; background: #000; color: white; border: 1px solid #ffc107; box-sizing: border-box;"></div>
+                        <div style="flex: 1; min-width: 100px;"><label style="font-size: 11px; color: #ccc;">Title:</label><input type="text" name="new_title" value="{{ test.title }}" required style="width:100%; padding: 5px; background: #000; color: white; border: 1px solid #ffc107; box-sizing: border-box;"></div>
+                        <div style="flex: 1; min-width: 60px;"><label style="font-size: 11px; color: #ccc;">Time:</label><input type="number" name="new_total_time" value="{{ test.total_time }}" required style="width:100%; padding: 5px; background: #000; color: white; border: 1px solid #ffc107; box-sizing: border-box;"></div>
+                        <div style="flex: 1; min-width: 60px;"><label style="font-size: 11px; color: #ccc;">+Ve:</label><input type="number" step="0.01" name="new_correct_marks" value="{{ test.correct_marks }}" required style="width:100%; padding: 5px; background: #000; color: white; border: 1px solid #ffc107; box-sizing: border-box;"></div>
+                        <div style="flex: 1; min-width: 60px;"><label style="font-size: 11px; color: #ccc;">-Ve:</label><input type="number" step="0.01" name="new_negative_marks" value="{{ test.negative_marks }}" required style="width:100%; padding: 5px; background: #000; color: white; border: 1px solid #ffc107; box-sizing: border-box;"></div>
+                        <div style="flex: 1; min-width: 140px;"><label style="font-size: 11px; color: #ccc;">Date/Time:</label><input type="datetime-local" id="date-input-{{ test.id }}" name="new_scheduled_time" value="{{ test.scheduled_time|date:'Y-m-d\TH:i' }}" style="width:100%; padding: 5px; background: #000; color: white; border: 1px solid #ffc107; box-sizing: border-box;"></div>
+                        <button type="submit" style="background: #00c6ff; color: black; border: none; padding: 6px 15px; border-radius: 3px; font-weight: bold; cursor: pointer; align-self: flex-end;">Update</button>
+                    </form>
+                </div>
             </div>
         </div>
-        {% empty %}
-        <p style="color: #ff4c4c;">You haven't created any tests yet.</p>
         {% endfor %}
     </div>
 
-    <!-- 🚀 JS for Sidebar Toggle -->
+    <!-- Custom Alert Modal -->
+    <div id="customAlertModal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <h3 style="color: #ffc107; margin-top: 0; font-size: 18px;">⚠️ Alert</h3>
+            <p id="customAlertMsg" style="color: #ccc; font-size: 14px; line-height: 1.5;"></p>
+            <div style="text-align: right; margin-top: 20px;">
+                <button onclick="closeCustomAlert()" class="btn-modal btn-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="customConfirmModal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <h3 style="color: #ff4c4c; margin-top: 0; font-size: 18px;">❓ Confirm Action</h3>
+            <p id="customConfirmMsg" style="color: #ccc; font-size: 14px; line-height: 1.5;"></p>
+            <div style="text-align: right; margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeCustomConfirm()" class="btn-modal btn-cancel">Cancel</button>
+                <button onclick="executeConfirm()" class="btn-modal btn-danger">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let confirmActionUrl = "";
+
+        function showCustomAlert(message) {
+            document.getElementById('customAlertMsg').innerText = message;
+            document.getElementById('customAlertModal').style.display = 'flex';
+        }
+        function closeCustomAlert() {
+            document.getElementById('customAlertModal').style.display = 'none';
+        }
+
+        function showCustomConfirm(message, url) {
+            document.getElementById('customConfirmMsg').innerText = message;
+            confirmActionUrl = url;
+            document.getElementById('customConfirmModal').style.display = 'flex';
+        }
+        function closeCustomConfirm() {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            confirmActionUrl = "";
+        }
+        function executeConfirm() {
+            if(confirmActionUrl) window.location.href = confirmActionUrl;
+        }
+
         function toggleSidebar() {
-            let sidebar = document.getElementById('teacherSidebar');
-            let overlay = document.getElementById('sidebarOverlay');
-            if (sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-                overlay.style.display = 'none';
+            let s = document.getElementById('teacherSidebar');
+            let o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('open');
+            o.style.display = s.classList.contains('open') ? 'block' : 'none';
+        }
+
+        function toggleCreateForm() {
+            let formContainer = document.getElementById('createFormContainer');
+            let arrow = document.getElementById('createFormArrow');
+            if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+                formContainer.style.display = 'block';
+                arrow.innerHTML = '▴';
             } else {
-                sidebar.classList.add('open');
-                overlay.style.display = 'block';
+                formContainer.style.display = 'none';
+                arrow.innerHTML = '▾';
+            }
+        }
+
+        function toggleEditForm(testId) {
+            let formDiv = document.getElementById('edit-form-' + testId);
+            if (formDiv.style.display === 'none' || formDiv.style.display === '') {
+                formDiv.style.display = 'block';
+            } else {
+                formDiv.style.display = 'none';
+            }
+        }
+
+        function checkTimeAndToggle(event, testId, currentStatus, scheduledTimeStr, toggleUrl) {
+            event.preventDefault();
+
+            if (currentStatus === 'DRAFT') {
+                let now = new Date();
+                let scheduledTime = scheduledTimeStr ? new Date(scheduledTimeStr) : null;
+
+                if (!scheduledTime || scheduledTime <= now) {
+                    showCustomAlert("यह टेस्ट ON (लाइव) नहीं हो सकता क्योंकि इसका समय पीछे का है या सेट नहीं है!\nकृपया पहले नीचे दिए गए फॉर्म में आगे का समय भरें।");
+
+                    let editForm = document.getElementById('edit-form-' + testId);
+                    editForm.style.display = 'block';
+
+                    let dateInput = document.getElementById('date-input-' + testId);
+                    if(dateInput) {
+                        dateInput.focus();
+                        dateInput.style.boxShadow = "0 0 10px #ff4c4c";
+                        dateInput.style.borderColor = "#ff4c4c";
+                    }
+                    return;
+                }
+            }
+
+            window.location.href = toggleUrl;
+        }
+
+        function toggleProfileMenu() {
+            let menu = document.getElementById('profileDropdown');
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.avatar') && !event.target.closest('.profile-dropdown')) {
+                let menu = document.getElementById('profileDropdown');
+                if (menu && menu.style.display === 'flex') {
+                    menu.style.display = 'none';
+                }
             }
         }
     </script>

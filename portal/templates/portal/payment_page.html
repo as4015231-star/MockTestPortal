@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBC Portal - Secure Payment</title>
+    <style>
+        body {
+            background-color: #020111;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .payment-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
+        }
+        .payment-card h2 {
+            color: #ffc107;
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #333;
+        }
+        .info-box p {
+            margin: 8px 0;
+            font-size: 15px;
+            color: #ccc;
+        }
+        .info-box span {
+            color: white;
+            font-weight: bold;
+        }
+        .amount {
+            font-size: 36px;
+            color: #00ff00;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .pay-btn {
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .pay-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+        }
+        .secure-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="payment-card">
+
+        <!-- 🚀 NEW: डायनामिक हेडिंग -->
+        {% if is_recharge %}
+            <h2>Add Money To Wallet</h2>
+            <p style="color: #aaa; font-size: 14px;">Complete your payment securely to recharge your wallet.</p>
+        {% else %}
+            <h2>Unlock Your Access</h2>
+            <p style="color: #aaa; font-size: 14px;">Complete your payment to continue giving tests without interruption.</p>
+        {% endif %}
+
+        <!-- 🚀 NEW: डायनामिक इन्फो बॉक्स (टीचर और स्टूडेंट के लिए अलग-अलग) -->
+        <div class="info-box">
+            {% if request.user.role == 'TEACHER' %}
+                <p>Teacher: <span>{{ request.user.full_name }}</span></p>
+                <p>Mobile: <span>{{ request.user.mobile_number }}</span></p>
+                <p>Coaching: <span>{{ teacher.coaching_name }} (Code: {{ teacher.coaching_code }})</span></p>
+            {% else %}
+                <p>Student: <span>{{ request.user.full_name }}</span></p>
+                <p>Mobile: <span>{{ request.user.mobile_number }}</span></p>
+                <p>Coaching: <span>{{ student.enrolled_coaching.coaching_name|default:"Independent Student" }}</span></p>
+            {% endif %}
+        </div>
+
+        <div class="amount">₹{{ fee_amount }}</div>
+
+        <!-- 🚀 NEW: वॉलेट पेमेंट का ऑप्शन तभी दिखाएं जब यह 'सब्सक्रिप्शन' हो (रिचार्ज में नहीं) -->
+        {% if not is_recharge %}
+            <div style="background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="margin: 0 0 10px 0; color: #ccc;">Your Wallet Balance:
+                    <strong style="color: #00ff00; font-size: 18px;">₹{{ student.wallet_balance }}</strong>
+                </p>
+
+                {% if student.wallet_balance >= fee_amount %}
+                    <a href="{% url 'pay_via_wallet' %}" style="display: block; background: #00ff00; color: black; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 5px; text-transform: uppercase;">
+                        Pay Using Wallet
+                    </a>
+                    <p style="margin: 15px 0; color: #888;">--- OR ---</p>
+                {% else %}
+                    <p style="color: #ff4c4c; font-size: 12px; margin: 0; padding-bottom: 10px;">(Insufficient balance to pay via wallet)</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Razorpay Payment Button -->
+        <button id="rzp-button1" class="pay-btn">Pay via Online (Razorpay)</button>
+
+        <div class="secure-text">
+            🔒 100% Secure Payment by Razorpay
+        </div>
+
+        <!-- Hidden form to submit payment details to our backend verify function -->
+        <form id="razorpay-form" action="{% url 'verify_payment' %}" method="POST" style="display: none;">
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="{{ razorpay_order_id }}">
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+        </form>
+    </div>
+
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        var options = {
+            "key": "{{ razorpay_merchant_key }}",
+            "amount": "{{ razorpay_amount }}",
+            "currency": "{{ currency }}",
+            "name": "KBC Mock Test Portal",
+            "description": "{% if is_recharge %}Wallet Recharge{% else %}Subscription Unlock Fee{% endif %}",
+            "image": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+            "order_id": "{{ razorpay_order_id }}",
+            "handler": function (response){
+                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                document.getElementById('razorpay-form').submit();
+            },
+            "prefill": {
+                // 🚀 NEW: request.user का इस्तेमाल किया है ताकि टीचर/स्टूडेंट दोनों का काम हो जाए
+                "name": "{{ request.user.full_name }}",
+                "email": "{{ request.user.email }}",
+                "contact": "{{ request.user.mobile_number }}"
+            },
+            "theme": {
+                "color": "#ffc107"
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+
+        rzp1.on('payment.failed', function (response){
+            alert("Payment Failed! Reason: " + response.error.description);
+        });
+
+        document.getElementById('rzp-button1').onclick = function(e){
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script>
+
+</body>
+</html>

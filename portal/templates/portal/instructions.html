@@ -7,7 +7,15 @@
         body { background-color: #f4f6f8; color: #333; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
         .header { background: #10143a; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ffc107; color: white; }
         .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #10143a; text-transform: uppercase; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+        /* 🚀 NEW: Instruction Header & Language Selector Styles */
+        .instruction-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .instruction-header h2 { color: #10143a; text-transform: uppercase; margin: 0; border-bottom: none; padding-bottom: 0; font-size: 22px; }
+
+        .lang-selector { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; color: #333; }
+        .lang-selector select { padding: 6px 10px; font-size: 14px; border: 1px solid #1565c0; border-radius: 4px; background: #f9f9f9; color: #000; cursor: pointer; outline: none; font-weight: bold; transition: 0.3s; }
+        .lang-selector select:focus { border-color: #ffc107; box-shadow: 0 0 5px rgba(255,193,7,0.5); }
+
         .rules-list { font-size: 16px; line-height: 1.8; margin-bottom: 30px; }
         .highlight { font-weight: bold; color: #d32f2f; }
 
@@ -27,15 +35,15 @@
         /* Live Badge Mobile Adjustment */
         @media (max-width: 600px) {
             .header { flex-direction: column; gap: 10px; padding: 15px 20px; text-align: center; }
+            .instruction-header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2 style="margin: 0; color: #ffc107;">{{ test.title }}</h2>
+        <h2 style="margin: 0; color: #ffc107; border: none; padding: 0; text-transform: none;">{{ test.title }}</h2>
         <div style="font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 5px;">
             <span>🧑‍🎓 Candidate: {{ request.user.full_name|upper }}</span>
-            <!-- 🚀 Live Count Badge Added Here -->
             <span id="liveCountBadge" onclick="openLiveModal()" style="background: rgba(0, 198, 255, 0.2); border: 1px solid #00c6ff; color: #00c6ff; padding: 4px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 8px rgba(0,198,255,0.4);">
                 👥 Live Waiting: <span id="liveCountNumber">...</span>
             </span>
@@ -43,7 +51,18 @@
     </div>
 
     <div class="container">
-        <h2>Please read the instructions carefully</h2>
+
+        <!-- 🚀 Header with Language Dropdown -->
+        <div class="instruction-header">
+            <h2>Please read the instructions carefully</h2>
+            <div class="lang-selector">
+                <label for="langDropdown">View In:</label>
+                <select id="langDropdown" onchange="toggleLanguage()">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                </select>
+            </div>
+        </div>
 
         {% if messages %}
             {% for message in messages %}
@@ -61,25 +80,41 @@
         </div>
         {% endif %}
 
-        <ul class="rules-list">
-            <li>Total duration of this test is <strong>{{ test.total_time }} minutes</strong>.</li>
-            <li>The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.</li>
-            <li>For every correct answer, you will be awarded <span style="color: green; font-weight: bold;">+{{ test.correct_marks }} marks</span>.</li>
-            <li>There is a negative marking. For every wrong answer, <span class="highlight">-{{ test.negative_marks }} mark(s)</span> will be deducted.</li>
-            <li>You can navigate between questions using the Question Palette on the right side of the screen.</li>
-        </ul>
+        <!-- 🚀 ENGLISH INSTRUCTIONS -->
+        <div id="instructions-en">
+            <ul class="rules-list">
+                <li>Total duration of this test is <strong>{{ test.total_time }} minutes</strong>.</li>
+                <li>The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.</li>
+                <li>For every correct answer, you will be awarded <span style="color: green; font-weight: bold;">+{{ test.correct_marks }} marks</span>.</li>
+                <li>There is a negative marking. For every wrong answer, <span class="highlight">-{{ test.negative_marks }} mark(s)</span> will be deducted.</li>
+                <li>You can navigate between questions using the Question Palette on the right side of the screen.</li>
+            </ul>
+        </div>
+
+        <!-- 🚀 HINDI INSTRUCTIONS (Hidden initially) -->
+        <div id="instructions-hi" style="display: none;">
+            <ul class="rules-list">
+                <li>इस परीक्षा की कुल अवधि <strong>{{ test.total_time }} मिनट</strong> है।</li>
+                <li>घड़ी सर्वर पर सेट की जाएगी। स्क्रीन के ऊपरी दाएं कोने में काउंटडाउन टाइमर परीक्षा पूरी करने के लिए आपके पास शेष बचा समय दिखाएगा।</li>
+                <li>प्रत्येक सही उत्तर के लिए, आपको <span style="color: green; font-weight: bold;">+{{ test.correct_marks }} अंक</span> दिए जाएंगे।</li>
+                <li>इसमें नकारात्मक अंकन (Negative Marking) है। प्रत्येक गलत उत्तर के लिए <span class="highlight">-{{ test.negative_marks }} अंक</span> काटे जाएंगे।</li>
+                <li>आप स्क्रीन के दाईं ओर दिए गए प्रश्न पैलेट (Question Palette) का उपयोग करके प्रश्नों के बीच नेविगेट कर सकते हैं।</li>
+            </ul>
+        </div>
 
         <form method="POST" class="action-area" id="instructionForm">
             {% csrf_token %}
+            <!-- 🚀 Toggling Text for Checkbox too -->
             <label class="terms">
                 <input type="checkbox" id="agreeCheck" onchange="checkConditions()">
-                I have read and understood the instructions. I am ready to begin.
+                <span id="agree-text-en">I have read and understood the instructions. I am ready to begin.</span>
+                <span id="agree-text-hi" style="display: none;">मैंने निर्देशों को पढ़ और समझ लिया है। मैं शुरू करने के लिए तैयार हूँ।</span>
             </label>
             <button type="submit" id="startBtn" class="start-btn" disabled>I am ready to begin</button>
         </form>
     </div>
 
-    <!-- 🚀 Live Students Modal (Same as Test Page) -->
+    <!-- 🚀 Live Students Modal -->
     <div id="liveStudentsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
         <div style="background:#10143a; width:90%; max-width:400px; border-radius:10px; border:1px solid #00c6ff; overflow:hidden; box-shadow: 0 10px 25px rgba(0,198,255,0.2);">
             <div style="background:#0b0d26; padding:15px; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items:center;">
@@ -93,8 +128,31 @@
     </div>
 
     <script>
-        let isSafeExit = false;
+        // 🚀 LANGUAGE TOGGLE LOGIC
+        function toggleLanguage() {
+            const selectedLang = document.getElementById("langDropdown").value;
+            const startBtn = document.getElementById("startBtn");
 
+            if (selectedLang === "hi") {
+                document.getElementById("instructions-en").style.display = "none";
+                document.getElementById("agree-text-en").style.display = "none";
+
+                document.getElementById("instructions-hi").style.display = "block";
+                document.getElementById("agree-text-hi").style.display = "inline";
+
+                startBtn.innerText = "मैं शुरू करने के लिए तैयार हूँ";
+            } else {
+                document.getElementById("instructions-hi").style.display = "none";
+                document.getElementById("agree-text-hi").style.display = "none";
+
+                document.getElementById("instructions-en").style.display = "block";
+                document.getElementById("agree-text-en").style.display = "inline";
+
+                startBtn.innerText = "I am ready to begin";
+            }
+        }
+
+        let isSafeExit = false;
         const startBtn = document.getElementById('startBtn');
         const agreeCheck = document.getElementById('agreeCheck');
         const timerBox = document.getElementById('waitingLounge');
@@ -114,7 +172,6 @@
 
         const isEarly = "{{ is_early }}" === "True";
         const scheduledTimeStr = "{{ test.scheduled_time|date:'c' }}";
-
         let isTimeReached = !isEarly;
 
         function checkConditions() {
@@ -194,7 +251,6 @@
             document.getElementById('liveStudentsModal').style.display = 'none';
         }
 
-        // Fetch live count initially, then every 10 seconds
         setTimeout(fetchLiveStudents, 1000);
         setInterval(fetchLiveStudents, 10000);
     </script>

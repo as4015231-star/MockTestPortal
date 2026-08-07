@@ -29,6 +29,10 @@
         .q-header { font-size: 16px; color: #ffc107; margin-bottom: 10px; font-weight: bold; }
         .q-text { font-size: 18px; color: white; line-height: 1.5; }
 
+        /* 🚀 NEW: Image Styling */
+        .q-image-container { text-align: center; margin-top: 15px; display: none; }
+        .q-image-container img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #555; box-shadow: 0 4px 8px rgba(0,0,0,0.5); max-height: 250px; }
+
         .options-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .option-label { display: flex; align-items: center; background: #10143a; padding: 12px 20px; border-radius: 50px; border: 2px solid #333; cursor: pointer; transition: 0.3s; font-size: 16px; position: relative; }
         .option-label:hover { border-color: #ffc107; }
@@ -127,6 +131,11 @@
             <div class="question-box">
                 <div class="q-header" id="questionHeader">Question 1</div>
                 <div class="q-text" id="questionText">Loading...</div>
+
+                <!-- 🚀 NEW: Dynamic Image Container -->
+                <div class="q-image-container" id="questionImageContainer">
+                    <img id="questionImage" src="" alt="Question Image">
+                </div>
             </div>
 
             <div class="options-box">
@@ -207,21 +216,21 @@
         const STATE_KEY = "kbc_state_" + TEST_ID;
         const INDEX_KEY = "kbc_index_" + TEST_ID;
         const ENDTIME_KEY = "kbc_endtime_" + TEST_ID;
-        const SHUFFLE_KEY = "kbc_shuffle_" + TEST_ID; // 🚀 नया शफल की
+        const SHUFFLE_KEY = "kbc_shuffle_" + TEST_ID;
 
-        // 1. ओरिजिनल सवाल लोड करें
+        // 1. 🚀 NEW: ओरिजिनल सवाल लोड करें (इमेज के साथ)
         let questions = [
             {% for q in questions %}
             {
                 id: {{ q.id }},
                 text: `{{ q.question_text|escapejs }}`,
+                imageUrl: `{% if q.question_image %}{{ q.question_image.url }}{% endif %}`,
                 options: { 'A': `{{ q.option_a|escapejs }}`, 'B': `{{ q.option_b|escapejs }}`, 'C': `{{ q.option_c|escapejs }}`, 'D': `{{ q.option_d|escapejs }}` },
                 status: 'not_visited', selected: null
             },
             {% endfor %}
         ];
 
-        // 🚀 2. स्मार्ट शफलिंग लॉजिक
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -231,14 +240,12 @@
 
         let savedShuffle = localStorage.getItem(SHUFFLE_KEY);
         if (savedShuffle) {
-            // अगर पहले से शफल हुआ था, तो उसी क्रम में लगाएं (रिफ्रेश सपोर्ट)
             let savedIds = JSON.parse(savedShuffle);
             let orderedQuestions = [];
             savedIds.forEach(id => {
                 let q = questions.find(q => q.id === id);
                 if (q) orderedQuestions.push(q);
             });
-            // सुरक्षा जांच: अगर कोई सवाल छूट गया तो फिर से शफल कर दें
             if (orderedQuestions.length === questions.length) {
                 questions = orderedQuestions;
             } else {
@@ -246,17 +253,14 @@
                 localStorage.setItem(SHUFFLE_KEY, JSON.stringify(questions.map(q => q.id)));
             }
         } else {
-            // पहली बार लोड होने पर शफल करें और सेव करें
             shuffleArray(questions);
             localStorage.setItem(SHUFFLE_KEY, JSON.stringify(questions.map(q => q.id)));
         }
 
-        // 🚀 3. शफल होने के बाद, सवालों को नया 1, 2, 3 इंडेक्स दें ताकि बच्चे को सीधा क्रम दिखे
         questions.forEach((q, i) => {
             q.index = i + 1;
         });
 
-        // 4. पुराने सेव किए गए जवाब (स्टेट) वापस लाएं
         let savedState = localStorage.getItem(STATE_KEY);
         if (savedState) {
             let parsedState = JSON.parse(savedState);
@@ -292,7 +296,6 @@
             let content = document.getElementById('sheetContent');
             content.innerHTML = '';
 
-            // फुल रिव्यू भी अब शफल्ड क्रम में ही दिखेगा!
             questions.forEach((q, i) => {
                 let card = document.createElement('div');
                 card.className = 'review-card';
@@ -343,6 +346,18 @@
 
             document.getElementById('questionHeader').innerText = "Question " + q.index;
             document.getElementById('questionText').innerText = q.text;
+
+            // 🚀 NEW: Image Logic (अगर इमेज है तो दिखाओ, वरना छुपा दो)
+            let imgContainer = document.getElementById('questionImageContainer');
+            let imgElement = document.getElementById('questionImage');
+
+            if (q.imageUrl && q.imageUrl.trim() !== "") {
+                imgElement.src = q.imageUrl;
+                imgContainer.style.display = "block";
+            } else {
+                imgElement.src = "";
+                imgContainer.style.display = "none";
+            }
 
             ['A', 'B', 'C', 'D'].forEach(opt => {
                 document.getElementById('text_' + opt).innerText = opt + ". " + q.options[opt];
@@ -454,7 +469,7 @@
             localStorage.removeItem(STATE_KEY);
             localStorage.removeItem(INDEX_KEY);
             localStorage.removeItem(ENDTIME_KEY);
-            localStorage.removeItem(SHUFFLE_KEY); // टेस्ट पूरा होने पर शफल की डिलीट करें
+            localStorage.removeItem(SHUFFLE_KEY);
 
             let form = document.getElementById('examForm');
             let container = document.getElementById('hiddenInputsContainer');
@@ -462,7 +477,7 @@
             questions.forEach(q => {
                 let input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = 'question_' + q.id;  // 🚀 बैकएंड को हमेशा ओरिजिनल ID जाएगी!
+                input.name = 'question_' + q.id;
                 input.value = q.selected ? q.selected : '';
                 container.appendChild(input);
             });

@@ -2,64 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Question Bank - KBC Portal</title>
     <style>
-        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
-        .header { background: #10143a; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 100; }
-        .header h2 { color: #ffc107; margin: 0; }
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
-        .main-container { display: flex; height: calc(100vh - 65px); }
+        .header { background: #10143a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 1000; height: 60px; box-sizing: border-box; }
+        .header h2 { color: #ffc107; margin: 0; font-size: 18px; }
+        .btn-back { color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 12px; border-radius: 5px; background: rgba(255,255,255,0.1); font-size: 12px; }
 
-        /* 🎛️ Left Sidebar Filters */
-        .filter-sidebar { width: 320px; background: #0b0d26; padding: 20px; border-right: 1px solid #444; overflow-y: auto; }
-        .filter-sidebar h3 { color: #00c6ff; border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
+        .filter-toggle-btn { position: fixed; top: 50%; left: 0; transform: translateY(-50%); background: rgba(0, 198, 255, 0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: black; padding: 15px 8px; border-radius: 0 10px 10px 0; font-weight: bold; font-size: 14px; cursor: pointer; z-index: 998; box-shadow: 4px 0 10px rgba(0, 198, 255, 0.2); writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 2px; transition: 0.3s; }
 
+        .filter-drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
+        .filter-drawer { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: rgba(11, 13, 38, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 1002; transition: left 0.3s ease-out; border-right: 2px solid rgba(0, 198, 255, 0.8); overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        .filter-drawer.open { left: 0; }
+
+        .drawer-header { padding: 20px; background: rgba(16, 20, 58, 0.8); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .drawer-header h3 { margin: 0; color: #ffc107; font-size: 18px; }
+        .drawer-close { background: none; border: none; color: #ff4c4c; font-size: 24px; cursor: pointer; }
+
+        .drawer-body { padding: 20px; }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 14px; color: #ccc; margin-bottom: 8px; font-weight: bold; }
-        .form-group select, .form-group input { width: 100%; padding: 10px; background: #000; color: white; border: 1px solid #00c6ff; border-radius: 5px; outline: none; box-sizing: border-box; }
+        .form-group label { display: block; font-size: 12px; color: #00c6ff; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        .form-group select { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.6); color: white; border: 1px solid #ffc107; border-radius: 5px; outline: none; font-size: 14px; }
 
-        /* 📝 Right Question Area (FIXED STICKY SEARCH) */
-        .question-area { flex: 1; padding: 0 20px 20px 20px; overflow-y: auto; position: relative; padding-bottom: 100px; }
+        .question-area { max-width: 1000px; margin: auto; padding: 15px; padding-bottom: 100px; }
 
-        /* 🚀 Sticky Search Bar */
-        .top-search-bar {
-            display: flex; gap: 10px; margin-bottom: 20px;
-            position: sticky; top: 0; background: #020111;
-            padding: 20px 0 15px 0; z-index: 50;
-            border-bottom: 1px solid #333;
-        }
+        .top-search-bar { position: sticky; top: 60px; background: #020111; z-index: 900; padding: 15px 0; border-bottom: 1px solid rgba(255, 193, 7, 0.3); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+        .top-search-bar input { width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #ffc107; background: rgba(255,255,255,0.05); color: white; outline: none; font-size: 15px; box-sizing: border-box; }
 
-        .top-search-bar input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #ffc107; background: rgba(255,255,255,0.05); color: white; outline: none; font-size: 15px; }
+        /* 🚀 NEW: Search Status / Results Counter */
+        .search-status { font-size: 12px; color: #00ff00; font-weight: bold; white-space: nowrap; }
 
         .q-card { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; transition: 0.2s; }
         .q-card:hover { border-color: #00c6ff; box-shadow: 0 0 10px rgba(0,198,255,0.2); }
         .checkbox-area input { transform: scale(1.5); cursor: pointer; margin-top: 5px; accent-color: #00ff00; }
         .q-content { flex: 1; }
-        .q-text { font-size: 16px; font-weight: bold; margin-bottom: 10px; line-height: 1.4; color: #fff; }
-        .q-meta { font-size: 12px; color: #aaa; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .badge { background: #10143a; padding: 4px 8px; border-radius: 3px; border: 1px solid #00c6ff; color: #00c6ff; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; color: #ccc; }
-        .opt-correct { color: #00ff00; font-weight: bold; }
+        .q-text { font-size: 15px; font-weight: bold; margin-bottom: 10px; line-height: 1.4; color: #fff; }
+        .q-meta { font-size: 12px; margin-bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .badge { background: #10143a; padding: 4px 8px; border-radius: 3px; border: 1px solid #00c6ff; color: #00c6ff; font-weight: bold; font-size: 10px; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 13px; color: #ccc; }
+        .opt-correct { color: #00ff00; font-weight: bold; background: rgba(0,255,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; }
 
-        /* 🛒 Floating Cart Button */
-        .floating-cart { position: fixed; bottom: 30px; right: 30px; background: linear-gradient(90deg, #00ff00, #00b300); color: black; border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transition: 0.3s; z-index: 100; }
-        .floating-cart:hover { transform: scale(1.05); background: linear-gradient(90deg, #ffc107, #ff9800); }
-        .cart-count { background: black; color: white; padding: 2px 8px; border-radius: 20px; font-size: 14px; }
+        .floating-cart { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(90deg, #00ff00, #00b300); color: black; border: none; padding: 12px 20px; border-radius: 50px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; z-index: 1000; }
+        .cart-count { background: black; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px; }
+
+        /* 🚀 NEW: Load More Button */
+        .btn-load-more { display: none; margin: 20px auto; padding: 10px 30px; background: transparent; color: #00c6ff; border: 1px solid #00c6ff; border-radius: 20px; font-weight: bold; cursor: pointer; text-align: center; }
+        .btn-load-more:hover { background: rgba(0, 198, 255, 0.1); }
+
+        @media (min-width: 768px) {
+            .options-grid { grid-template-columns: 1fr 1fr; }
+            .question-area { padding-left: 60px; }
+        }
     </style>
 </head>
 <body>
+
     <div class="header">
         <h2>📚 Global Question Bank</h2>
-        <a href="{% url 'teacher_dashboard' %}" style="color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 15px; border-radius: 5px; background: rgba(255,255,255,0.1);">Back to Dashboard</a>
+        <a href="{% url 'teacher_dashboard' %}" class="btn-back">← Dashboard</a>
     </div>
 
-    <div class="main-container">
-        <!-- 🎛️ Sidebar Filters -->
-        <div class="filter-sidebar">
-            <h3>Filters & Actions</h3>
+    <!-- Filter Toggle -->
+    <div class="filter-toggle-btn" onclick="toggleFilterDrawer()">⚙️ FILTERS</div>
 
+    <!-- Filter Drawer -->
+    <div class="filter-drawer-overlay" id="filterOverlay" onclick="toggleFilterDrawer(false)"></div>
+    <div class="filter-drawer" id="filterDrawer">
+        <div class="drawer-header">
+            <h3>⚙️ Filter Options</h3>
+            <button class="drawer-close" onclick="toggleFilterDrawer(false)">✖</button>
+        </div>
+        <div class="drawer-body">
             <div class="form-group">
-                <label>1. Filter By Category (Class)</label>
+                <label>1. Category (Class)</label>
                 <select id="categoryFilter">
                     <option value="ALL">-- All Categories --</option>
                     {% for cat in categories %}
@@ -67,9 +84,8 @@
                     {% endfor %}
                 </select>
             </div>
-
             <div class="form-group">
-                <label>2. Filter By Subject</label>
+                <label>2. Subject</label>
                 <select id="subjectFilter">
                     <option value="ALL">-- All Subjects --</option>
                     {% for sub in subcategories %}
@@ -77,9 +93,8 @@
                     {% endfor %}
                 </select>
             </div>
-
             <div class="form-group">
-                <label>3. Filter By Chapter</label>
+                <label>3. Chapter</label>
                 <select id="chapterFilter">
                     <option value="ALL">-- All Chapters --</option>
                     {% for chap in chapters %}
@@ -88,96 +103,57 @@
                 </select>
             </div>
         </div>
-
-        <!-- 📝 Questions List -->
-        <div class="question-area">
-            <!-- 🚀 Sticky Search Bar -->
-            <div class="top-search-bar">
-                <input type="text" id="searchInput" placeholder="Search questions by keywords (Type to live search)...">
-            </div>
-
-            <div id="questionsContainer">
-                {% for q in questions %}
-                <!-- 🚀 FIX: Data Attributes for Category, Subcategory AND Chapter -->
-                <div class="q-card"
-                     data-category="{{ q.category.id }}"
-                     data-subcategory="{{ q.subcategory.id }}"
-                     data-chapter="{% if q.chapter %}{{ q.chapter.id }}{% else %}NONE{% endif %}"
-                     data-text="{{ q.question_text|lower }} {{ q.option_a|lower }} {{ q.option_b|lower }} {{ q.option_c|lower }} {{ q.option_d|lower }}">
-                    <div class="checkbox-area">
-                        <input type="checkbox" class="q-checkbox" value="{{ q.id }}" onchange="updateCartCount()">
-                    </div>
-                    <div class="q-content">
-                        <div class="q-meta">
-                            <span class="badge">{{ q.category.name }}</span>
-                            <span class="badge" style="border-color:#ffc107; color:#ffc107;">{{ q.subcategory.name }}</span>
-                            {% if q.chapter %}
-                            <span class="badge" style="border-color:#28a745; color:#28a745;">{{ q.chapter.name }}</span>
-                            {% endif %}
-                        </div>
-                        <div class="q-text">{{ q.question_text }}</div>
-                        <div class="options-grid">
-                            <div class="{% if q.correct_answer == 'A' %}opt-correct{% endif %}">A. {{ q.option_a }}</div>
-                            <div class="{% if q.correct_answer == 'B' %}opt-correct{% endif %}">B. {{ q.option_b }}</div>
-                            <div class="{% if q.correct_answer == 'C' %}opt-correct{% endif %}">C. {{ q.option_c }}</div>
-                            <div class="{% if q.correct_answer == 'D' %}opt-correct{% endif %}">D. {{ q.option_d }}</div>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div style="text-align: center; padding: 50px;">
-                    <h3 style="color:#ffc107;">No questions found!</h3>
-                    <p style="color:#ccc;">Admin needs to add questions to the Global Bank.</p>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div id="noDataMsg" style="display:none; text-align:center; padding:50px; color:#ff4c4c;">
-                <h3>⚠️ No questions match your current filters.</h3>
-            </div>
-
-            <!-- Floating Button -->
-            <button class="floating-cart" onclick="openCheckoutModal()">
-                <span>➕ Add to Test</span>
-                <span class="cart-count" id="cartCount">0</span>
-            </button>
-        </div>
     </div>
 
-    <!-- 🚀 Smart Checkout Modal -->
+    <div class="question-area">
+        <div class="top-search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Type at least 3 letters to search...">
+            <div class="search-status" id="searchStatus">Loading...</div>
+        </div>
+
+        <!-- 🚀 JavaScript will inject questions here -->
+        <div id="questionsContainer"></div>
+
+        <div id="loader" style="display:none; text-align:center; padding:20px; color:#ffc107;">⏳ Loading Questions...</div>
+
+        <button class="btn-load-more" id="loadMoreBtn" onclick="loadNextPage()">⬇️ Load More Questions</button>
+
+        <button class="floating-cart" onclick="openCheckoutModal()">
+            <span>➕ Add to Test</span>
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
+
+    <!-- 🚀 Checkout Modal (Same as before) -->
     <div id="checkoutModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
         <div style="background:#10143a; padding:30px; border-radius:10px; width:90%; max-width:500px; border:2px solid #ffc107;">
             <h2 style="color:#00c6ff; margin-top:0;">🛒 Add <span id="modalQCount">0</span> Questions to Test</h2>
-            <p style="color:#ccc; font-size:14px; margin-bottom:20px;">आप इन सवालों को कहाँ जोड़ना चाहते हैं?</p>
 
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #444;">
-                <label style="display:flex; align-items:center; gap:10px; font-weight:bold; color:#ffc107; cursor:pointer;">
-                    <input type="radio" name="checkoutType" value="existing" checked id="radioExisting" style="transform:scale(1.5);">
-                    1. Add to Existing Draft Test
-                </label>
-                <div style="margin-top:15px;" id="existingBox">
-                    <select id="modalTestSelect" style="width:100%; padding:10px; background:#000; color:white; border:1px solid #00c6ff; border-radius:5px;">
-                        {% for t in draft_tests %}
-                            <option value="{{ t.id }}" {% if request.GET.test_id == t.id|stringformat:"s" %}selected{% endif %}>
-                                {{ t.title }} (Code: {{ t.test_code }}) - [Has {{ t.questions.count }} Qs]
-                            </option>
-                        {% empty %}
-                            <option value="" disabled style="color:#ff4c4c;">No Draft Tests Available!</option>
-                        {% endfor %}
-                    </select>
+            {% if request.GET.test_id %}
+                <input type="hidden" id="hiddenTestId" value="{{ request.GET.test_id }}">
+                <input type="hidden" name="checkoutType" value="existing" id="radioExisting" checked>
+                <div style="background:rgba(0, 255, 0, 0.1); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #00ff00; text-align: center;">
+                    <p style="color:#00ff00; font-weight:bold; margin: 0; font-size: 15px;">✅ ये प्रश्न सीधे आपके द्वारा चुने गए टेस्ट में जोड़े जाएंगे।</p>
                 </div>
-            </div>
-
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; border:1px solid #444;">
-                <label style="display:flex; align-items:center; gap:10px; font-weight:bold; color:#ffc107; cursor:pointer;">
-                    <input type="radio" name="checkoutType" value="new" id="radioNew" style="transform:scale(1.5);">
-                    2. Create a NEW Test for these Questions
-                </label>
-                <div style="margin-top:15px; display:none; display:flex; flex-direction:column; gap:10px;" id="newBox">
-                    <input type="text" id="newTitle" placeholder="Test Title (e.g., Weekly Math Test)" style="padding:10px; background:#000; color:white; border:1px solid #444; border-radius:5px;">
-                    <input type="text" id="newCode" placeholder="Test Code (e.g., MTH01)" style="padding:10px; background:#000; color:white; border:1px solid #444; border-radius:5px;">
+            {% else %}
+                <p style="color:#ccc; font-size:14px; margin-bottom:20px;">आप इन सवालों को कहाँ जोड़ना चाहते हैं?</p>
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #444;">
+                    <label style="display:flex; align-items:center; gap:10px; font-weight:bold; color:#ffc107; cursor:pointer;">
+                        <input type="radio" name="checkoutType" value="existing" checked id="radioExisting" style="transform:scale(1.5);">
+                        1. Add to Existing Draft Test
+                    </label>
+                    <div style="margin-top:15px;" id="existingBox">
+                        <select id="modalTestSelect" style="width:100%; padding:10px; background:#000; color:white; border:1px solid #00c6ff; border-radius:5px;">
+                            <option value="" disabled selected>-- Select Draft Test --</option>
+                            {% for t in draft_tests %}
+                                <option value="{{ t.id }}">{{ t.title }} (Code: {{ t.test_code }})</option>
+                            {% empty %}
+                                <option value="" disabled style="color:#ff4c4c;">No Draft Tests Available!</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
 
             <div style="display:flex; gap:15px; margin-top:25px;">
                 <button onclick="submitCheckout()" style="flex:1; background:#28a745; color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:16px; cursor:pointer;">🚀 Confirm & Add</button>
@@ -186,133 +162,170 @@
         </div>
     </div>
 
-    <!-- 🚀 JS for Live Search & SMART Cascading Filters -->
+    <!-- 🚀 NEW: Smart Fetch Logic (Debounce + Abort + Pagination) -->
     <script>
+        let touchstartX = 0;
+        let touchendX = 0;
+        document.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
+        document.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            let swipeDistance = touchendX - touchstartX;
+            let drawer = document.getElementById('filterDrawer');
+            if (swipeDistance > 50 && !drawer.classList.contains('open')) toggleFilterDrawer(true);
+            else if (swipeDistance < -50 && drawer.classList.contains('open')) toggleFilterDrawer(false);
+        });
+
+        function toggleFilterDrawer(forceOpen = null) {
+            let drawer = document.getElementById('filterDrawer');
+            let overlay = document.getElementById('filterOverlay');
+            if (forceOpen === true) drawer.classList.add('open');
+            else if (forceOpen === false) drawer.classList.remove('open');
+            else drawer.classList.toggle('open');
+            overlay.style.display = drawer.classList.contains('open') ? 'block' : 'none';
+        }
+
+        // ==========================================
+        // 🚀 SERVER-SIDE FETCH LOGIC
+        // ==========================================
         const categoryFilter = document.getElementById('categoryFilter');
         const subjectFilter = document.getElementById('subjectFilter');
         const chapterFilter = document.getElementById('chapterFilter');
         const searchInput = document.getElementById('searchInput');
 
-        // Event Listeners
-        categoryFilter.addEventListener('change', () => { filterDropdowns('category'); applyFilters(); });
-        subjectFilter.addEventListener('change', () => { filterDropdowns('subject'); applyFilters(); });
-        chapterFilter.addEventListener('change', applyFilters);
-        searchInput.addEventListener('input', applyFilters);
+        let currentPage = 1;
+        let searchTimeout = null;
+        let abortController = null;
 
-        // 🚀 Smart Cascading Logic (क्लास -> सब्जेक्ट -> चैप्टर)
-        function filterDropdowns(source) {
-            let catId = categoryFilter.value;
-            let subId = subjectFilter.value;
+        // Triggers
+        categoryFilter.addEventListener('change', () => { filterDropdowns(); fetchQuestions(1); });
+        subjectFilter.addEventListener('change', () => { filterDropdowns(); fetchQuestions(1); });
+        chapterFilter.addEventListener('change', () => { fetchQuestions(1); });
 
-            if (source === 'category') {
-                // कैटेगरी बदलने पर सब्जेक्ट्स को फ़िल्टर करें
-                let subOptions = subjectFilter.options;
-                for (let i = 1; i < subOptions.length; i++) {
-                    let opt = subOptions[i];
-                    if (catId === "ALL" || opt.getAttribute('data-category') === catId) {
-                        opt.style.display = 'block';
-                    } else {
-                        opt.style.display = 'none';
-                        if (opt.selected) subjectFilter.value = "ALL";
-                    }
-                }
-                chapterFilter.value = "ALL"; // चैप्टर रीसेट करें
-                subId = subjectFilter.value;
+        // 🚀 1. DEBOUNCING + 3 CHAR LIMIT on Search
+        searchInput.addEventListener('input', () => {
+            let text = searchInput.value.trim();
+            if (text.length > 0 && text.length < 3) {
+                document.getElementById('searchStatus').innerText = "Type more...";
+                return; // Stop if less than 3 chars
             }
 
-            // सब्जेक्ट बदलने (या कैटेगरी के कारण सब्जेक्ट रीसेट होने) पर चैप्टर फ़िल्टर करें
-            let chapOptions = chapterFilter.options;
-            for (let i = 1; i < chapOptions.length; i++) {
-                let opt = chapOptions[i];
-                if (subId === "ALL" || opt.getAttribute('data-subcategory') === subId) {
-                    opt.style.display = 'block';
-                } else {
-                    opt.style.display = 'none';
-                    if (opt.selected) chapterFilter.value = "ALL";
-                }
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchQuestions(1);
+            }, 500); // 500ms Delay
+        });
+
+        function filterDropdowns() {
+            let catId = categoryFilter.value;
+            let subId = subjectFilter.value;
+            // Hide/Show Logic (Same as before)
+            for (let i = 1; i < subjectFilter.options.length; i++) {
+                let opt = subjectFilter.options[i];
+                opt.style.display = (catId === "ALL" || opt.getAttribute('data-category') === catId) ? 'block' : 'none';
+            }
+            for (let i = 1; i < chapterFilter.options.length; i++) {
+                let opt = chapterFilter.options[i];
+                opt.style.display = (subId === "ALL" || opt.getAttribute('data-subcategory') === subId) ? 'block' : 'none';
             }
         }
 
-        // सवालों को Live फ़िल्टर करना
-        function applyFilters() {
+        // 🚀 2. FETCH DATA FROM SERVER
+        function fetchQuestions(page = 1) {
+            currentPage = page;
             let catId = categoryFilter.value;
             let subId = subjectFilter.value;
             let chapId = chapterFilter.value;
-            let searchText = searchInput.value.toLowerCase();
+            let text = searchInput.value.trim();
 
-            let cards = document.querySelectorAll('.q-card');
-            let visibleCount = 0;
+            document.getElementById('loader').style.display = 'block';
+            if (page === 1) document.getElementById('questionsContainer').innerHTML = ''; // Clear old
 
-            cards.forEach(card => {
-                let cardCat = card.getAttribute('data-category');
-                let cardSub = card.getAttribute('data-subcategory');
-                let cardChap = card.getAttribute('data-chapter');
-                let cardText = card.getAttribute('data-text');
+            // 🚀 3. ABORT PREVIOUS REQUEST
+            if (abortController) abortController.abort();
+            abortController = new AbortController();
 
-                let matchCat = (catId === "ALL" || catId === cardCat);
-                let matchSub = (subId === "ALL" || subId === cardSub);
-                let matchChap = (chapId === "ALL" || chapId === cardChap);
-                let matchSearch = (searchText === "" || cardText.includes(searchText));
+            let url = `?ajax=1&page=${page}&category=${catId}&subject=${subId}&chapter=${chapId}&search=${encodeURIComponent(text)}`;
 
-                if (matchCat && matchSub && matchChap && matchSearch) {
-                    card.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+            fetch(url, { signal: abortController.signal })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('searchStatus').innerText = `Results: ${data.total_results}`;
+                    renderQuestions(data.questions);
 
-            document.getElementById('noDataMsg').style.display = (visibleCount === 0) ? 'block' : 'none';
+                    document.getElementById('loadMoreBtn').style.display = data.has_next ? 'block' : 'none';
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') console.error(err);
+                });
         }
 
-        // --- Checkout Logic ---
+        function loadNextPage() {
+            fetchQuestions(currentPage + 1);
+        }
+
+        function renderQuestions(questions) {
+            let container = document.getElementById('questionsContainer');
+            if (questions.length === 0 && currentPage === 1) {
+                container.innerHTML = `<div style="text-align: center; padding: 50px;"><h3 style="color:#ffc107;">No questions found!</h3></div>`;
+                return;
+            }
+
+            questions.forEach(q => {
+                let card = document.createElement('div');
+                card.className = "q-card";
+                card.innerHTML = `
+                    <div class="checkbox-area">
+                        <input type="checkbox" class="q-checkbox" value="${q.id}" onchange="updateCartCount()">
+                    </div>
+                    <div class="q-content">
+                        <div class="q-meta">
+                            ${q.category ? `<span class="badge">${q.category}</span>` : ''}
+                            ${q.subcategory ? `<span class="badge" style="border-color:#ffc107; color:#ffc107;">${q.subcategory}</span>` : ''}
+                            ${q.chapter ? `<span class="badge" style="border-color:#28a745; color:#28a745;">${q.chapter}</span>` : ''}
+                        </div>
+                        <div class="q-text">${q.question_text}</div>
+                        <div class="options-grid">
+                            <div class="${q.correct_answer === 'A' ? 'opt-correct' : ''}">A. ${q.option_a}</div>
+                            <div class="${q.correct_answer === 'B' ? 'opt-correct' : ''}">B. ${q.option_b}</div>
+                            <div class="${q.correct_answer === 'C' ? 'opt-correct' : ''}">C. ${q.option_c}</div>
+                            <div class="${q.correct_answer === 'D' ? 'opt-correct' : ''}">D. ${q.option_d}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Checkout Logic (Same as before)
         function updateCartCount() {
             let checkboxes = document.querySelectorAll('.q-checkbox:checked');
             document.getElementById('cartCount').innerText = checkboxes.length;
         }
 
-        document.getElementById('radioExisting').addEventListener('change', function() {
-            document.getElementById('existingBox').style.display = 'block';
-            document.getElementById('newBox').style.display = 'none';
-        });
-
-        document.getElementById('radioNew').addEventListener('change', function() {
-            document.getElementById('existingBox').style.display = 'none';
-            document.getElementById('newBox').style.display = 'flex';
-        });
-
         function openCheckoutModal() {
             let checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            if (checkboxes.length === 0) {
-                alert("⚠️ Please select at least 1 question by checking the boxes!");
-                return;
-            }
+            if (checkboxes.length === 0) return alert("⚠️ Please select at least 1 question!");
             document.getElementById('modalQCount').innerText = checkboxes.length;
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
         function submitCheckout() {
-            let type = document.querySelector('input[name="checkoutType"]:checked').value;
             let checkboxes = document.querySelectorAll('.q-checkbox:checked');
             let q_ids = Array.from(checkboxes).map(cb => cb.value);
-
             let payload = { q_ids: q_ids };
 
-            if (type === 'existing') {
-                payload.test_id = document.getElementById('modalTestSelect').value;
-                if(!payload.test_id) return alert("Please select a test!");
-            } else {
-                payload.title = document.getElementById('newTitle').value;
-                payload.test_code = document.getElementById('newCode').value;
-                if(!payload.title || !payload.test_code) return alert("Please enter Title and Code!");
-            }
+            let hiddenTestId = document.getElementById('hiddenTestId');
+            let selectTestId = document.getElementById('modalTestSelect');
+
+            if (hiddenTestId) payload.test_id = hiddenTestId.value;
+            else if (selectTestId) payload.test_id = selectTestId.value;
+
+            if(!payload.test_id) return alert("Please select a test!");
 
             fetch("{% url 'api_add_bank_questions' %}", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
+                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
                 body: JSON.stringify(payload)
             })
             .then(res => res.json())
@@ -320,11 +333,12 @@
                 if(data.status === 'success') {
                     alert(data.message);
                     window.location.href = "{% url 'teacher_dashboard' %}";
-                } else {
-                    alert("Error: " + data.message);
-                }
+                } else alert("Error: " + data.message);
             });
         }
+
+        // 🚀 Load first page on start
+        document.addEventListener("DOMContentLoaded", () => fetchQuestions(1));
     </script>
 </body>
 </html>

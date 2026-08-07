@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - KBC Portal</title>
+    <style>
+        body { background-color: #020111; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Arial', sans-serif; padding: 20px; box-sizing: border-box; }
+        .auth-card { background: rgba(255, 255, 255, 0.05); border: 2px solid #ffc107; border-radius: 15px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 0 20px rgba(255, 193, 7, 0.2); box-sizing: border-box; }
+        .auth-card h2 { color: #ffc107; margin-top: 0; text-transform: uppercase; }
+        .auth-card p { color: #ccc; font-size: 14px; margin-bottom: 25px; }
+        .input-field { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ffc107; background: rgba(0,0,0,0.5); color: white; font-size: 20px; text-align: center; letter-spacing: 5px; box-sizing: border-box; outline: none; }
+        .input-field:focus { background: rgba(255, 255, 255, 0.1); }
+        .btn-submit { width: 100%; background: linear-gradient(90deg, #ffc107, #ff9800); color: black; border: none; padding: 14px; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 16px; transition: 0.3s; }
+        .btn-submit:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); }
+        .messages p { padding: 10px; border-radius: 5px; font-size: 14px; }
+        .success { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; }
+        .error { background: rgba(255, 0, 0, 0.2); color: #ff4c4c; border: 1px solid #ff4c4c; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h2>📩 Verify OTP</h2>
+        <p>आपके ईमेल <strong>{{ request.session.reset_email }}</strong> पर 6-अंकों का OTP भेजा गया है।</p>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="{{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form action="{% url 'verify_reset_otp' %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="otp" class="input-field" placeholder="------" maxlength="6" required autocomplete="off">
+            <button type="submit" class="btn-submit">Verify OTP</button>
+        </form>
+    </div>
+</body>
+</html>

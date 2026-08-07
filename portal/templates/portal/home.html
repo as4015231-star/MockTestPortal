@@ -8,8 +8,8 @@
         .header { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; }
         .header h1 { color: #ffc107; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
         .user-info { display: flex; align-items: center; gap: 20px; }
-        .display-name { font-size: 18px; font-weight: bold; background: rgba(255, 193, 7, 0.1); padding: 8px 15px; border-radius: 5px; border: 1px solid #ffc107; }
-        .logout-btn { background-color: #ff4c4c; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .display-name { font-size: 16px; font-weight: bold; background: rgba(255, 193, 7, 0.1); padding: 8px 15px; border-radius: 5px; border: 1px solid #ffc107; }
+        .logout-btn { background-color: #ff4c4c; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px; }
         .logout-btn:hover { background-color: #ff1c1c; }
         .main-content { padding: 40px; text-align: center; }
         .welcome-box { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 10px; border: 1px dashed #ffc107; display: inline-block; max-width: 500px; width: 100%; }
@@ -21,6 +21,14 @@
         .start-btn:hover { background: linear-gradient(to right, #0072ff, #00c6ff); box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
         .msg-box { color: #ffc107; background: rgba(255,193,7,0.1); padding: 10px; border-radius: 5px; border: 1px solid #ffc107; margin-bottom: 10px; font-size: 14px; }
         .error-msg { color: #ff4c4c; background: rgba(255,76,76,0.1); border-color: #ff4c4c; }
+        .login-prompt-btn { background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block; margin-top: 15px; }
+
+        /* 🚀 NEW: Profile Button Hover Effect */
+        a.profile-btn:hover {
+            background: #00c6ff !important;
+            color: #020111 !important;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -28,19 +36,28 @@
         <h1>Mock Test Portal</h1>
         <div class="user-info">
             {% if user.is_authenticated %}
-                <div class="display-name">ID: {{ user.student_profile.display_name }}</div>
+                <div class="display-name">ID: {{ request.user.student_profile.display_name|default:user.full_name }}</div>
+
+                <!-- 🚀 WALLET BALANCE DISPLAY -->
+                <a href="{% url 'wallet_dashboard' %}" class="display-name" style="background: rgba(0, 255, 0, 0.1); border-color: #00ff00; color: #00ff00; text-decoration: none; cursor: pointer; font-size: 14px;">
+                    Wallet: ₹{{ request.user.student_profile.wallet_balance }}
+                </a>
+
+                <!-- 🚀 NEW: My Profile Button -->
+                <a href="{% url 'profile' %}" class="profile-btn" style="display: inline-block; background: rgba(0, 198, 255, 0.1); color: #00c6ff; border: 1px solid #00c6ff; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.3s; vertical-align: middle;">
+                    👤 My Profile
+                </a>
+
                 <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
             {% else %}
-                <a href="{% url 'login' %}" style="color: #ffc107;">Login</a>
+                <a href="{% url 'login' %}" style="color: #ffc107; font-weight: bold; text-decoration: none;">Login</a>
             {% endif %}
         </div>
     </div>
 
     <div class="main-content">
         <div class="welcome-box">
-            <h2 style="color: #ffc107; margin-top: 0;">Welcome, {{ user.full_name }}!</h2>
-
-            <!-- एरर या सफलता के मैसेज यहाँ दिखेंगे -->
+            <!-- एरर या सफलता के मैसेज -->
             {% if messages %}
                 <div style="margin: 15px 0;">
                     {% for message in messages %}
@@ -49,14 +66,41 @@
                 </div>
             {% endif %}
 
-            <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">Ready for your test? Enter the Test Code below:</p>
+            <!-- 🚀 अगर यूज़र लॉगिन है -->
+            {% if user.is_authenticated %}
+                <h2 style="color: #ffc107; margin-top: 0;">Welcome, {{ request.user.student_profile.display_name|default:user.full_name }}!</h2>
 
-            <!-- टेस्ट शुरू करने का फॉर्म -->
-            <form action="{% url 'start_test' %}" method="POST" style="display: flex; gap: 10px; justify-content: center;">
-                {% csrf_token %}
-                <input type="text" name="test_code" placeholder="Enter Test Code" required class="test-input">
-                <button type="submit" class="start-btn">Start Exam</button>
-            </form>
+                <!-- चेक करें कि प्लान है या नहीं -->
+                {% if has_plan %}
+                    <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">Ready for your test? Enter the Test Code below:</p>
+
+                    <form action="{% url 'start_test' %}" method="POST" style="display: flex; gap: 10px; justify-content: center;">
+                        {% csrf_token %}
+                        <input type="text" name="test_code" placeholder="Enter Test Code" required class="test-input">
+                        <button type="submit" class="start-btn">Start Exam</button>
+                    </form>
+                {% else %}
+                    <!-- अगर प्लान एक्सपायर हो गया है तो यह पेमेंट बॉक्स दिखाएं -->
+                    <div style="background: rgba(255, 0, 0, 0.1); border: 1px dashed #ff4c4c; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <h3 style="color: #ff4c4c; margin-top: 0;">⚠️ आपका फ्री ट्रायल समाप्त हो गया है!</h3>
+                        <p style="color: #ccc; font-size: 14px;">आगे टेस्ट देने के लिए कृपया अपना सब्सक्रिप्शन रिन्यू करें।</p>
+
+                        <a href="{% url 'initiate_payment' %}"
+                           style="display: inline-block; background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; margin-top: 15px;">
+                           अभी पेमेंट करें (Pay Now)
+                        </a>
+                    </div>
+                {% endif %}
+
+            <!-- 🚀 अगर यूज़र लॉगिन नहीं है (नया विज़िटर) -->
+            {% else %}
+                <h2 style="color: #ffc107; margin-top: 0;">Welcome to Mock Test Portal</h2>
+                <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">टेस्ट शुरू करने के लिए कृपया अपने अकाउंट में लॉगिन करें।</p>
+
+                <a href="{% url 'login' %}" class="login-prompt-btn">लॉगिन (Login)</a>
+                <a href="{% url 'signup' %}" class="login-prompt-btn" style="background: #333; color: white; margin-left: 10px;">रजिस्टर (Register)</a>
+            {% endif %}
+
         </div>
     </div>
 </body>

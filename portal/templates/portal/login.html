@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>KBC Mock Test - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 35px; border-radius: 15px; box-shadow: 0 0 25px rgba(255, 193, 7, 0.3); width: 350px; border: 1px solid #ffc107; }
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .container { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 35px; border-radius: 15px; box-shadow: 0 0 25px rgba(255, 193, 7, 0.3); width: 100%; max-width: 350px; border: 1px solid #ffc107; box-sizing: border-box; }
         h2 { text-align: center; color: #ffc107; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ffc107; background: rgba(255, 255, 255, 0.05); color: white; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
         input:focus { outline: none; background: rgba(255, 255, 255, 0.1); }
-        button { width: 100%; padding: 14px; background: linear-gradient(to right, #ffc107, #ff9800); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; text-transform: uppercase; }
-        button:hover { background: linear-gradient(to right, #ffea00, #ffb300); }
+        button { width: 100%; padding: 14px; background: linear-gradient(to right, #ffc107, #ff9800); color: #000; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; text-transform: uppercase; transition: 0.3s; }
+        button:hover { background: linear-gradient(to right, #ffea00, #ffb300); transform: scale(1.02); }
         .messages { text-align: center; margin-bottom: 15px; font-size: 14px; }
-        .error { color: #ff4c4c; }
-        .success { color: #00ff00; }
+        .error { color: #ff4c4c; background: rgba(255, 76, 76, 0.1); padding: 8px; border-radius: 5px; border: 1px solid #ff4c4c; }
+        .success { color: #00ff00; background: rgba(0, 255, 0, 0.1); padding: 8px; border-radius: 5px; border: 1px solid #00ff00; }
         a { color: #ffc107; text-decoration: none; font-weight: bold; }
         a:hover { text-decoration: underline; }
+
+        /* 🚀 NEW: Forgot Password Link CSS */
+        .forgot-link { display: block; text-align: right; font-size: 12px; margin-top: -5px; margin-bottom: 15px; font-weight: normal; color: #00c6ff; }
+        .forgot-link:hover { color: #ffc107; }
     </style>
 </head>
 <body>
@@ -34,9 +39,15 @@
             {% csrf_token %}
             <input type="text" name="mobile_number" placeholder="Mobile Number" maxlength="10" required>
             <input type="password" name="password" placeholder="Password" required>
+
+            <!-- 🚀 NEW: Forgot Password Link (Right Aligned) -->
+            <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot Password?</a>
+
             <button type="submit">Login</button>
         </form>
-        <p style="text-align: center; margin-top: 20px; font-size: 14px;">Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+        <p style="text-align: center; margin-top: 25px; font-size: 14px; color: #ccc;">Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+
     </div>
+
 </body>
 </html>
