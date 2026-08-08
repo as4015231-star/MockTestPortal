@@ -46,6 +46,7 @@ AUTH_USER_MODEL = 'portal.CustomUser'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -123,6 +124,7 @@ USE_TZ = True # यह True ही रहने दें
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # 🚀 NEW: यह लाइन जोड़ें
 
 # Email Settings for Development (OTP टर्मिनल पर दिखेगा)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
