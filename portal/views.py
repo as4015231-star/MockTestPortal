@@ -1523,3 +1523,42 @@ def update_correct_answer(request, q_id):
             messages.error(request, 'प्रश्न नहीं मिला!')
 
     return redirect('teacher_dashboard')
+
+
+@login_required
+def auto_save_answer(request):
+    if request.method == 'POST':
+        try:
+            # AJAX से आने वाले JSON डेटा को पढ़ना
+            data = json.loads(request.body)
+            attempt_id = data.get('attempt_id')
+            question_id = data.get('question_id')
+            selected_answer = data.get('answer')
+
+            # 🚀 असली डेटाबेस सेविंग लॉजिक (सिक्योरिटी के साथ)
+            # 1. वेरीफाई करें कि यह टेस्ट इसी लॉगिन किये हुए छात्र (Student) का है
+            attempt = TestAttempt.objects.get(
+                id=attempt_id,
+                student=request.user.student_profile
+            )
+
+            # 2. डेटाबेस से सही प्रश्न ढूँढें
+            question = Question.objects.get(id=question_id)
+
+            # 3. बैकग्राउंड में उत्तर सेव करें (अगर पहले से है तो अपडेट करें, नहीं तो नया बनाएं)
+            StudentAnswer.objects.update_or_create(
+                attempt=attempt,
+                question=question,
+                defaults={'selected_option': selected_answer}
+            )
+
+            return JsonResponse({'status': 'success', 'message': 'Answer saved in background'})
+
+        except TestAttempt.DoesNotExist:
+            return JsonResponse({'status': 'error', 'error': 'Invalid test attempt or unauthorized.'})
+        except Question.DoesNotExist:
+            return JsonResponse({'status': 'error', 'error': 'Question not found.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'error': str(e)})
+
+    return JsonResponse({'status': 'invalid request'})

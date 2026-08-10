@@ -57,4 +57,7 @@ urlpatterns = [
     path('wallet/', views.wallet_dashboard, name='wallet_dashboard'),
     path('wallet/add/', views.add_money, name='add_money'),
     path('wallet/withdraw/', views.request_withdrawal, name='request_withdrawal'),
+    path('api/auto-save/', views.auto_save_answer, name='auto_save_answer'),
+
+
 ]

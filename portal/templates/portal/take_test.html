@@ -29,7 +29,7 @@
         .q-header { font-size: 16px; color: #ffc107; margin-bottom: 10px; font-weight: bold; }
         .q-text { font-size: 18px; color: white; line-height: 1.5; }
 
-        /* 🚀 NEW: Image Styling */
+        /* Image Styling */
         .q-image-container { text-align: center; margin-top: 15px; display: none; }
         .q-image-container img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #555; box-shadow: 0 4px 8px rgba(0,0,0,0.5); max-height: 250px; }
 
@@ -41,7 +41,7 @@
 
         /* Action Buttons */
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; color: white; text-transform: uppercase; text-align: center; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; color: white; text-transform: uppercase; text-align: center; transition: 0.3s; }
         .btn-prev { background: linear-gradient(145deg, #555, #333); }
         .btn-save { background: linear-gradient(145deg, #008CBA, #005f7a); }
         .btn-clear { background: linear-gradient(145deg, #f44336, #ba2d24); }
@@ -58,7 +58,7 @@
         .bg-marked { background: #a200ff; color: white; }
         .number-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
         .num-btn { width: 100%; aspect-ratio: 1; border: none; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-submit-final { margin-top: 20px; padding: 15px; background: linear-gradient(to right, #555, #777); color: white; border: 1px solid #444; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; text-transform: uppercase; }
+        .btn-submit-final { margin-top: 20px; padding: 15px; background: linear-gradient(to right, #f44336, #ba2d24); color: white; border: 1px solid #444; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; text-transform: uppercase; }
 
         /* Mobile Adjustments */
         .overlay { display: none; }
@@ -132,7 +132,6 @@
                 <div class="q-header" id="questionHeader">Question 1</div>
                 <div class="q-text" id="questionText">Loading...</div>
 
-                <!-- 🚀 NEW: Dynamic Image Container -->
                 <div class="q-image-container" id="questionImageContainer">
                     <img id="questionImage" src="" alt="Question Image">
                 </div>
@@ -157,7 +156,7 @@
                 <button type="button" class="btn btn-prev" onclick="moveToPrevious()" id="btnPrev">Previous</button>
                 <button type="button" class="btn btn-clear" onclick="clearResponse()">Clear Response</button>
                 <button type="button" class="btn btn-review" onclick="markForReview()">Mark for Review</button>
-                <button type="button" class="btn btn-save" onclick="saveAndNext()">Save & Next</button>
+                <button type="button" class="btn btn-save" id="btnSaveNext" onclick="saveAndNext()">Save & Next</button>
             </div>
         </div>
 
@@ -178,7 +177,7 @@
             <div style="background: #10143a; padding: 8px; text-align: center; margin-bottom: 10px; border-radius: 5px;">Question Palette</div>
             <div class="number-grid" id="paletteGrid"></div>
 
-            <button type="button" class="btn-submit-final" onclick="submitExamManually()">Auto-Submits at End</button>
+            <button type="button" class="btn-submit-final" onclick="submitExamManually()">Submit Exam</button>
         </div>
     </div>
 
@@ -213,12 +212,12 @@
         let isSafeExit = false;
 
         const TEST_ID = "{{ test.id }}";
+        const ATTEMPT_ID = "{{ attempt.id }}"; // 🚀 NEW: Attempt ID for backend linking
         const STATE_KEY = "kbc_state_" + TEST_ID;
         const INDEX_KEY = "kbc_index_" + TEST_ID;
         const ENDTIME_KEY = "kbc_endtime_" + TEST_ID;
         const SHUFFLE_KEY = "kbc_shuffle_" + TEST_ID;
 
-        // 1. 🚀 NEW: ओरिजिनल सवाल लोड करें (इमेज के साथ)
         let questions = [
             {% for q in questions %}
             {
@@ -257,9 +256,7 @@
             localStorage.setItem(SHUFFLE_KEY, JSON.stringify(questions.map(q => q.id)));
         }
 
-        questions.forEach((q, i) => {
-            q.index = i + 1;
-        });
+        questions.forEach((q, i) => { q.index = i + 1; });
 
         let savedState = localStorage.getItem(STATE_KEY);
         if (savedState) {
@@ -279,6 +276,29 @@
             let stateToSave = questions.map(q => ({ status: q.status, selected: q.selected }));
             localStorage.setItem(STATE_KEY, JSON.stringify(stateToSave));
             localStorage.setItem(INDEX_KEY, currentIndex);
+        }
+
+        // 🚀 NEW: AJAX Auto-Save Function
+        function saveAnswerInBackground(questionId, answerValue) {
+            fetch("{% url 'auto_save_answer' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    "attempt_id": ATTEMPT_ID,
+                    "question_id": questionId,
+                    "answer": answerValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    console.log("✅ Auto-saved Q" + questionId + " as: " + (answerValue || "Cleared"));
+                }
+            })
+            .catch(error => console.error("Auto-save failed:", error));
         }
 
         function togglePalette() {
@@ -332,14 +352,6 @@
             });
         }
 
-        let touchStartX = 0; let touchEndX = 0;
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
-        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, false);
-        function handleSwipe() {
-            if (touchEndX < touchStartX - 60) { document.getElementById('paletteSection').classList.add('open'); document.getElementById('mobileOverlay').classList.add('open'); }
-            if (touchEndX > touchStartX + 60) { document.getElementById('paletteSection').classList.remove('open'); document.getElementById('mobileOverlay').classList.remove('open'); }
-        }
-
         function renderQuestion(index) {
             let q = questions[index];
             if(q.status === 'not_visited') q.status = 'not_answered';
@@ -347,10 +359,8 @@
             document.getElementById('questionHeader').innerText = "Question " + q.index;
             document.getElementById('questionText').innerText = q.text;
 
-            // 🚀 NEW: Image Logic (अगर इमेज है तो दिखाओ, वरना छुपा दो)
             let imgContainer = document.getElementById('questionImageContainer');
             let imgElement = document.getElementById('questionImage');
-
             if (q.imageUrl && q.imageUrl.trim() !== "") {
                 imgElement.src = q.imageUrl;
                 imgContainer.style.display = "block";
@@ -373,6 +383,21 @@
             document.getElementById('btnPrev').style.opacity = (index === 0) ? "0.3" : "1";
             document.getElementById('btnPrev').style.pointerEvents = (index === 0) ? "none" : "auto";
 
+            // 🚀 NEW: Button changes on the last question
+            let btnSave = document.getElementById('btnSaveNext');
+            if (index === questions.length - 1) {
+                btnSave.innerText = "Save & Submit";
+                btnSave.style.background = "linear-gradient(145deg, #4caf50, #2e7d32)";
+                btnSave.onclick = function() {
+                    saveAndNext();
+                    setTimeout(submitExamManually, 200); // 200ms delay to let auto-save fire
+                };
+            } else {
+                btnSave.innerText = "Save & Next";
+                btnSave.style.background = "linear-gradient(145deg, #008CBA, #005f7a)";
+                btnSave.onclick = saveAndNext;
+            }
+
             updatePalette();
             saveLocalState();
         }
@@ -384,6 +409,9 @@
 
             questions[currentIndex].selected = opt;
             saveLocalState();
+
+            // 🚀 NEW: Trigger backend save immediately on click
+            saveAnswerInBackground(questions[currentIndex].id, opt);
         }
 
         function getSelectedOption() {
@@ -409,6 +437,8 @@
         function clearResponse() {
             questions[currentIndex].selected = null;
             questions[currentIndex].status = 'not_answered';
+            saveLocalState();
+            saveAnswerInBackground(questions[currentIndex].id, ""); // Clear on server too
             renderQuestion(currentIndex);
         }
 
@@ -484,8 +514,19 @@
             form.submit();
         }
 
+        // 🚀 NEW: Smart Validation Check for Manual Submit
         function submitExamManually() {
-            alert("⚠️ परीक्षा का समय अभी समाप्त नहीं हुआ है!\n\nआप समय से पहले टेस्ट सबमिट नहीं कर सकते। कृपया तब तक अपने उत्तरों को दोबारा चेक (Review) करें।\n\nसमय (Timer) 00:00 होने पर आपका टेस्ट एक साथ अपने-आप (Auto-Submit) जमा हो जाएगा।");
+            let unattemptedCount = questions.filter(q => q.status === 'not_visited' || q.status === 'not_answered').length;
+
+            if (unattemptedCount > 0) {
+                alert(`⚠️ चेतावनी: आपके कुल ${questions.length} में से अभी ${unattemptedCount} प्रश्न छूटे हुए हैं!\n\nआप छूटे हुए प्रश्नों के साथ टेस्ट सबमिट नहीं कर सकते। कृपया वापस जाएं और सभी प्रश्नों का उत्तर दें।\n(समय समाप्त होने पर टेस्ट अपने-आप सबमिट हो जाएगा)`);
+                return; // 🛑 Block submission
+            }
+
+            let confirmSubmit = confirm("✅ आपने सभी प्रश्नों के उत्तर दे दिए हैं! क्या आप टेस्ट सबमिट करना चाहते हैं?");
+            if (confirmSubmit) {
+                submitExam();
+            }
         }
 
         let isStrictTimer = {{ is_strict|yesno:"true,false" }};
@@ -519,7 +560,7 @@
 
             if (timeInSeconds <= 0) {
                 clearInterval(timerInterval);
-                submitExam();
+                submitExam(); // 🚀 Force Auto-Submit when time is up
             }
             timeInSeconds--;
         }, 1000);
