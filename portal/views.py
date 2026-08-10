@@ -470,7 +470,6 @@ def take_test(request, attempt_id):
     })
 
 
-# --- 1. Result View ---
 @login_required
 def test_result(request, attempt_id):
     if request.user.role != 'STUDENT':
@@ -479,8 +478,23 @@ def test_result(request, attempt_id):
     try:
         attempt = TestAttempt.objects.get(id=attempt_id, student=request.user.student_profile)
         test = attempt.test
-        student_answers = attempt.answers.all()
 
+        # 🛡️ 1. चेक करें कि क्या टेस्ट का समय अभी बचा हुआ है (Waiting Lounge Logic)
+        if test.scheduled_time and test.total_time:
+            end_time = test.scheduled_time + timedelta(minutes=test.total_time)
+            now = timezone.now()
+
+            if now < end_time:
+                # समय बचा है! बच्चे को रिजल्ट नहीं, बल्कि 'वेटिंग लाउंज' दिखाएं
+                remaining_seconds = int((end_time - now).total_seconds())
+                return render(request, 'portal/waiting_lounge.html', {
+                    'test': test,
+                    'remaining_seconds': remaining_seconds,
+                    'attempt': attempt
+                })
+
+        # 🎯 2. अगर समय खत्म हो गया है, तो असली रिजल्ट दिखाएं (आपका पुराना लॉजिक)
+        student_answers = attempt.answers.all()
         coaching_name = test.teacher.user.full_name
         mobile_last_4 = str(request.user.mobile_number)[-4:]
         student_display_name = f"{request.user.full_name} ({mobile_last_4})"
@@ -520,6 +534,7 @@ def test_result(request, attempt_id):
             'coaching_name': coaching_name, 'student_display_name': student_display_name
         }
         return render(request, 'portal/test_result.html', context)
+
     except TestAttempt.DoesNotExist:
         messages.error(request, 'रिजल्ट नहीं मिला!')
         return redirect('home')
@@ -529,6 +544,25 @@ def test_result(request, attempt_id):
 @login_required
 def test_scoreboard(request, test_id):
     test = MockTest.objects.get(id=test_id)
+
+    # 🛡️ 1. राम जैसे छात्रों के लिए ऑटो-क्लोज़ लॉजिक (Server-Side Force Submit)
+    if test.scheduled_time and test.total_time:
+        end_time = test.scheduled_time + timedelta(minutes=test.total_time)
+        if timezone.now() >= end_time:
+            # वो सभी छात्र जिनका टेस्ट 'Completed' नहीं हुआ है, उन्हें पकड़ो
+            pending_attempts = TestAttempt.objects.filter(test=test, is_completed=False)
+            for p_attempt in pending_attempts:
+                # उनका स्कोर निकालो और सबमिट कर दो
+                correct = sum(
+                    1 for ans in p_attempt.answers.all() if ans.selected_option == ans.question.correct_answer)
+                wrong = sum(1 for ans in p_attempt.answers.all() if
+                            ans.selected_option and ans.selected_option != ans.question.correct_answer)
+
+                p_attempt.score = (Decimal(correct) * test.correct_marks) - (Decimal(wrong) * test.negative_marks)
+                p_attempt.is_completed = True
+                p_attempt.save()
+
+    # 🎯 2. अब सिर्फ 'Completed' छात्रों का स्कोरबोर्ड बनाओ (आपका पुराना लॉजिक)
     attempts = TestAttempt.objects.filter(test=test, is_completed=True)
     questions = test.questions.all().order_by('id')
     coaching_name = test.teacher.user.full_name
@@ -562,7 +596,6 @@ def test_scoreboard(request, test_id):
 
     current_rank = 1
     previous_score = None
-
     for student in student_data:
         if previous_score is None:
             student['rank'] = current_rank
@@ -571,10 +604,7 @@ def test_scoreboard(request, test_id):
             student['rank'] = current_rank
         else:
             student['rank'] = current_rank
-
         previous_score = student['score']
-
-    for student in student_data:
         student['name'] = f"Rank {student['rank']} | {student['name']}"
 
     rows = []
@@ -604,7 +634,6 @@ def test_scoreboard(request, test_id):
         'rows': rows,
         'coaching_name': coaching_name
     })
-
 
 # --- 3. Celebration View (UPDATED WITH JOINT WINNERS LOGIC) ---
 @login_required
