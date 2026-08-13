@@ -324,7 +324,7 @@
                 let scheduledTime = scheduledTimeStr ? new Date(scheduledTimeStr) : null;
 
                 if (!scheduledTime || scheduledTime <= now) {
-                    showCustomAlert("यह टेस्ट ON (लाइव) नहीं हो सकता क्योंकि इसका समय पीछे का है या सेट नहीं है!\nकृपया पहले नीचे दिए गए फॉर्म में आगे का समय भरें।");
+                    showCustomAlert("कृपया आगे का समय दर्ज करें |");
 
                     let editForm = document.getElementById('edit-form-' + testId);
                     editForm.style.display = 'block';
