@@ -126,8 +126,7 @@ USE_TZ = True # यह True ही रहने दें
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # 🚀 NEW: यह लाइन जोड़ें
 
-# Email Settings for Development (OTP टर्मिनल पर दिखेगा)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # Custom Login URL
 LOGIN_URL = 'login'
@@ -150,3 +149,13 @@ RAZORPAY_KEY_SECRET = 'cTbUNPOgbI6RZEuTI2NzDYXE'
 import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# 📧 EMAIL SMTP SETTINGS
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'testmock856@gmail.com'  # अपना असली Gmail ID डालें
+EMAIL_HOST_PASSWORD = 'ajpj ewez muxs xlmg' # अपना App Password डालें (नीचे स्टेप 2 देखें)
+DEFAULT_FROM_EMAIL = 'Mock Test Portal <testmock856@gmail.com>'
