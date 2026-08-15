@@ -155,8 +155,8 @@ import os
 # ==========================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 
 # 🚀 यहाँ 'your_actual_email@gmail.com' की जगह अपना असली ईमेल
 # और '16_digit_password' की जगह अपना असली ऐप पासवर्ड डाल दें।
