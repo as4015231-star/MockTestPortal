@@ -306,6 +306,26 @@
             o.style.display = s.classList.contains('open') ? 'block' : 'none';
         }
 
+        // 🚀 NAYA: Sidebar Swipe to Close Logic (Touch Events)
+        let sidebarTouchStartX = 0;
+        let sidebarTouchEndX = 0;
+        const sidebarElement = document.getElementById('teacherSidebar');
+
+        sidebarElement.addEventListener('touchstart', e => {
+            sidebarTouchStartX = e.changedTouches[0].screenX;
+        });
+
+        sidebarElement.addEventListener('touchend', e => {
+            sidebarTouchEndX = e.changedTouches[0].screenX;
+            // अगर उंगली 50px से ज्यादा बाईं ओर (Left) स्लाइड हुई है
+            if (sidebarTouchEndX < sidebarTouchStartX - 50) {
+                let s = document.getElementById('teacherSidebar');
+                let o = document.getElementById('sidebarOverlay');
+                s.classList.remove('open');
+                o.style.display = 'none';
+            }
+        });
+
         function toggleCreateForm() {
             let formContainer = document.getElementById('createFormContainer');
             let arrow = document.getElementById('createFormArrow');
