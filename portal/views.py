@@ -100,16 +100,25 @@ def signup_view(request):
         </div>
         """
 
-        send_mail(
-            subject,
-            plain_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
-            html_message=html_message  # 🚀 HTML Message यहाँ से भेजा जाएगा
-        )
-        return redirect('verify_otp')
+        # 🛡️ 🚀 NAYA: Try-Except Block (Crash Protection)
+        try:
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+                html_message=html_message  # 🚀 HTML Message यहाँ से भेजा जाएगा
+            )
+            return redirect('verify_otp')
+
+        except Exception as e:
+            # 🛑 अगर ईमेल फेल हो जाए, तो साइट क्रैश नहीं होगी, बल्कि असल एरर स्क्रीन पर प्रिंट कर देगी!
+            messages.error(request, f'⚠️ ईमेल एरर: {str(e)}')
+            return redirect('signup')
+
     return render(request, 'portal/signup.html')
+
 
 def verify_otp_view(request):
     if request.method == 'POST':
@@ -979,7 +988,7 @@ def forgot_password_view(request):
         try:
             user = CustomUser.objects.get(email__iexact=email)
         except CustomUser.DoesNotExist:
-            messages.error(request, 'यह ईमेल रजिस्टर नहीं है।');
+            messages.error(request, 'यह ईमेल रजिस्टर नहीं है।')
             return redirect('forgot_password')
 
         reset_otp = str(random.randint(100000, 999999))
@@ -1009,18 +1018,27 @@ def forgot_password_view(request):
         </div>
         """
 
-        send_mail(
-            subject,
-            plain_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-            html_message=html_message  # 🚀 HTML Message यहाँ से भेजा जाएगा
-        )
+        # 🛡️ 🚀 NAYA: Try-Except Block (Crash Protection)
+        try:
+            # ईमेल भेजने की कोशिश करें
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+                html_message=html_message
+            )
+            messages.success(request, 'आपके ईमेल पर OTP भेजा गया है।')
+            return redirect('verify_reset_otp')
 
-        messages.success(request, 'आपके ईमेल पर OTP भेजा गया है।')
-        return redirect('verify_reset_otp')
+        except Exception as e:
+            # 🛑 अगर ईमेल फेल हो जाए, तो साइट क्रैश नहीं होगी, बल्कि असल एरर स्क्रीन पर प्रिंट कर देगी!
+            messages.error(request, f'⚠️ ईमेल एरर: {str(e)}')
+            return redirect('forgot_password')
+
     return render(request, 'portal/forgot_password.html')
+
 
 
 def verify_reset_otp_view(request):

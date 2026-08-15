@@ -148,19 +148,19 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-import os  # (अगर फाइल में सबसे ऊपर import os नहीं लिखा है, तो इसे लिख लें)
+import os
 
 # ==========================================
-# 📧 EMAIL SMTP SETTINGS (Secure for Render)
+# 📧 EMAIL SMTP SETTINGS
 # ==========================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# 🚀 यह Render के Environment Variables से आपका ईमेल और पासवर्ड अपने-आप उठा लेगा
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# 🚀 यहाँ 'your_actual_email@gmail.com' की जगह अपना असली ईमेल
+# और '16_digit_password' की जगह अपना असली ऐप पासवर्ड डाल दें।
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your_actual_email@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '16_digit_password')
 
-# 🚀 ईमेल भेजने वाले का नाम (यह भी डायनामिक है)
 DEFAULT_FROM_EMAIL = f'Mock Test Portal <{EMAIL_HOST_USER}>'
