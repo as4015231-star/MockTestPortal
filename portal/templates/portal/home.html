@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- 🚀 NAYA: Viewport Meta Tag (यह मोबाइल पर पेज को सही साइज में सेट करता है) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KBC Mock Test - Dashboard</title>
     <style>
+        /* 🚀 NAYA: Box Sizing (पैडिंग को चौड़ाई के अंदर ही रखता है) */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
         .header { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; }
         .header h1 { color: #ffc107; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
@@ -21,7 +28,7 @@
         .error-msg { color: #ff4c4c; background: rgba(255,76,76,0.1); border-color: #ff4c4c; }
         .login-prompt-btn { background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block; margin-top: 15px; }
 
-        /* 🚀 NEW: Profile Dropdown Styles */
+        /* Profile Dropdown Styles */
         .profile-dropdown {
             position: relative;
             display: inline-block;
@@ -86,6 +93,44 @@
         .show {
             display: block;
         }
+
+        /* 🚀 NAYA: Mobile Responsiveness (Media Queries) */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+                text-align: center;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .main-content {
+                padding: 20px 15px;
+            }
+            .welcome-box {
+                padding: 25px 15px;
+                width: 100%;
+            }
+            .test-form {
+                flex-direction: column !important; /* मोबाइल पर इनपुट और बटन ऊपर-नीचे होंगे */
+            }
+            .test-input {
+                width: 100%; /* मोबाइल पर 100% चौड़ा */
+            }
+            .start-btn {
+                width: 100%; /* मोबाइल पर 100% चौड़ा */
+            }
+            .login-prompt-btn {
+                display: block;
+                width: 100%;
+                margin: 10px 0 0 0 !important;
+            }
+            .dropdown-content {
+                right: 50%;
+                transform: translateX(50%); /* मोबाइल पर ड्रॉपडाउन को बीच में रखता है */
+            }
+        }
     </style>
 </head>
 <body>
@@ -93,15 +138,12 @@
         <h1>Mock Test Portal</h1>
         <div class="user-info">
             {% if user.is_authenticated %}
-                <!-- 🚀 NEW: Dropdown Profile Menu -->
                 <div class="profile-dropdown">
-                    <!-- बटन: यूज़र का नाम और मोबाइल के आखिरी 4 अंक -->
                     <button onclick="toggleDropdown()" class="profile-btn">
                         👤 {{ request.user.full_name }} ({{ request.user.mobile_number|stringformat:"s"|slice:"-4:" }}) ▼
                     </button>
 
                     <div id="userDropdown" class="dropdown-content">
-                        <!-- वॉलेट का बैलेंस भी ड्रॉपडाउन में दिखा दिया है -->
                         <a href="{% url 'wallet_dashboard' %}">💳 My Wallet (₹{{ request.user.student_profile.wallet_balance }})</a>
                         <a href="{% url 'profile' %}">⚙️ My Profile</a>
                         <a href="{% url 'logout' %}" style="color: #ff4c4c;">🚪 Logout</a>
@@ -115,7 +157,6 @@
 
     <div class="main-content">
         <div class="welcome-box">
-            <!-- एरर या सफलता के मैसेज -->
             {% if messages %}
                 <div style="margin: 15px 0;">
                     {% for message in messages %}
@@ -124,51 +165,43 @@
                 </div>
             {% endif %}
 
-            <!-- 🚀 अगर यूज़र लॉगिन है -->
             {% if user.is_authenticated %}
                 <h2 style="color: #ffc107; margin-top: 0;">Welcome, {{ request.user.student_profile.display_name|default:user.full_name }}!</h2>
 
-                <!-- चेक करें कि प्लान है या नहीं -->
                 {% if has_plan %}
                     <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">Ready for your test? Enter the Test Code below:</p>
 
-                    <form action="{% url 'start_test' %}" method="POST" style="display: flex; gap: 10px; justify-content: center;">
+                    <!-- 🚀 NAYA: Form में 'test-form' क्लास जोड़ी गई है -->
+                    <form action="{% url 'start_test' %}" method="POST" class="test-form" style="display: flex; gap: 10px; justify-content: center;">
                         {% csrf_token %}
                         <input type="text" name="test_code" placeholder="Enter Test Code" required class="test-input">
                         <button type="submit" class="start-btn">Start Exam</button>
                     </form>
                 {% else %}
-                    <!-- अगर प्लान एक्सपायर हो गया है तो यह पेमेंट बॉक्स दिखाएं -->
                     <div style="background: rgba(255, 0, 0, 0.1); border: 1px dashed #ff4c4c; padding: 20px; border-radius: 10px; margin-top: 20px;">
                         <h3 style="color: #ff4c4c; margin-top: 0;">⚠️ आपका फ्री ट्रायल समाप्त हो गया है!</h3>
-                        <p style="color: #ccc; font-size: 14px;">आगे टेस्ट देने के लिए कृपया अपना सब्सक्रिप्शन रिन्यू करें。</p>
+                        <p style="color: #ccc; font-size: 14px;">आगे टेस्ट देने के लिए कृपया अपना सब्सक्रिप्शन रिन्यू करें।</p>
 
-                        <a href="{% url 'initiate_payment' %}"
-                           style="display: inline-block; background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; margin-top: 15px;">
-                           अभी पेमेंट करें (Pay Now)
-                        </a>
+                        <a href="{% url 'initiate_payment' %}" class="login-prompt-btn">अभी पेमेंट करें (Pay Now)</a>
                     </div>
                 {% endif %}
 
-            <!-- 🚀 अगर यूज़र लॉगिन नहीं है (नया विज़िटर) -->
             {% else %}
                 <h2 style="color: #ffc107; margin-top: 0;">Welcome to Mock Test Portal</h2>
                 <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">टेस्ट शुरू करने के लिए कृपया अपने अकाउंट में लॉगिन करें।</p>
 
                 <a href="{% url 'login' %}" class="login-prompt-btn">लॉगिन (Login)</a>
-                <a href="{% url 'signup' %}" class="login-prompt-btn" style="background: #333; color: white; margin-left: 10px;">रजिस्टर (Register)</a>
+                <a href="{% url 'signup' %}" class="login-prompt-btn" style="background: #333; color: white;">रजिस्टर (Register)</a>
             {% endif %}
 
         </div>
     </div>
 
-    <!-- 🚀 NEW: Dropdown Toggle Logic -->
     <script>
         function toggleDropdown() {
             document.getElementById("userDropdown").classList.toggle("show");
         }
 
-        // अगर यूज़र ड्रॉपडाउन के बाहर कहीं भी क्लिक करता है, तो मेनू बंद हो जाएगा
         window.onclick = function(event) {
             if (!event.target.matches('.profile-btn')) {
                 var dropdowns = document.getElementsByClassName("dropdown-content");
