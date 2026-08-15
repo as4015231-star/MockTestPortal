@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,7 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-brst)0x%f9s3_vo+3@=_@rpt9631$)0bk8ov&&yr4_$v4-)di*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# 🚀 Render और Local दोनों पर काम करने के लिए स्मार्ट DEBUG
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['*']
 
@@ -37,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'portal',  # यहाँ हमने अपना नया ऐप जोड़ दिया
+    'portal',  # यहाँ हमने अपना नया ऐप जोड़ दिया
 ]
 
 
@@ -45,8 +47,8 @@ AUTH_USER_MODEL = 'portal.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 🚀 Static files को Render पर चलाने के लिए
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -109,44 +111,39 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-# इसे बदलें:
-TIME_ZONE = 'UTC'
-
-# इस पर:
+# 🚀 Indian Time Zone
 TIME_ZONE = 'Asia/Kolkata'
 
-# और पक्का करें कि ये लाइनें भी ऐसी ही हों:
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True # यह True ही रहने दें
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # 🚀 NEW: यह लाइन जोड़ें
-
-
-
-# Custom Login URL
-LOGIN_URL = 'login'
-
-import os
-
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 🚀 NEW
 
 # यह लाइन Django को बताएगी कि आपकी इमेजेज कहाँ रखी हैं
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+# 🚀 Render पर CSS/JS को सही से लोड करने के लिए WhiteNoise स्टोरेज
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+# Custom Login URL
+LOGIN_URL = 'login'
+
+
+# Razorpay Settings
 RAZORPAY_KEY_ID = 'rzp_test_T3sERZ1EG27ZEy'
 RAZORPAY_KEY_SECRET = 'cTbUNPOgbI6RZEuTI2NzDYXE'
 
 
-import os
+# Media Files Settings
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -157,5 +154,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'testmock856@gmail.com'  # अपना असली Gmail ID डालें
-EMAIL_HOST_PASSWORD = 'ajpj ewez muxs xlmg' # अपना App Password डालें (नीचे स्टेप 2 देखें)
+# 🚀 FIX: App password में से सारे स्पेस हटा दिए गए हैं (ईमेल भेजने के लिए ज़रूरी)
+EMAIL_HOST_PASSWORD = 'ajpjewezmuxsxlmg'
 DEFAULT_FROM_EMAIL = 'Mock Test Portal <testmock856@gmail.com>'
