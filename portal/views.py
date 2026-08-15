@@ -75,11 +75,41 @@ def signup_view(request):
             'email': email, 'coaching_code': coaching_code, 'password': password
         }
         request.session['otp'] = otp
-        send_mail('आपका KBC पोर्टल OTP', f'आपका रजिस्ट्रेशन OTP है: {otp}', 'admin@kbcportal.com', [email],
-                  fail_silently=False)
+
+        # 🚀 NAYA: HTML Email Template for Signup
+        current_time = timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p")
+        subject = f'Mock Test Portal OTP: {otp}'
+        plain_message = f'आपका रजिस्ट्रेशन OTP है: {otp}'
+
+        html_message = f"""
+        <div style="font-family: Arial, sans-serif; background-color: #f4ebdd; padding: 30px 10px;">
+            <div style="max-width: 450px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <h2 style="text-align: center; color: #ffc107; margin-top: 0; font-size: 24px;">Mock Test Portal 📚</h2>
+                <p style="color: #333; font-size: 16px;">नमस्ते <b>{full_name}</b>,</p>
+                <p style="color: #555; font-size: 15px; line-height: 1.5;">Mock Test Portal में आपका स्वागत है! आपके अकाउंट को वेरीफाई करने का OTP नीचे दिया गया है:</p>
+
+                <div style="background-color: #4ade80; color: #000; font-size: 36px; font-weight: bold; letter-spacing: 6px; text-align: center; padding: 15px; border-radius: 8px; margin: 25px 0;">
+                    {otp}
+                </div>
+
+                <p style="font-size: 13px; color: #666; line-height: 1.6;">यह OTP <b>{current_time}</b> पर भेजा गया है और केवल <b>10 मिनट</b> के लिए मान्य है। कृपया इसे किसी के साथ शेयर न करें।</p>
+
+                <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+                <p style="font-size: 14px; color: #888; text-align: center;">धन्यवाद,<br><b style="color: #333;">Mock Test Portal Team</b></p>
+            </div>
+        </div>
+        """
+
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+            html_message=html_message  # 🚀 HTML Message यहाँ से भेजा जाएगा
+        )
         return redirect('verify_otp')
     return render(request, 'portal/signup.html')
-
 
 def verify_otp_view(request):
     if request.method == 'POST':
@@ -954,8 +984,40 @@ def forgot_password_view(request):
 
         reset_otp = str(random.randint(100000, 999999))
         request.session['reset_email'], request.session['reset_otp'] = user.email, reset_otp
-        send_mail('KBC Portal - Password Reset OTP', f'आपका OTP है: {reset_otp}', 'admin@kbcportal.com', [user.email],
-                  fail_silently=False)
+
+        # 🚀 NAYA: HTML Email Template for Password Reset
+        current_time = timezone.localtime(timezone.now()).strftime("%d %b %Y, %I:%M %p")
+        subject = f'Mock Test Portal Password Reset OTP: {reset_otp}'
+        plain_message = f'आपका पासवर्ड रीसेट OTP है: {reset_otp}'
+
+        html_message = f"""
+        <div style="font-family: Arial, sans-serif; background-color: #f4ebdd; padding: 30px 10px;">
+            <div style="max-width: 450px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <h2 style="text-align: center; color: #00c6ff; margin-top: 0; font-size: 24px;">Mock Test Portal 🔒</h2>
+                <p style="color: #333; font-size: 16px;">नमस्ते <b>{user.full_name}</b>,</p>
+                <p style="color: #555; font-size: 15px; line-height: 1.5;">आपके अकाउंट का पासवर्ड रीसेट करने का अनुरोध प्राप्त हुआ है। आपका OTP नीचे दिया गया है:</p>
+
+                <div style="background-color: #4ade80; color: #000; font-size: 36px; font-weight: bold; letter-spacing: 6px; text-align: center; padding: 15px; border-radius: 8px; margin: 25px 0;">
+                    {reset_otp}
+                </div>
+
+                <p style="font-size: 13px; color: #666; line-height: 1.6;">यह OTP <b>{current_time}</b> पर भेजा गया है और केवल <b>10 मिनट</b> के लिए मान्य है। यदि आपने यह अनुरोध नहीं किया है, तो कृपया इस ईमेल को अनदेखा करें।</p>
+
+                <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+                <p style="font-size: 14px; color: #888; text-align: center;">धन्यवाद,<br><b style="color: #333;">Mock Test Portal Team</b></p>
+            </div>
+        </div>
+        """
+
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+            html_message=html_message  # 🚀 HTML Message यहाँ से भेजा जाएगा
+        )
+
         messages.success(request, 'आपके ईमेल पर OTP भेजा गया है।')
         return redirect('verify_reset_otp')
     return render(request, 'portal/forgot_password.html')
