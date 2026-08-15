@@ -3,342 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Question Bank - KBC Portal</title>
+    <title>Choose Questions - Mock Test Portal</title>
     <style>
-        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background-color: #0b0d26; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; padding-bottom: 80px; overflow-x: hidden; }
 
-        .header { background: #10143a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 1000; height: 60px; box-sizing: border-box; }
-        .header h2 { color: #ffc107; margin: 0; font-size: 18px; }
-        .btn-back { color: white; text-decoration: none; font-weight: bold; border: 1px solid white; padding: 5px 12px; border-radius: 5px; background: rgba(255,255,255,0.1); font-size: 12px; }
+        .top-bar { background: #10143a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00c6ff; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .top-bar h2 { margin: 0; color: #00c6ff; font-size: 20px; }
 
-        .filter-toggle-btn { position: fixed; top: 50%; left: 0; transform: translateY(-50%); background: rgba(0, 198, 255, 0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: black; padding: 15px 8px; border-radius: 0 10px 10px 0; font-weight: bold; font-size: 14px; cursor: pointer; z-index: 998; box-shadow: 4px 0 10px rgba(0, 198, 255, 0.2); writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 2px; transition: 0.3s; }
+        .main-container { padding: 20px; max-width: 900px; margin: auto; }
 
-        .filter-drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; display: none; }
-        .filter-drawer { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: rgba(11, 13, 38, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 1002; transition: left 0.3s ease-out; border-right: 2px solid rgba(0, 198, 255, 0.8); overflow-y: auto; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
-        .filter-drawer.open { left: 0; }
+        /* 🚀 NAYA: Search Bar Styles */
+        .search-container { position: sticky; top: 60px; background: #0b0d26; padding: 15px 0; z-index: 90; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .search-input-wrapper { flex-grow: 1; position: relative; }
+        .search-input { width: 100%; padding: 12px 20px 12px 40px; border-radius: 25px; border: 1px solid #ffc107; background: #050714; color: white; outline: none; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
+        .search-input:focus { box-shadow: 0 0 10px rgba(255, 193, 7, 0.4); border-color: #00c6ff; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #aaa; }
+        .results-count { color: #00ff00; font-weight: bold; font-size: 13px; white-space: nowrap; }
 
-        .drawer-header { padding: 20px; background: rgba(16, 20, 58, 0.8); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .drawer-header h3 { margin: 0; color: #ffc107; font-size: 18px; }
-        .drawer-close { background: none; border: none; color: #ff4c4c; font-size: 24px; cursor: pointer; }
+        .question-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444; display: flex; gap: 15px; align-items: flex-start; flex-direction: column; transition: 0.3s; }
+        .question-item:hover { background: rgba(255,255,255,0.1); border-color: #ffc107; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.1); }
 
-        .drawer-body { padding: 20px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 12px; color: #00c6ff; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
-        .form-group select { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.6); color: white; border: 1px solid #ffc107; border-radius: 5px; outline: none; font-size: 14px; }
+        /* 🚀 NAYA: Tags Style */
+        .q-tags { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .tag-exam { border: 1px solid #00c6ff; color: #00c6ff; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .tag-subject { border: 1px solid #ffc107; color: #ffc107; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
 
-        .question-area { max-width: 1000px; margin: auto; padding: 15px; padding-bottom: 100px; }
+        .q-header { display: flex; width: 100%; gap: 15px; align-items: flex-start; }
+        .checkbox-custom { width: 22px; height: 22px; cursor: pointer; accent-color: #00ff00; margin-top: 3px; }
+        .q-text { font-size: 15px; line-height: 1.5; flex-grow: 1; }
+        .q-options { font-size: 13px; color: #aaa; margin-top: 8px; line-height: 1.6; }
 
-        .top-search-bar { position: sticky; top: 60px; background: #020111; z-index: 900; padding: 15px 0; border-bottom: 1px solid rgba(255, 193, 7, 0.3); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
-        .top-search-bar input { width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #ffc107; background: rgba(255,255,255,0.05); color: white; outline: none; font-size: 15px; box-sizing: border-box; }
-
-        /* 🚀 NEW: Search Status / Results Counter */
-        .search-status { font-size: 12px; color: #00ff00; font-weight: bold; white-space: nowrap; }
-
-        .q-card { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; transition: 0.2s; }
-        .q-card:hover { border-color: #00c6ff; box-shadow: 0 0 10px rgba(0,198,255,0.2); }
-        .checkbox-area input { transform: scale(1.5); cursor: pointer; margin-top: 5px; accent-color: #00ff00; }
-        .q-content { flex: 1; }
-        .q-text { font-size: 15px; font-weight: bold; margin-bottom: 10px; line-height: 1.4; color: #fff; }
-        .q-meta { font-size: 12px; margin-bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .badge { background: #10143a; padding: 4px 8px; border-radius: 3px; border: 1px solid #00c6ff; color: #00c6ff; font-weight: bold; font-size: 10px; }
-        .options-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 13px; color: #ccc; }
-        .opt-correct { color: #00ff00; font-weight: bold; background: rgba(0,255,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; }
-
-        .floating-cart { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(90deg, #00ff00, #00b300); color: black; border: none; padding: 12px 20px; border-radius: 50px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; z-index: 1000; }
-        .cart-count { background: black; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px; }
-
-        /* 🚀 NEW: Load More Button */
-        .btn-load-more { display: none; margin: 20px auto; padding: 10px 30px; background: transparent; color: #00c6ff; border: 1px solid #00c6ff; border-radius: 20px; font-weight: bold; cursor: pointer; text-align: center; }
+        /* 🚀 NAYA: Load More Button */
+        .btn-load-more { background: transparent; border: 1px solid #00c6ff; color: #00c6ff; width: 100%; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; display: none; }
         .btn-load-more:hover { background: rgba(0, 198, 255, 0.1); }
 
-        @media (min-width: 768px) {
-            .options-grid { grid-template-columns: 1fr 1fr; }
-            .question-area { padding-left: 60px; }
-        }
+        /* Drawer & Filter Styles */
+        .filter-side-btn { position: fixed; left: 0; top: 50%; transform: translateY(-50%); background: #00c6ff; color: #000; border: none; padding: 15px 8px; font-weight: bold; font-size: 14px; cursor: pointer; border-radius: 0 8px 8px 0; z-index: 900; box-shadow: 2px 0 10px rgba(0, 198, 255, 0.4); writing-mode: vertical-rl; text-orientation: mixed; transform: translateY(-50%) rotate(180deg); letter-spacing: 2px; transition: 0.3s; }
+        .filter-side-btn:hover { background: #ffc107; box-shadow: 2px 0 15px rgba(255, 193, 7, 0.6); }
+
+        .filter-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; backdrop-filter: blur(2px); }
+        .filter-drawer { position: fixed; top: 0; left: -320px; width: 300px; height: calc(100vh - 75px); background: rgba(11, 13, 38, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2001; transition: left 0.3s ease-out; border-right: 2px solid #00c6ff; border-bottom: 2px solid #00c6ff; border-bottom-right-radius: 15px; display: flex; flex-direction: column; box-shadow: 5px 0 20px rgba(0,0,0,0.8); }
+        .filter-drawer.open { left: 0; }
+
+        .drawer-header { padding: 15px 20px; background: rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .drawer-header h3 { margin: 0; color: #ffc107; font-size: 18px; }
+        .drawer-close { background: none; border: none; color: #ff4c4c; font-size: 24px; cursor: pointer; }
+        .drawer-body { padding: 20px; flex-grow: 1; overflow-y: auto; }
+
+        .bank-toggle-container { display: flex; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid #444; overflow: hidden; margin-bottom: 25px; }
+        .bank-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #ccc; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px; }
+        .bank-btn.active { background: linear-gradient(145deg, #00c6ff, #0072ff); color: white; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: #00c6ff; margin-bottom: 8px; font-weight: bold; }
+        .form-control { width: 100%; padding: 10px; background: rgba(0,0,0,0.6); color: white; border: 1px solid #555; border-radius: 5px; box-sizing: border-box; outline: none; }
+        .form-control:focus { border-color: #ffc107; }
+
+        .btn-apply { background: #00ff00; color: #000; width: 100%; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; transition: 0.3s; }
+
+        .floating-cart { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: #10143a; border-top: 2px solid #ffc107; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 3000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        .cart-info { font-size: 16px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
+        .cart-count { background: #ffc107; color: black; padding: 2px 10px; border-radius: 20px; font-size: 18px; font-weight: 900;}
+        .btn-preview-cart { background: rgba(0, 198, 255, 0.2); color: #00c6ff; border: 1px solid #00c6ff; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-proceed { background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; padding: 10px 20px; border: none; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;}
+        .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; border: 1px solid #00c6ff; }
+        .btn-submit { width: 100%; background: #00c6ff; color: black; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>📚 Global Question Bank</h2>
-        <a href="{% url 'teacher_dashboard' %}" class="btn-back">← Dashboard</a>
+    <div class="top-bar">
+        <h2>📚 Question Bank</h2>
+        <a href="{% url 'teacher_dashboard' %}" style="color: #ccc; text-decoration: none; font-size: 24px;">✖</a>
     </div>
 
-    <!-- Filter Toggle -->
-    <div class="filter-toggle-btn" onclick="toggleFilterDrawer()">⚙️ FILTERS</div>
+    <button class="filter-side-btn" onclick="openFilter()">⚙️ FILTERS</button>
 
-    <!-- Filter Drawer -->
-    <div class="filter-drawer-overlay" id="filterOverlay" onclick="toggleFilterDrawer(false)"></div>
+    <div class="filter-overlay" id="filterOverlay" onclick="closeFilter()"></div>
     <div class="filter-drawer" id="filterDrawer">
         <div class="drawer-header">
             <h3>⚙️ Filter Options</h3>
-            <button class="drawer-close" onclick="toggleFilterDrawer(false)">✖</button>
+            <button class="drawer-close" onclick="closeFilter()">✖</button>
         </div>
         <div class="drawer-body">
+
+            <div class="bank-toggle-container">
+                <button class="bank-btn active" id="btnPrivate" onclick="setBankType('PRIVATE')">🔒 Private Bank</button>
+                <button class="bank-btn" id="btnGlobal" onclick="setBankType('GLOBAL')">🌍 Global Bank</button>
+            </div>
+
             <div class="form-group">
-                <label>1. Category (Class)</label>
-                <select id="categoryFilter">
-                    <option value="ALL">-- All Categories --</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat.id }}">{{ cat.name }}</option>
-                    {% endfor %}
+                <label>1. Category (Course/Exam)</label>
+                <select id="filterExam" class="form-control" onchange="loadSubjects(this.value)">
+                    <option value="">-- Select Exam --</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>2. Subject</label>
-                <select id="subjectFilter">
-                    <option value="ALL">-- All Subjects --</option>
-                    {% for sub in subcategories %}
-                    <option value="{{ sub.id }}" data-category="{{ sub.category.id }}">{{ sub.name }}</option>
-                    {% endfor %}
+                <select id="filterSubject" class="form-control" onchange="loadChapters(this.value)">
+                    <option value="">-- First Select Exam --</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>3. Chapter</label>
-                <select id="chapterFilter">
-                    <option value="ALL">-- All Chapters --</option>
-                    {% for chap in chapters %}
-                    <option value="{{ chap.id }}" data-subcategory="{{ chap.subcategory.id }}">{{ chap.name }}</option>
+                <select id="filterChapter" class="form-control">
+                    <option value="">-- First Select Subject --</option>
+                </select>
+            </div>
+
+            <button class="btn-apply" onclick="applyFilter()">🔍 Load Questions</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Type at least 3 letters to search...">
+            </div>
+            <span class="results-count" id="resultsCount">Results: 0</span>
+        </div>
+
+        <h3 id="currentFilterText" style="color:#00c6ff; border-bottom:1px solid #444; padding-bottom:10px; display:none;"></h3>
+
+        <div id="questionsList">
+            <div style="text-align: center; margin-top: 30px;" id="welcomeMsg">
+                <h1 style="color: #444; font-size: 60px; margin: 0;">👈</h1>
+                <h3 style="color: #ffc107;">प्रश्न खोजने के लिए बायीं तरफ मौजूद <br><b style="color:#00c6ff;">"FILTERS"</b> बटन दबाएं!</h3>
+                <p style="color: #888; font-size: 14px;">या ऊपर सर्च बार में सीधे प्रश्न का नाम लिखें।</p>
+            </div>
+        </div>
+
+        <button id="loadMoreBtn" class="btn-load-more" onclick="loadMore()">⬇️ Load More Questions</button>
+
+    </div>
+
+    <div class="floating-cart">
+        <div class="cart-info">
+            <span style="font-size:24px;">🛒</span>
+            <span class="cart-count" id="cartCount">0</span>
+            <button class="btn-preview-cart" onclick="previewCartModal()">👀 Preview Selected</button>
+        </div>
+        <button class="btn-proceed" onclick="openModal()">Review & Add ➔</button>
+    </div>
+
+    <div class="modal" id="cartPreviewModal">
+        <div class="modal-content">
+            <h3 style="color:#00c6ff; margin-top:0;">👀 Preview Selected Questions</h3>
+            <div id="cartPreviewBody"></div>
+            <button type="button" onclick="closeModal('cartPreviewModal')" style="width:100%; background:transparent; border:1px solid #ff4c4c; color:#ff4c4c; padding:10px; border-radius:5px; cursor:pointer; margin-top:15px;">Close Preview</button>
+        </div>
+    </div>
+
+    <div class="modal" id="submitModal">
+        <div class="modal-content">
+            <h3 style="color:#ffc107; margin-top:0;">Add to Test</h3>
+            <p style="font-size: 12px; color: #aaa;">Selected: <span id="modalQCount" style="color:#00ff00; font-weight:bold;">0</span> questions.</p>
+            <form id="saveTestForm" onsubmit="submitQuestions(event)">
+                <div class="form-group">
+                    <label style="color:#ccc; font-size:12px;">Select Draft Test</label>
+                    <select id="existingTest" class="form-control">
+                        <option value="">-- Create New Test --</option>
+                        {% for test in draft_tests %}
+                            <option value="{{ test.id }}">{{ test.title }} ({{ test.test_code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="newTestFields">
+                    <div class="form-group"><input type="text" id="newTitle" class="form-control" placeholder="Test Title"></div>
+                    <div class="form-group"><input type="text" id="newCode" class="form-control" placeholder="Test Code"></div>
+                </div>
+                <button type="submit" class="btn-submit">💾 Save & Map Questions</button>
+                <button type="button" onclick="closeModal('submitModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="moveModal">
+        <div class="modal-content">
+            <h3 style="color:#00c6ff; margin-top:0;">✏️ Move Question</h3>
+            <input type="hidden" id="moveQuestionId">
+            <div class="form-group">
+                <select id="moveExamSelect" class="form-control" onchange="fetchMoveSubjects(this.value)">
+                    <option value="">-- 1. Select Course --</option>
+                    {% for exam in private_exams %}
+                        <option value="{{ exam.id }}">{{ exam.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </div>
-    </div>
-
-    <div class="question-area">
-        <div class="top-search-bar">
-            <input type="text" id="searchInput" placeholder="🔍 Type at least 3 letters to search...">
-            <div class="search-status" id="searchStatus">Loading...</div>
-        </div>
-
-        <!-- 🚀 JavaScript will inject questions here -->
-        <div id="questionsContainer"></div>
-
-        <div id="loader" style="display:none; text-align:center; padding:20px; color:#ffc107;">⏳ Loading Questions...</div>
-
-        <button class="btn-load-more" id="loadMoreBtn" onclick="loadNextPage()">⬇️ Load More Questions</button>
-
-        <button class="floating-cart" onclick="openCheckoutModal()">
-            <span>➕ Add to Test</span>
-            <span class="cart-count" id="cartCount">0</span>
-        </button>
-    </div>
-
-    <!-- 🚀 Checkout Modal (Same as before) -->
-    <div id="checkoutModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
-        <div style="background:#10143a; padding:30px; border-radius:10px; width:90%; max-width:500px; border:2px solid #ffc107;">
-            <h2 style="color:#00c6ff; margin-top:0;">🛒 Add <span id="modalQCount">0</span> Questions to Test</h2>
-
-            {% if request.GET.test_id %}
-                <input type="hidden" id="hiddenTestId" value="{{ request.GET.test_id }}">
-                <input type="hidden" name="checkoutType" value="existing" id="radioExisting" checked>
-                <div style="background:rgba(0, 255, 0, 0.1); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #00ff00; text-align: center;">
-                    <p style="color:#00ff00; font-weight:bold; margin: 0; font-size: 15px;">✅ ये प्रश्न सीधे आपके द्वारा चुने गए टेस्ट में जोड़े जाएंगे।</p>
-                </div>
-            {% else %}
-                <p style="color:#ccc; font-size:14px; margin-bottom:20px;">आप इन सवालों को कहाँ जोड़ना चाहते हैं?</p>
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #444;">
-                    <label style="display:flex; align-items:center; gap:10px; font-weight:bold; color:#ffc107; cursor:pointer;">
-                        <input type="radio" name="checkoutType" value="existing" checked id="radioExisting" style="transform:scale(1.5);">
-                        1. Add to Existing Draft Test
-                    </label>
-                    <div style="margin-top:15px;" id="existingBox">
-                        <select id="modalTestSelect" style="width:100%; padding:10px; background:#000; color:white; border:1px solid #00c6ff; border-radius:5px;">
-                            <option value="" disabled selected>-- Select Draft Test --</option>
-                            {% for t in draft_tests %}
-                                <option value="{{ t.id }}">{{ t.title }} (Code: {{ t.test_code }})</option>
-                            {% empty %}
-                                <option value="" disabled style="color:#ff4c4c;">No Draft Tests Available!</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-            {% endif %}
-
-            <div style="display:flex; gap:15px; margin-top:25px;">
-                <button onclick="submitCheckout()" style="flex:1; background:#28a745; color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:16px; cursor:pointer;">🚀 Confirm & Add</button>
-                <button onclick="document.getElementById('checkoutModal').style.display='none'" style="flex:1; background:#ff4c4c; color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:16px; cursor:pointer;">Cancel</button>
+            <div class="form-group">
+                <select id="moveSubjectSelect" class="form-control" onchange="fetchMoveChapters(this.value)">
+                    <option value="">-- 2. Select Subject --</option>
+                </select>
             </div>
+            <div class="form-group"><select id="moveChapterSelect" class="form-control"><option value="">-- 3. Select Chapter --</option></select></div>
+            <button type="button" onclick="executeMove()" class="btn-submit">🚀 Move Now</button>
+            <button type="button" onclick="closeModal('moveModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
-    <!-- 🚀 NEW: Smart Fetch Logic (Debounce + Abort + Pagination) -->
     <script>
-        let touchstartX = 0;
-        let touchendX = 0;
-        document.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
-        document.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            let swipeDistance = touchendX - touchstartX;
-            let drawer = document.getElementById('filterDrawer');
-            if (swipeDistance > 50 && !drawer.classList.contains('open')) toggleFilterDrawer(true);
-            else if (swipeDistance < -50 && drawer.classList.contains('open')) toggleFilterDrawer(false);
-        });
+        const privateExams = [ {% for e in private_exams %}{ id: {{e.id}}, name: "{{e.name}}" },{% endfor %} ];
+        const globalExams = [ {% for e in global_exams %}{ id: {{e.id}}, name: "{{e.name}}" },{% endfor %} ];
 
-        function toggleFilterDrawer(forceOpen = null) {
-            let drawer = document.getElementById('filterDrawer');
-            let overlay = document.getElementById('filterOverlay');
-            if (forceOpen === true) drawer.classList.add('open');
-            else if (forceOpen === false) drawer.classList.remove('open');
-            else drawer.classList.toggle('open');
-            overlay.style.display = drawer.classList.contains('open') ? 'block' : 'none';
-        }
+        let selectedQuestions = new Map();
 
-        // ==========================================
-        // 🚀 SERVER-SIDE FETCH LOGIC
-        // ==========================================
-        const categoryFilter = document.getElementById('categoryFilter');
-        const subjectFilter = document.getElementById('subjectFilter');
-        const chapterFilter = document.getElementById('chapterFilter');
-        const searchInput = document.getElementById('searchInput');
-
+        // 🚀 NAYA: Pagination & Search State Variables
+        let currentBankType = 'PRIVATE';
+        let currentFilterChapter = 'ALL';
+        let currentSearchQuery = '';
         let currentPage = 1;
-        let searchTimeout = null;
-        let abortController = null;
 
-        // Triggers
-        categoryFilter.addEventListener('change', () => { filterDropdowns(); fetchQuestions(1); });
-        subjectFilter.addEventListener('change', () => { filterDropdowns(); fetchQuestions(1); });
-        chapterFilter.addEventListener('change', () => { fetchQuestions(1); });
+        // Drawer Logic & Swipe to Close
+        function openFilter() {
+            document.getElementById('filterDrawer').classList.add('open');
+            document.getElementById('filterOverlay').style.display = 'block';
+            if(document.getElementById('filterExam').options.length <= 1) setBankType(currentBankType);
+        }
 
-        // 🚀 1. DEBOUNCING + 3 CHAR LIMIT on Search
-        searchInput.addEventListener('input', () => {
-            let text = searchInput.value.trim();
-            if (text.length > 0 && text.length < 3) {
-                document.getElementById('searchStatus').innerText = "Type more...";
-                return; // Stop if less than 3 chars
-            }
+        function closeFilter() {
+            document.getElementById('filterDrawer').classList.remove('open');
+            document.getElementById('filterOverlay').style.display = 'none';
+        }
 
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                fetchQuestions(1);
-            }, 500); // 500ms Delay
+        let touchstartX = 0; let touchendX = 0;
+        const filterDrawer = document.getElementById('filterDrawer');
+        filterDrawer.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
+        filterDrawer.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            if (touchendX < touchstartX - 50) closeFilter();
         });
 
-        function filterDropdowns() {
-            let catId = categoryFilter.value;
-            let subId = subjectFilter.value;
-            // Hide/Show Logic (Same as before)
-            for (let i = 1; i < subjectFilter.options.length; i++) {
-                let opt = subjectFilter.options[i];
-                opt.style.display = (catId === "ALL" || opt.getAttribute('data-category') === catId) ? 'block' : 'none';
-            }
-            for (let i = 1; i < chapterFilter.options.length; i++) {
-                let opt = chapterFilter.options[i];
-                opt.style.display = (subId === "ALL" || opt.getAttribute('data-subcategory') === subId) ? 'block' : 'none';
-            }
+        function setBankType(type) {
+            currentBankType = type;
+            document.getElementById('btnPrivate').classList.remove('active');
+            document.getElementById('btnGlobal').classList.remove('active');
+
+            let examSelect = document.getElementById('filterExam');
+            examSelect.innerHTML = '<option value="">-- Select Exam --</option>';
+            document.getElementById('filterSubject').innerHTML = '<option value="">-- First Select Exam --</option>';
+            document.getElementById('filterChapter').innerHTML = '<option value="">-- First Select Subject --</option>';
+
+            let exams = (type === 'PRIVATE') ? privateExams : globalExams;
+            if (type === 'PRIVATE') document.getElementById('btnPrivate').classList.add('active');
+            else document.getElementById('btnGlobal').classList.add('active');
+
+            exams.forEach(e => { examSelect.innerHTML += `<option value="${e.id}">${e.name}</option>`; });
+
+            // 🚀 NAYA: Bank Switch करते ही डेटा रीसेट करें
+            currentFilterChapter = 'ALL';
+            currentSearchQuery = '';
+            document.getElementById('searchInput').value = '';
+            currentPage = 1;
+            fetchData(false);
         }
 
-        // 🚀 2. FETCH DATA FROM SERVER
-        function fetchQuestions(page = 1) {
-            currentPage = page;
-            let catId = categoryFilter.value;
-            let subId = subjectFilter.value;
-            let chapId = chapterFilter.value;
-            let text = searchInput.value.trim();
-
-            document.getElementById('loader').style.display = 'block';
-            if (page === 1) document.getElementById('questionsContainer').innerHTML = ''; // Clear old
-
-            // 🚀 3. ABORT PREVIOUS REQUEST
-            if (abortController) abortController.abort();
-            abortController = new AbortController();
-
-            let url = `?ajax=1&page=${page}&category=${catId}&subject=${subId}&chapter=${chapId}&search=${encodeURIComponent(text)}`;
-
-            fetch(url, { signal: abortController.signal })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('searchStatus').innerText = `Results: ${data.total_results}`;
-                    renderQuestions(data.questions);
-
-                    document.getElementById('loadMoreBtn').style.display = data.has_next ? 'block' : 'none';
-                })
-                .catch(err => {
-                    if (err.name !== 'AbortError') console.error(err);
-                });
-        }
-
-        function loadNextPage() {
-            fetchQuestions(currentPage + 1);
-        }
-
-        function renderQuestions(questions) {
-            let container = document.getElementById('questionsContainer');
-            if (questions.length === 0 && currentPage === 1) {
-                container.innerHTML = `<div style="text-align: center; padding: 50px;"><h3 style="color:#ffc107;">No questions found!</h3></div>`;
-                return;
-            }
-
-            questions.forEach(q => {
-                let card = document.createElement('div');
-                card.className = "q-card";
-                card.innerHTML = `
-                    <div class="checkbox-area">
-                        <input type="checkbox" class="q-checkbox" value="${q.id}" onchange="updateCartCount()">
-                    </div>
-                    <div class="q-content">
-                        <div class="q-meta">
-                            ${q.category ? `<span class="badge">${q.category}</span>` : ''}
-                            ${q.subcategory ? `<span class="badge" style="border-color:#ffc107; color:#ffc107;">${q.subcategory}</span>` : ''}
-                            ${q.chapter ? `<span class="badge" style="border-color:#28a745; color:#28a745;">${q.chapter}</span>` : ''}
-                        </div>
-                        <div class="q-text">${q.question_text}</div>
-                        <div class="options-grid">
-                            <div class="${q.correct_answer === 'A' ? 'opt-correct' : ''}">A. ${q.option_a}</div>
-                            <div class="${q.correct_answer === 'B' ? 'opt-correct' : ''}">B. ${q.option_b}</div>
-                            <div class="${q.correct_answer === 'C' ? 'opt-correct' : ''}">C. ${q.option_c}</div>
-                            <div class="${q.correct_answer === 'D' ? 'opt-correct' : ''}">D. ${q.option_d}</div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
+        function loadSubjects(examId) {
+            let subSelect = document.getElementById('filterSubject');
+            let chapSelect = document.getElementById('filterChapter');
+            if(!examId) { subSelect.innerHTML = '<option value="">-- First Select Exam --</option>'; chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>'; return; }
+            subSelect.innerHTML = '<option value="">Loading...</option>';
+            fetch(`/api/get-subjects/?exam_id=${examId}`).then(res => res.json()).then(data => {
+                subSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+                data.subjects.forEach(s => subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
             });
         }
 
-        // Checkout Logic (Same as before)
-        function updateCartCount() {
-            let checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            document.getElementById('cartCount').innerText = checkboxes.length;
+        function loadChapters(subId) {
+            let chapSelect = document.getElementById('filterChapter');
+            if(!subId) { chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>'; return; }
+            chapSelect.innerHTML = '<option value="">Loading...</option>';
+            fetch(`/api/get-chapters/?subject_id=${subId}`).then(res => res.json()).then(data => {
+                chapSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
+                data.chapters.forEach(c => chapSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+            });
         }
 
-        function openCheckoutModal() {
-            let checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            if (checkboxes.length === 0) return alert("⚠️ Please select at least 1 question!");
-            document.getElementById('modalQCount').innerText = checkboxes.length;
-            document.getElementById('checkoutModal').style.display = 'flex';
+        function applyFilter() {
+            let chapterId = document.getElementById('filterChapter').value;
+            if(!chapterId) { alert("⚠️ कृपया कोई Chapter चुनें!"); return; }
+
+            closeFilter();
+            currentFilterChapter = chapterId;
+            currentSearchQuery = '';
+            document.getElementById('searchInput').value = ''; // Search clear
+            currentPage = 1;
+            fetchData(false);
         }
 
-        function submitCheckout() {
-            let checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            let q_ids = Array.from(checkboxes).map(cb => cb.value);
-            let payload = { q_ids: q_ids };
+        // 🚀 NAYA: Search Bar Event Listener (Debouncing)
+        let searchTimer;
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            clearTimeout(searchTimer);
+            let val = e.target.value.trim();
 
-            let hiddenTestId = document.getElementById('hiddenTestId');
-            let selectTestId = document.getElementById('modalTestSelect');
+            if(val.length >= 3) {
+                searchTimer = setTimeout(() => {
+                    currentSearchQuery = val;
+                    currentFilterChapter = 'ALL'; // 🚀 सर्च करते ही पूरे गोदाम (Bank) में सर्च होगा
+                    currentPage = 1;
+                    fetchData(false);
+                }, 500); // 500ms wait
+            } else if (val.length === 0 && currentSearchQuery.length >= 3) {
+                // अगर सर्च बॉक्स खाली कर दिया
+                currentSearchQuery = '';
+                currentPage = 1;
+                // अगर पहले से कोई फिल्टर लगा था, तो उसे वापस लगा दें
+                if(document.getElementById('filterChapter').value) {
+                    currentFilterChapter = document.getElementById('filterChapter').value;
+                }
+                fetchData(false);
+            }
+        });
 
-            if (hiddenTestId) payload.test_id = hiddenTestId.value;
-            else if (selectTestId) payload.test_id = selectTestId.value;
+        // 🚀 NAYA: Load More Button Click
+        function loadMore() {
+            currentPage++;
+            let btn = document.getElementById('loadMoreBtn');
+            btn.innerText = '⏳ Loading...';
+            btn.disabled = true;
+            fetchData(true);
+        }
 
-            if(!payload.test_id) return alert("Please select a test!");
+        // 🚀 NAYA: Master Fetch Function (Handles Pagination & Search)
+        function fetchData(append) {
+            let listContainer = document.getElementById('questionsList');
+            let loadBtn = document.getElementById('loadMoreBtn');
+            let heading = document.getElementById('currentFilterText');
+
+            if(!append) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:50px;"><h2 style="color:#00c6ff;">⏳ प्रश्न लोड हो रहे हैं...</h2></div>';
+                document.getElementById('welcomeMsg')?.remove();
+            }
+
+            fetch(`?ajax=1&bank_type=${currentBankType}&chapter=${currentFilterChapter}&search=${currentSearchQuery}&page=${currentPage}`)
+            .then(response => response.json())
+            .then(data => {
+                if(!append) listContainer.innerHTML = '';
+
+                // Update Results Count
+                document.getElementById('resultsCount').innerText = `Results: ${data.total_results || 0}`;
+
+                if (data.questions.length === 0 && !append) {
+                    listContainer.innerHTML = '<div style="text-align:center; padding:50px;"><h3 style="color:#ff4c4c;">कोई प्रश्न नहीं मिला।</h3></div>';
+                    loadBtn.style.display = 'none';
+                    heading.style.display = 'none';
+                    return;
+                }
+
+                // Show Heading
+                let bankBadge = currentBankType === 'PRIVATE' ? '<span style="background:#ffc107; color:black; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:bold; vertical-align:middle;">🔒 Private</span>' : '<span style="background:#00c6ff; color:black; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:bold; vertical-align:middle;">🌍 Global</span>';
+                heading.style.display = 'block';
+                heading.innerHTML = currentSearchQuery ? `सर्च रिज़ल्ट्स: "${currentSearchQuery}" ${bankBadge}` : `प्रश्नों की सूची ${bankBadge}`;
+
+                data.questions.forEach(q => {
+                    let isChecked = selectedQuestions.has(q.id) ? 'checked' : '';
+                    let actionButtons = '';
+
+                    if(currentBankType === 'PRIVATE'){
+                        actionButtons = `
+                        <div style="margin-top:10px; padding-left: 35px;">
+                            <button type="button" onclick="openMoveModal(${q.id})" style="background: rgba(0,198,255,0.2); color:#00c6ff; border:1px solid #00c6ff; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:12px;">✏️ Move</button>
+                            <button type="button" onclick="deleteQuestion(${q.id})" style="background: rgba(255,76,76,0.2); color:#ff4c4c; border:1px solid #ff4c4c; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:12px; margin-left:8px;">🗑️ Delete</button>
+                        </div>`;
+                    }
+
+                    // 🚀 NAYA: Category Tags (Like SANSKRIT, SOCIAL SCIENCE)
+                    let tagsHtml = `<div class="q-tags">`;
+                    if(q.exam) tagsHtml += `<span class="tag-exam">${q.exam}</span>`;
+                    if(q.subject) tagsHtml += `<span class="tag-subject">${q.subject}</span>`;
+                    tagsHtml += `</div>`;
+
+                    let html = `
+                        <div class="question-item" id="q-box-${q.id}">
+                            ${tagsHtml}
+                            <div class="q-header">
+                                <label style="display:flex; gap:15px; cursor:pointer; flex-grow:1;">
+                                    <input type="checkbox" class="checkbox-custom" value="${q.id}" onchange="toggleCart(this, ${q.id})" ${isChecked}>
+                                    <div class="q-text" id="q-text-${q.id}">
+                                        <b>Q:</b> ${q.question_text}
+                                        <div class="q-options">
+                                            A. ${q.option_a} <br>
+                                            B. ${q.option_b} <br>
+                                            C. ${q.option_c} <br>
+                                            D. ${q.option_d} <br>
+                                            <span style="color:#00ff00; font-weight:bold; display:inline-block; margin-top:5px;">Ans: ${q.correct_answer}</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            ${actionButtons}
+                        </div>
+                    `;
+                    listContainer.insertAdjacentHTML('beforeend', html);
+                });
+
+                // Pagination Logic
+                if (data.has_next) {
+                    loadBtn.style.display = 'block';
+                    loadBtn.innerText = '⬇️ Load More Questions';
+                    loadBtn.disabled = false;
+                } else {
+                    loadBtn.style.display = 'none';
+                }
+            });
+        }
+
+        // CART LOGIC
+        function toggleCart(checkbox, qId) {
+            if (checkbox.checked) {
+                let qTextHtml = document.getElementById(`q-text-${qId}`).innerHTML;
+                selectedQuestions.set(qId, qTextHtml);
+            } else {
+                selectedQuestions.delete(qId);
+            }
+            document.getElementById('cartCount').innerText = selectedQuestions.size;
+            document.getElementById('modalQCount').innerText = selectedQuestions.size;
+        }
+
+        function previewCartModal() {
+            if (selectedQuestions.size === 0) { alert("⚠️ Please select questions first."); return; }
+            let previewBox = document.getElementById('cartPreviewBody');
+            previewBox.innerHTML = '';
+            let counter = 1;
+            selectedQuestions.forEach((qHtml, qId) => {
+                previewBox.insertAdjacentHTML('beforeend', `<div style="background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444;"><span style="color: #ffc107; font-weight: bold;">Q${counter}:</span> ${qHtml}</div>`);
+                counter++;
+            });
+            document.getElementById('cartPreviewModal').style.display = 'flex';
+        }
+
+        function openModal() {
+            if(selectedQuestions.size === 0) { alert("⚠️ Please select questions first."); return; }
+            document.getElementById('submitModal').style.display = 'flex';
+        }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        document.getElementById('existingTest').addEventListener('change', function() {
+            document.getElementById('newTestFields').style.display = this.value ? 'none' : 'block';
+        });
+
+        function submitQuestions(e) {
+            e.preventDefault();
+            let test_id = document.getElementById('existingTest').value;
+            let title = document.getElementById('newTitle').value;
+            let code = document.getElementById('newCode').value;
+            let qIdsArray = Array.from(selectedQuestions.keys());
+
+            let btn = document.querySelector('.btn-submit');
+            btn.innerText = "⏳ Saving..."; btn.disabled = true;
 
             fetch("{% url 'api_add_bank_questions' %}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    alert(data.message);
-                    window.location.href = "{% url 'teacher_dashboard' %}";
-                } else alert("Error: " + data.message);
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ test_id: test_id, title: title, test_code: code, q_ids: qIdsArray })
+            }).then(res => res.json()).then(data => {
+                if(data.status === 'success') { alert(data.message); window.location.href = "{% url 'teacher_dashboard' %}"; }
+                else { alert(data.message); btn.innerText = "💾 Save & Map Questions"; btn.disabled = false; }
             });
         }
 
-        // 🚀 Load first page on start
-        document.addEventListener("DOMContentLoaded", () => fetchQuestions(1));
+        // MOVE & DELETE LOGIC
+        function deleteQuestion(qId) {
+            if(confirm('⚠️ क्या आप वाकई इस प्रश्न को प्राइवेट बैंक से डिलीट करना चाहते हैं?')) {
+                fetch(`/api/delete-private-question/${qId}/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+                .then(res => res.json()).then(data => {
+                    if(data.status === 'success') {
+                        document.getElementById(`q-box-${qId}`).remove();
+                        if (selectedQuestions.has(qId)) { selectedQuestions.delete(qId); document.getElementById('cartCount').innerText = selectedQuestions.size; }
+                    } else alert(data.message);
+                });
+            }
+        }
+
+        function openMoveModal(qId) { document.getElementById('moveQuestionId').value = qId; document.getElementById('moveModal').style.display = 'flex'; }
+        function fetchMoveSubjects(examId) { fetch(`/api/get-subjects/?exam_id=${examId}`).then(res => res.json()).then(data => { let subSelect = document.getElementById('moveSubjectSelect'); subSelect.innerHTML = '<option value="">-- 2. Select Subject --</option>'; data.subjects.forEach(s => subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`); document.getElementById('moveChapterSelect').innerHTML = '<option value="">-- 3. Select Chapter --</option>'; }); }
+        function fetchMoveChapters(subId) { fetch(`/api/get-chapters/?subject_id=${subId}`).then(res => res.json()).then(data => { let chapSelect = document.getElementById('moveChapterSelect'); chapSelect.innerHTML = '<option value="">-- 3. Select Chapter --</option>'; data.chapters.forEach(c => chapSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`); }); }
+
+        function executeMove() {
+            let qId = document.getElementById('moveQuestionId').value;
+            let chapId = document.getElementById('moveChapterSelect').value;
+            if(!chapId) { alert("⚠️ कृपया चैप्टर सेलेक्ट करें!"); return; }
+
+            fetch("{% url 'api_move_private_question' %}", {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ q_id: qId, chapter_id: chapId })
+            }).then(res => res.json()).then(data => {
+                if(data.status === 'success') { alert(data.message); document.getElementById(`q-box-${qId}`).remove(); closeModal('moveModal'); }
+                else alert(data.message);
+            });
+        }
+
+        // On Page Load: Load initial private bank questions automatically
+        window.onload = function() {
+            setBankType('PRIVATE');
+        };
     </script>
 </body>
 </html>

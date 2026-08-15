@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Upload to Private Bank - Portal</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+
+        /* Header & Sidebar Styles */
+        .header {
+            position: sticky; top: 0; z-index: 999;
+            background: rgba(11, 13, 38, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid rgba(255, 193, 7, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .coaching-brand { text-align: center; flex-grow: 1; }
+        .coaching-brand h1 { margin: 0; font-size: 26px; text-transform: uppercase; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .coaching-brand p { margin: 2px 0 0 0; font-size: 11px; color: #00c6ff; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; }
+
+        .menu-btn { font-size: 28px; background: none; border: none; color: #ffc107; cursor: pointer; }
+
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
+        .sidebar { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: #10143a; z-index: 1001; transition: 0.3s; border-right: 2px solid #ffc107; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 15px; background: #0b0d26; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; }
+        .sidebar-menu { padding: 15px; list-style: none; margin: 0; }
+        .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #00c6ff; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
+
+        .container { padding: 30px; max-width: 800px; margin: auto; }
+
+        /* Form Styles */
+        .upload-card { background: #10143a; padding: 25px; border-radius: 10px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; color: #ccc; margin-bottom: 8px; }
+
+        .input-group { display: flex; gap: 10px; align-items: center; }
+        .form-control { flex-grow: 1; padding: 12px; background: #050714; color: white; border: 1px solid #ffc107; border-radius: 5px; box-sizing: border-box; outline: none; }
+        .form-control:focus { border-color: #00c6ff; box-shadow: 0 0 8px rgba(0, 198, 255, 0.5); }
+
+        /* Add New Button */
+        .btn-add-new { background: rgba(0, 198, 255, 0.1); border: 1px dashed #00c6ff; color: #00c6ff; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 44px; display: flex; align-items: center; }
+        .btn-add-new:hover { background: rgba(0, 198, 255, 0.2); }
+
+        .btn-upload { width: 100%; padding: 15px; font-size: 16px; font-weight: bold; background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-upload:hover { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); transform: scale(1.02); }
+
+        .alert { padding: 15px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .alert-success { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; }
+        .alert-error { background: rgba(255, 76, 76, 0.1); border: 1px solid #ff4c4c; color: #ff4c4c; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid #00c6ff; }
+        .btn-submit { width: 100%; background: #00c6ff; color: black; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar HTML -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="teacherSidebar">
+        <div class="sidebar-header">
+            <h2 style="color: #ffc107; margin: 0; font-size: 16px;">⚙️ QUICK TOOLS</h2>
+            <button onclick="toggleSidebar()" style="background: none; border: none; color: #ff4c4c; font-size: 20px; cursor: pointer;">✖</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'teacher_dashboard' %}" class="menu-link" style="border-left-color: #ffc107;">🏠 Back to Dashboard</a></li>
+            <li><a href="{% url 'choose_questions' %}" class="menu-link" style="border-left-color: #00c6ff;">📚 Choose & Add Questions</a></li>
+            <li><a href="{% url 'upload_private_bank' %}" class="menu-link" style="border-left-color: #00ff00; background: rgba(0, 255, 0, 0.1);">📤 Upload to Private Bank</a></li>
+        </ul>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="coaching-brand">
+            <h1>{{ request.user.teacher_profile.coaching_name|default:"TEACHER DASHBOARD" }}</h1>
+            <p>Upload to Private Bank</p>
+        </div>
+        <div style="width: 28px;"></div>
+    </div>
+
+    <div class="container">
+        <h2 style="color: #ffc107; margin-bottom: 5px;">📤 Upload to Private Bank</h2>
+        <p style="color: #ccc; font-size: 14px; margin-bottom: 25px;">यहाँ अपलोड किए गए प्रश्न आपके प्राइवेट गोदाम में सुरक्षित रहेंगे, जिन्हें आप कभी भी किसी भी टेस्ट में इस्तेमाल कर सकेंगे।</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="upload-card">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'upload_private_bank' %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>1. Select Course/Exam</label>
+                    <div class="input-group">
+                        <select name="exam_id" id="examSelect" class="form-control" required>
+                            <option value="">-- Select Exam --</option>
+                            {% for exam in exams %}
+                                <option value="{{ exam.id }}">{{ exam.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn-add-new" onclick="openAddModal('exam')">➕ New</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>2. Select Subject</label>
+                    <div class="input-group">
+                        <select name="subject_id" id="subjectSelect" class="form-control" required>
+                            <option value="">-- First Select Exam --</option>
+                        </select>
+                        <button type="button" class="btn-add-new" onclick="openAddModal('subject')">➕ New</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>3. Select Chapter</label>
+                    <div class="input-group">
+                        <select name="chapter_id" id="chapterSelect" class="form-control" required>
+                            <option value="">-- First Select Subject --</option>
+                        </select>
+                        <button type="button" class="btn-add-new" onclick="openAddModal('chapter')">➕ New</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>4. Upload Excel File (.xlsx)</label>
+                    <input type="file" name="excel_file" class="form-control" accept=".xlsx, .xls" required style="padding: 9px;">
+                    <small style="color: #00c6ff; display: block; margin-top: 5px;">Format: Q | A | B | C | D | Correct Ans (A/B/C/D) | Explanation</small>
+                </div>
+
+                <button type="submit" class="btn-upload">🚀 Upload Questions to Bank</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🚀 ADD NEW CATEGORY MODAL -->
+    <div class="modal" id="addCategoryModal">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="color:#00c6ff; margin-top:0;">➕ Add New</h3>
+            <p id="modalDesc" style="font-size: 12px; color: #aaa;">नया नाम यहाँ टाइप करें:</p>
+
+            <input type="hidden" id="categoryType">
+
+            <div class="form-group">
+                <input type="text" id="newCategoryName" class="form-control" placeholder="Enter name here..." autocomplete="off">
+            </div>
+
+            <button type="button" onclick="saveCategory()" class="btn-submit">💾 Save & Select</button>
+            <button type="button" onclick="closeModal()" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            let s = document.getElementById('teacherSidebar');
+            let o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('open');
+            o.style.display = s.classList.contains('open') ? 'block' : 'none';
+        }
+
+        // ==========================================
+        // 🚀 AJAX Dropdown Logic (Old + Refined)
+        // ==========================================
+        document.getElementById('examSelect').addEventListener('change', function() {
+            let examId = this.value;
+            let subSelect = document.getElementById('subjectSelect');
+            let chapSelect = document.getElementById('chapterSelect');
+
+            if(!examId) {
+                subSelect.innerHTML = '<option value="">-- First Select Exam --</option>';
+                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
+                return;
+            }
+            subSelect.innerHTML = '<option value="">Loading...</option>';
+            fetch(`/api/get-subjects/?exam_id=${examId}`).then(res => res.json()).then(data => {
+                subSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+                data.subjects.forEach(s => subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
+            });
+        });
+
+        document.getElementById('subjectSelect').addEventListener('change', function() {
+            let subId = this.value;
+            let chapSelect = document.getElementById('chapterSelect');
+            if(!subId) {
+                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
+                return;
+            }
+            chapSelect.innerHTML = '<option value="">Loading...</option>';
+            fetch(`/api/get-chapters/?subject_id=${subId}`).then(res => res.json()).then(data => {
+                chapSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
+                data.chapters.forEach(c => chapSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+            });
+        });
+
+        // ==========================================
+        // 🚀 Add New Category Modal Logic
+        // ==========================================
+        function openAddModal(type) {
+            let title = '';
+
+            // Validation Before Opening
+            if(type === 'subject' && !document.getElementById('examSelect').value) {
+                alert('⚠️ कृपया पहले Exam/Course सेलेक्ट करें!');
+                return;
+            }
+            if(type === 'chapter' && !document.getElementById('subjectSelect').value) {
+                alert('⚠️ कृपया पहले Subject सेलेक्ट करें!');
+                return;
+            }
+
+            if(type === 'exam') title = 'Add New Course / Exam';
+            if(type === 'subject') title = 'Add New Subject';
+            if(type === 'chapter') title = 'Add New Chapter';
+
+            document.getElementById('modalTitle').innerText = '➕ ' + title;
+            document.getElementById('categoryType').value = type;
+            document.getElementById('newCategoryName').value = '';
+
+            document.getElementById('addCategoryModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('newCategoryName').focus(), 100);
+        }
+
+        function closeModal() {
+            document.getElementById('addCategoryModal').style.display = 'none';
+        }
+
+        function saveCategory() {
+            let type = document.getElementById('categoryType').value;
+            let name = document.getElementById('newCategoryName').value.trim();
+
+            if(!name) { alert("⚠️ कृपया नाम दर्ज करें!"); return; }
+
+            let parent_id = '';
+            if(type === 'subject') parent_id = document.getElementById('examSelect').value;
+            if(type === 'chapter') parent_id = document.getElementById('subjectSelect').value;
+
+            // Submit Button Loading state
+            let btn = document.querySelector('.btn-submit');
+            btn.innerText = "⏳ Saving...";
+            btn.disabled = true;
+
+            fetch("{% url 'api_create_category' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ type: type, name: name, parent_id: parent_id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.innerText = "💾 Save & Select";
+                btn.disabled = false;
+
+                if(data.status === 'success') {
+                    // Inject and Select the new Option dynamically!
+                    let selectBox;
+                    if(type === 'exam') selectBox = document.getElementById('examSelect');
+                    if(type === 'subject') selectBox = document.getElementById('subjectSelect');
+                    if(type === 'chapter') selectBox = document.getElementById('chapterSelect');
+
+                    let newOption = new Option(data.name, data.id, true, true);
+                    selectBox.add(newOption);
+
+                    // Trigger change event to load child dropdowns automatically
+                    let event = new Event('change');
+                    selectBox.dispatchEvent(event);
+
+                    closeModal();
+                } else {
+                    alert(data.message);
+                }
+            }).catch(err => {
+                alert("❌ Something went wrong!");
+                btn.innerText = "💾 Save & Select";
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

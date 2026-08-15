@@ -3,39 +3,37 @@ from django.urls import path
 from django.shortcuts import render, redirect
 from django import forms
 import openpyxl
-from django.contrib.auth.hashers import make_password  # 🚀 NAYA: पासवर्ड हैश करने के लिए
+from django.contrib.auth.hashers import make_password
 
-# एक ही जगह सारे मॉडल्स इम्पोर्ट कर लिए गए हैं
+# 🚀 नए डेटाबेस डिज़ाइन के अनुसार सारे मॉडल्स इम्पोर्ट किए गए हैं
 from .models import (
     CustomUser, TeacherProfile, StudentProfile,
-    MockTest, Question,
-    QuestionCategory, QuestionSubCategory, QuestionChapter, GlobalQuestionBank
+    ExamCategory, SubjectCategory, ChapterCategory,
+    MockTest, Question, TestQuestionMapping,
+    TestAttempt, StudentAnswer,
+    PaymentTransaction, WalletTransaction, WithdrawalRequest
 )
 
-
-# 1. कस्टम यूज़र को एडमिन पैनल में दिखाना
+# ==========================================
+# 1. USERS & PROFILES
+# ==========================================
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'mobile_number', 'email', 'role', 'is_active')
     search_fields = ('full_name', 'mobile_number', 'email')
     list_filter = ('role', 'is_active')
 
-    # 🚀 FIX: एडमिन पैनल से पासवर्ड सेव करते समय उसे सुरक्षित तरीके से हैश (Encrypt) करना
+    # एडमिन पैनल से पासवर्ड सेव करते समय उसे सुरक्षित तरीके से हैश (Encrypt) करना
     def save_model(self, request, obj, form, change):
-        # अगर पासवर्ड मौजूद है और पहले से हैश नहीं किया गया है
         if obj.password and not obj.password.startswith('pbkdf2_'):
             obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
 
-
-# 2. टीचर/कोचिंग प्रोफाइल को एडमिन पैनल में दिखाना
 @admin.register(TeacherProfile)
 class TeacherProfileAdmin(admin.ModelAdmin):
     list_display = ('coaching_name', 'coaching_code', 'user', 'wallet_balance')
     search_fields = ('coaching_name', 'coaching_code', 'user__full_name')
 
-
-# 3. छात्र प्रोफाइल को एडमिन पैनल में दिखाना
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
     list_display = ('display_name', 'user', 'enrolled_coaching', 'is_super_student')
@@ -43,59 +41,45 @@ class StudentProfileAdmin(admin.ModelAdmin):
     list_filter = ('is_super_student', 'enrolled_coaching')
 
 
-# 4. मॉक टेस्ट और प्रश्न
-@admin.register(MockTest)
-class MockTestAdmin(admin.ModelAdmin):
-    list_display = ('title', 'test_code', 'teacher', 'status', 'created_at')
-    list_filter = ('status', 'teacher')
+# ==========================================
+# 📂 2. THE 3-LAYER CATEGORY SYSTEM
+# ==========================================
+@admin.register(ExamCategory)
+class ExamCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_by', 'created_at']
+    search_fields = ['name']
 
+@admin.register(SubjectCategory)
+class SubjectCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'exam', 'created_by']
+    list_filter = ['exam']
+    search_fields = ['name']
+
+@admin.register(ChapterCategory)
+class ChapterCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'subject', 'created_by']
+    list_filter = ['subject__exam', 'subject']
+    search_fields = ['name']
+
+
+# ==========================================
+# 🏦 3. MASTER QUESTION BANK & EXCEL UPLOAD
+# ==========================================
+
+class ExcelUploadForm(forms.Form):
+    exam = forms.ModelChoiceField(queryset=ExamCategory.objects.all(), label="1. Select Exam/Course")
+    subject = forms.ModelChoiceField(queryset=SubjectCategory.objects.all(), label="2. Select Subject")
+    chapter = forms.ModelChoiceField(queryset=ChapterCategory.objects.all(), label="3. Select Chapter")
+    excel_file = forms.FileField(label="4. Upload Excel File")
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'test', 'correct_answer')
-
-
-# 5. क्वेश्चन कैटेगरी और सब-कैटेगरी
-@admin.register(QuestionCategory)
-class QuestionCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'created_at']
-    search_fields = ['name']
-
-
-@admin.register(QuestionSubCategory)
-class QuestionSubCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category']
-    list_filter = ['category']
-    search_fields = ['name']
-
-
-# 🚀 NAYA: Chapter Admin
-@admin.register(QuestionChapter)
-class QuestionChapterAdmin(admin.ModelAdmin):
-    list_display = ['name', 'subcategory']
-    list_filter = ['subcategory__category', 'subcategory']
-    search_fields = ['name']
-
-
-# ==========================================
-# --- 6. EXCEL UPLOAD LOGIC FOR ADMIN ---
-# ==========================================
-
-# 🚀 FIX: फॉर्म में अब Chapter का फील्ड भी जोड़ दिया गया है
-class ExcelUploadForm(forms.Form):
-    category = forms.ModelChoiceField(queryset=QuestionCategory.objects.all(), label="1. Select Class")
-    subcategory = forms.ModelChoiceField(queryset=QuestionSubCategory.objects.all(), label="2. Select Subject")
-    chapter = forms.ModelChoiceField(queryset=QuestionChapter.objects.all(), label="3. Select Chapter")
-    excel_file = forms.FileField(label="4. Upload Excel File")
-
-
-@admin.register(GlobalQuestionBank)
-class GlobalQuestionBankAdmin(admin.ModelAdmin):
-    # 🚀 FIX: लिस्ट में chapter भी दिखेगा
-    list_display = ['question_text', 'category', 'subcategory', 'chapter', 'correct_answer']
-    list_filter = ['category', 'subcategory', 'chapter']
+    # 🌟 assigned_coaching से पता चलेगा कि प्रश्न प्राइवेट है या ग्लोबल
+    list_display = ['question_text', 'chapter', 'assigned_coaching', 'correct_answer']
+    list_filter = ['assigned_coaching', 'chapter__subject__exam', 'chapter__subject', 'chapter']
     search_fields = ['question_text']
 
+    # आपका पुराना कस्टम टेम्प्लेट
     change_list_template = "admin/global_question_changelist.html"
 
     def get_urls(self):
@@ -109,8 +93,6 @@ class GlobalQuestionBankAdmin(admin.ModelAdmin):
         if request.method == 'POST':
             form = ExcelUploadForm(request.POST, request.FILES)
             if form.is_valid():
-                category = form.cleaned_data['category']
-                subcategory = form.cleaned_data['subcategory']
                 chapter = form.cleaned_data['chapter']
                 excel_file = form.cleaned_data['excel_file']
 
@@ -122,10 +104,10 @@ class GlobalQuestionBankAdmin(admin.ModelAdmin):
                         if not row[0]:
                             continue
 
-                        GlobalQuestionBank.objects.create(
-                            category=category,
-                            subcategory=subcategory,
-                            chapter=chapter,  # 🚀 NAYA: सवाल के साथ चैप्टर सेव हो रहा है
+                        # 🚀 मैजिक: एडमिन द्वारा अपलोड किए गए प्रश्नों में assigned_coaching = None रहेगा (यानी ग्लोबल)
+                        Question.objects.create(
+                            chapter=chapter,
+                            assigned_coaching=None,
                             question_text=str(row[0]),
                             option_a=str(row[1]),
                             option_b=str(row[2]),
@@ -136,7 +118,7 @@ class GlobalQuestionBankAdmin(admin.ModelAdmin):
                         )
                         count += 1
 
-                    self.message_user(request, f"✅ सफलता! {count} प्रश्न चैप्टर '{chapter.name}' में जोड़ दिए गए हैं।")
+                    self.message_user(request, f"✅ सफलता! {count} ग्लोबल प्रश्न '{chapter.name}' में जोड़ दिए गए हैं।")
                     return redirect('..')
                 except Exception as e:
                     self.message_user(request, f"❌ एरर: {str(e)}", level='error')
@@ -149,3 +131,49 @@ class GlobalQuestionBankAdmin(admin.ModelAdmin):
             title="Upload Global Questions via Excel"
         )
         return render(request, "admin/upload_global_excel.html", context)
+
+
+# ==========================================
+# 🛒 4. TESTS & SHOPPING CART
+# ==========================================
+@admin.register(MockTest)
+class MockTestAdmin(admin.ModelAdmin):
+    list_display = ('title', 'test_code', 'teacher', 'status', 'created_at')
+    list_filter = ('status', 'teacher')
+
+@admin.register(TestQuestionMapping)
+class TestQuestionMappingAdmin(admin.ModelAdmin):
+    list_display = ('test', 'question', 'order')
+    list_filter = ('test',)
+
+
+# ==========================================
+# 🎯 5. TRACKING & ANSWERS
+# ==========================================
+@admin.register(TestAttempt)
+class TestAttemptAdmin(admin.ModelAdmin):
+    list_display = ('student', 'test', 'is_completed', 'score', 'start_time')
+    list_filter = ('is_completed',)
+
+@admin.register(StudentAnswer)
+class StudentAnswerAdmin(admin.ModelAdmin):
+    list_display = ('attempt', 'question', 'selected_option')
+
+
+# ==========================================
+# 🚀 6. PAYMENTS & WALLET
+# ==========================================
+@admin.register(PaymentTransaction)
+class PaymentTransactionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'payment_type', 'amount', 'status', 'created_at')
+    list_filter = ('status', 'payment_type')
+
+@admin.register(WalletTransaction)
+class WalletTransactionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'transaction_type', 'amount', 'created_at')
+    list_filter = ('transaction_type',)
+
+@admin.register(WithdrawalRequest)
+class WithdrawalRequestAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'status', 'payment_method', 'created_at')
+    list_filter = ('status', 'payment_method')

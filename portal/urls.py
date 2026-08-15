@@ -58,6 +58,14 @@ urlpatterns = [
     path('wallet/add/', views.add_money, name='add_money'),
     path('wallet/withdraw/', views.request_withdrawal, name='request_withdrawal'),
     path('api/auto-save/', views.auto_save_answer, name='auto_save_answer'),
+    path('upload-private-bank/', views.upload_private_bank, name='upload_private_bank'),
+    path('api/get-subjects/', views.get_subjects, name='get_subjects'),
+    path('api/get-chapters/', views.get_chapters, name='get_chapters'),
+    path('api/delete-private-question/<int:q_id>/', views.api_delete_private_question, name='api_delete_private_question'),
+    path('api/move-private-question/', views.api_move_private_question, name='api_move_private_question'),
+    path('api/create-category/', views.api_create_category, name='api_create_category'),
+    path('upload-global-bank/', views.upload_global_bank, name='upload_global_bank'),
+
 
 
 ]

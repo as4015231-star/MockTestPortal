@@ -114,9 +114,18 @@
         </div>
         <ul class="sidebar-menu">
             <li><a href="{% url 'choose_questions' %}" class="menu-link" style="border-left-color: #00c6ff;">📚 Choose & Add Questions</a></li>
+
+            <!-- 🚀 नया बटन: Upload to Private Bank -->
+            <li><a href="{% url 'upload_private_bank' %}" class="menu-link" style="border-left-color: #00ff00;">📤 Upload to Private Bank</a></li>
+
             <li><a href="#" class="menu-link" style="border-left-color: #888;">➕ Add Single Question</a></li>
             <li><a href="#" class="menu-link" style="border-left-color: #00ff00;">📊 View Test Reports</a></li>
             <li><a href="#" class="menu-link" style="border-left-color: #ff4c4c;">⚙️ Dashboard Settings</a></li>
+
+            {% if request.user.is_superuser %}
+            <!-- 🌍 ग्लोबल बैंक (सिर्फ एडमिन के लिए) -->
+            <li><a href="{% url 'upload_global_bank' %}" class="menu-link" style="border-left-color: #00c6ff;">🌍 Upload to Global Bank</a></li>
+            {% endif %}
         </ul>
     </div>
 
@@ -173,7 +182,7 @@
         <div class="test-card">
 
             <div class="card-top-actions">
-                {% if test.questions.count > 0 %}
+                {% if test.mapped_questions.count > 0 %}
                 <a href="{% url 'preview_test' test.id %}" class="btn-preview-top" title="Preview Test">👀 Preview</a>
                 {% endif %}
                 <a href="{% url 'delete_test' test.id %}" onclick="event.preventDefault(); showCustomConfirm('क्या आप वाकई इस टेस्ट को डिलीट करना चाहते हैं?', this.href);" class="btn-delete-top" title="Delete Test">✖</a>
@@ -203,8 +212,8 @@
                 <p><strong>Code:</strong> {{ test.test_code }} | <strong>Time:</strong> {{ test.total_time }}m | <strong>Marks:</strong> +{{ test.correct_marks }}/-{{ test.negative_marks }}</p>
 
                 <p>
-                    <strong>Q's Uploaded:</strong> <span style="color: #00ff00; font-size: 16px;">{{ test.questions.count }}</span>
-                    {% if test.questions.count > 0 %}
+                    <strong>Q's Uploaded:</strong> <span style="color: #00ff00; font-size: 16px;">{{ test.mapped_questions.count }}</span>
+                    {% if test.mapped_questions.count > 0 %}
                     <a href="{% url 'delete_questions' test.id %}" onclick="event.preventDefault(); showCustomConfirm('क्या आप इस टेस्ट के सभी प्रश्न डिलीट करना चाहते हैं?', this.href);" style="color: #ff4c4c; margin-left: 8px; text-decoration: none; font-size: 18px; vertical-align: middle; cursor: pointer;" title="Delete All Questions">
                         🗑️
                     </a>
@@ -216,7 +225,9 @@
                 {% if test.status == 'DRAFT' %}
                 <div class="hybrid-btns" style="display: flex; gap: 10px; width: 100%; padding-bottom: 15px; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                     <a href="{% url 'upload_excel' test.id %}" class="btn" style="background: #28a745; color: white; flex: 1;">📥 Upload Excel</a>
-                    <a href="{% url 'choose_questions' %}?test_id={{ test.id }}" class="btn" style="background: #17a2b8; color: white; flex: 1;">📚 Global Bank</a>
+
+                    <!-- 🚀 नया बटन: Choose from Bank -->
+                    <a href="{% url 'choose_questions' %}?test_id={{ test.id }}" class="btn" style="background: #00c6ff; color: black; flex: 1;">🛒 Choose from Bank</a>
                 </div>
                 {% endif %}
 
