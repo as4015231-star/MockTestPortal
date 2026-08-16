@@ -19,7 +19,8 @@
         .sidebar.open { left: 0; }
         .sidebar-header { padding: 15px; background: #0b0d26; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; }
         .sidebar-menu { padding: 15px; list-style: none; margin: 0; }
-        .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #ffc107; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
+        .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #ffc107; margin-bottom: 10px; font-size: 14px; font-weight: bold; transition: 0.3s; }
+        .menu-link:hover { background: rgba(255,255,255,0.1); }
 
         .container { padding: 30px; max-width: 800px; margin: auto; }
 
@@ -60,6 +61,11 @@
             <li><a href="{% url 'teacher_dashboard' %}" class="menu-link">🏠 Back to Dashboard</a></li>
             <li><a href="{% url 'choose_questions' %}" class="menu-link">📚 View Question Bank</a></li>
             <li><a href="{% url 'upload_global_bank' %}" class="menu-link" style="border-left-color: #00c6ff; background: rgba(0, 198, 255, 0.1);">🌍 Upload to Global Bank</a></li>
+
+            <!-- 🚀 NEW: Logout Button -->
+            <li style="margin-top: 30px;">
+                <a href="{% url 'logout' %}" class="menu-link" style="border-left-color: #ff4c4c; color: #ff4c4c; background: rgba(255, 76, 76, 0.05);">🚪 Logout</a>
+            </li>
         </ul>
     </div>
 

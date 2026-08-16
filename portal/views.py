@@ -561,29 +561,45 @@ def test_result(request, attempt_id):
 
         student_answers = attempt.answers.all()
         total_questions = test.mapped_questions.count()
-        attempted = student_answers.exclude(selected_option__isnull=True).exclude(selected_option='').count()
         correct_answers, wrong_answers, answer_data = 0, 0, []
 
+        # लूप चलाकर पहले सही और गलत जवाब गिनें
         for mapping in test.mapped_questions.select_related('question').all():
             q = mapping.question
             ans = student_answers.filter(question=q).first()
             selected = ans.selected_option if ans else None
             is_correct = False
-            if selected:
+
+            if selected:  # अगर छात्र ने कोई ऑप्शन चुना है
                 if selected == q.correct_answer:
-                    correct_answers, is_correct = correct_answers + 1, True
+                    correct_answers += 1
+                    is_correct = True
                 else:
                     wrong_answers += 1
+
             answer_data.append({'question': q, 'selected': selected, 'is_correct': is_correct})
 
+        # 🚀 NAYA: 100% सटीक गणित (अब यह कभी माइनस में नहीं जाएगा)
+        attempted_questions = correct_answers + wrong_answers
+        skipped_questions = total_questions - attempted_questions
+
+        # स्कोर कैलकुलेट करें
         total_score = (Decimal(correct_answers) * test.correct_marks) - (Decimal(wrong_answers) * test.negative_marks)
-        if attempt.score != total_score: attempt.score = total_score; attempt.save(update_fields=['score'])
+        if attempt.score != total_score:
+            attempt.score = total_score
+            attempt.save(update_fields=['score'])
 
         return render(request, 'portal/test_result.html', {
-            'test': test, 'attempt': attempt, 'total_questions': total_questions, 'attempted': attempted,
-            'unattempted': total_questions - attempted, 'correct_answers': correct_answers,
+            'test': test,
+            'attempt': attempt,
+            'total_questions': total_questions,
+            'attempted': attempted_questions,
+            'unattempted': skipped_questions,  # 🚀 यह वैल्यू अब एकदम सही जाएगी
+            'correct_answers': correct_answers,
             'wrong_answers': wrong_answers,
-            'total_score': total_score, 'answer_data': answer_data, 'coaching_name': test.teacher.user.full_name,
+            'total_score': total_score,
+            'answer_data': answer_data,
+            'coaching_name': test.teacher.user.full_name,
             'student_display_name': f"{request.user.full_name} ({str(request.user.mobile_number)[-4:]})"
         })
     except TestAttempt.DoesNotExist:
