@@ -32,20 +32,84 @@ razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZOR
 # ==========================================
 # 1. AUTH & HOME VIEWS
 # ==========================================
+# ==========================================
+# 1. AUTH & HOME VIEWS
+# ==========================================
 def home(request):
     if request.user.is_authenticated:
+
+        # 🚀 NAYA: Auto-Logout Logic for Demo Users
+        # अगर यूज़र का मोबाइल नंबर 'DEMO' से शुरू होता है, तो उसे चुपचाप लॉगआउट कर दें
+        if request.user.mobile_number and request.user.mobile_number.startswith('DEMO'):
+            logout(request)
+            return redirect('home')
+
+        # अगर असली एडमिन है, तो बैंक में भेजें
         if request.user.is_superuser or request.user.is_staff:
             return redirect('upload_global_bank')
+
+        # अगर असली टीचर है, तो डैशबोर्ड में भेजें
         if request.user.role == 'TEACHER':
             return redirect('teacher_dashboard')
+
+        # अगर असली स्टूडेंट है, तो उसका डैशबोर्ड दिखाएं
         if request.user.role == 'STUDENT':
             try:
                 student = request.user.student_profile
                 return render(request, 'portal/home.html', {'has_plan': student.has_active_plan()})
             except StudentProfile.DoesNotExist:
                 pass
+
     return render(request, 'portal/home.html', {})
 
+# ==========================================
+# 🚀 NAYA: QUICK JOIN / DEMO TEST LOGIC
+# ==========================================
+# ==========================================
+# 🚀 QUICK JOIN / DEMO TEST LOGIC
+# ==========================================
+def quick_join_test(request):
+    if request.method == 'POST':
+        student_name = request.POST.get('student_name', '').strip()
+        coaching_code = request.POST.get('coaching_code', '').strip()
+        test_code = request.POST.get('test_code', '').strip().upper()
+
+        try:
+            teacher = TeacherProfile.objects.get(coaching_code=coaching_code)
+        except TeacherProfile.DoesNotExist:
+            messages.error(request, '❌ गलत कोचिंग कोड! कृपया सही कोड दर्ज करें।')
+            return redirect('quick_join_test')  # 🚀 NAYA: वापस इसी पेज पर भेजें
+
+        if not teacher.is_demo_active():
+            messages.error(request,
+                           '⏳ इस कोचिंग का फ्री डेमो पीरियड समाप्त हो गया है। कृपया अपने मोबाइल नंबर से रजिस्टर करके टेस्ट दें।')
+            return redirect('home')
+
+        try:
+            test = MockTest.objects.get(test_code=test_code, teacher=teacher, status='PUBLISHED')
+        except MockTest.DoesNotExist:
+            messages.error(request, '❌ गलत टेस्ट कोड या यह टेस्ट अभी लाइव नहीं है!')
+            return redirect('quick_join_test')  # 🚀 NAYA: वापस इसी पेज पर भेजें
+
+        guest_mobile = f"DEMO{random.randint(100000, 999999)}"
+        guest_email = f"demo_{guest_mobile}@quickjoin.com"
+
+        user = CustomUser.objects.create_user(
+            mobile_number=guest_mobile, email=guest_email, password='guestpassword123',
+            full_name=student_name, role='STUDENT'
+        )
+
+        StudentProfile.objects.create(user=user, enrolled_coaching=teacher, display_name=f"{student_name} (Demo)")
+
+        login(request, user)
+        user.last_session_key = request.session.session_key
+        user.save()
+
+        messages.success(request, f'🎉 स्वागत है {student_name}! आपका फ्री डेमो टेस्ट शुरू हो रहा है।')
+        return redirect('test_instructions', test_id=test.id)
+
+    # 🚀 NAYA: अगर POST नहीं है (यानी यूजर ने बटन पर क्लिक किया है), तो यह नया पेज खोलें
+    return render(request, 'portal/quick_join.html')
 
 def signup_view(request):
     if request.method == 'POST':

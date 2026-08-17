@@ -55,6 +55,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 # ==========================================
 # 2. PROFILES (TEACHER & STUDENT)
 # ==========================================
+# ==========================================
+# 2. PROFILES (TEACHER & STUDENT)
+# ==========================================
 class TeacherProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='teacher_profile')
     coaching_code = models.CharField(max_length=10, unique=True)
@@ -67,8 +70,19 @@ class TeacherProfile(models.Model):
                                            help_text="इस फीस में एडमिन का हिस्सा")
     subscription_validity_days = models.IntegerField(default=30, help_text="यह पैकेज कितने दिन चलेगा?")
 
+    # 🚀 NAYA: Demo Control System (Admin Control)
+    demo_expiry_date = models.DateTimeField(null=True, blank=True, help_text="डेमो समाप्त होने की तारीख (एडमिन कंट्रोल)")
+
     def __str__(self):
         return self.coaching_name
+
+    # 🪄 स्मार्ट फंक्शन: यह चेक करेगा कि कोचिंग का डेमो अभी चालू है या खत्म हो गया
+    def is_demo_active(self):
+        from django.utils import timezone
+        if self.demo_expiry_date and timezone.now() <= self.demo_expiry_date:
+            return True
+        return False
+
 
 
 class StudentProfile(models.Model):

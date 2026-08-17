@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- 🚀 NAYA: Viewport Meta Tag (यह मोबाइल पर पेज को सही साइज में सेट करता है) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KBC Mock Test - Dashboard</title>
     <style>
-        /* 🚀 NAYA: Box Sizing (पैडिंग को चौड़ाई के अंदर ही रखता है) */
         *, *::before, *::after {
             box-sizing: border-box;
         }
@@ -20,116 +18,44 @@
         .welcome-box { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 10px; border: 1px dashed #ffc107; display: inline-block; max-width: 500px; width: 100%; }
 
         /* फॉर्म के लिए CSS */
-        .test-input { padding: 12px; border-radius: 5px; border: 1px solid #ffc107; background: rgba(255,255,255,0.05); color: white; width: 60%; font-size: 16px; text-transform: uppercase; outline: none; }
-        .test-input:focus { background: rgba(255, 255, 255, 0.1); }
+        .test-input { padding: 12px; border-radius: 5px; border: 1px solid #ffc107; background: rgba(255,255,255,0.05); color: white; width: 60%; font-size: 16px; text-transform: uppercase; outline: none; transition: 0.3s; }
+        .test-input:focus { background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 8px rgba(255, 193, 7, 0.5); }
+
         .start-btn { background: linear-gradient(to right, #00c6ff, #0072ff); color: white; border: none; padding: 12px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .start-btn:hover { background: linear-gradient(to right, #0072ff, #00c6ff); box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
+
         .msg-box { color: #ffc107; background: rgba(255,193,7,0.1); padding: 10px; border-radius: 5px; border: 1px solid #ffc107; margin-bottom: 10px; font-size: 14px; }
         .error-msg { color: #ff4c4c; background: rgba(255,76,76,0.1); border-color: #ff4c4c; }
-        .login-prompt-btn { background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block; margin-top: 15px; }
+
+        /* 🚀 NAYA: Button Styles */
+        .login-prompt-btn { background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 14px 20px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block; transition: 0.3s; text-align: center; }
+        .login-prompt-btn:hover { transform: scale(1.02); box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3); }
+        .btn-group { display: flex; gap: 15px; justify-content: center; }
 
         /* Profile Dropdown Styles */
-        .profile-dropdown {
-            position: relative;
-            display: inline-block;
-        }
+        .profile-dropdown { position: relative; display: inline-block; }
+        .profile-btn { background-color: #10143a; color: #ffc107; padding: 10px 20px; font-size: 14px; font-weight: bold; border: 2px solid #00c6ff; border-radius: 25px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s ease-in-out; }
+        .profile-btn:hover { background-color: #00c6ff; color: #0b0d26; box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: #10143a; min-width: 200px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.7); border: 1px solid #00c6ff; border-radius: 10px; z-index: 1000; overflow: hidden; margin-top: 8px; text-align: left; }
+        .dropdown-content a { color: white; padding: 12px 16px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #333; transition: 0.3s; }
+        .dropdown-content a:last-child { border-bottom: none; }
+        .dropdown-content a:hover { background-color: rgba(0, 198, 255, 0.1); color: #00c6ff; padding-left: 20px; }
+        .show { display: block; }
 
-        .profile-btn {
-            background-color: #10143a;
-            color: #ffc107;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border: 2px solid #00c6ff;
-            border-radius: 25px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.3s ease-in-out;
-        }
-
-        .profile-btn:hover {
-            background-color: #00c6ff;
-            color: #0b0d26;
-            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: #10143a;
-            min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.7);
-            border: 1px solid #00c6ff;
-            border-radius: 10px;
-            z-index: 1000;
-            overflow: hidden;
-            margin-top: 8px;
-            text-align: left;
-        }
-
-        .dropdown-content a {
-            color: white;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 14px;
-            border-bottom: 1px solid #333;
-            transition: 0.3s;
-        }
-
-        .dropdown-content a:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-content a:hover {
-            background-color: rgba(0, 198, 255, 0.1);
-            color: #00c6ff;
-            padding-left: 20px;
-        }
-
-        .show {
-            display: block;
-        }
-
-        /* 🚀 NAYA: Mobile Responsiveness (Media Queries) */
+        /* 🚀 NAYA: Mobile Responsiveness (Perfect Button Stacking) */
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                padding: 15px;
-                gap: 15px;
-                text-align: center;
-            }
-            .header h1 {
-                font-size: 20px;
-            }
-            .main-content {
-                padding: 20px 15px;
-            }
-            .welcome-box {
-                padding: 25px 15px;
-                width: 100%;
-            }
-            .test-form {
-                flex-direction: column !important; /* मोबाइल पर इनपुट और बटन ऊपर-नीचे होंगे */
-            }
-            .test-input {
-                width: 100%; /* मोबाइल पर 100% चौड़ा */
-            }
-            .start-btn {
-                width: 100%; /* मोबाइल पर 100% चौड़ा */
-            }
-            .login-prompt-btn {
-                display: block;
-                width: 100%;
-                margin: 10px 0 0 0 !important;
-            }
-            .dropdown-content {
-                right: 50%;
-                transform: translateX(50%); /* मोबाइल पर ड्रॉपडाउन को बीच में रखता है */
-            }
+            .header { flex-direction: column; padding: 15px; gap: 15px; text-align: center; }
+            .header h1 { font-size: 20px; }
+            .main-content { padding: 20px 15px; }
+            .welcome-box { padding: 30px 15px; width: 100%; }
+            .test-form { flex-direction: column !important; }
+            .test-input { width: 100% !important; }
+            .start-btn { width: 100%; }
+            .dropdown-content { right: 50%; transform: translateX(50%); }
+
+            /* मोबाइल पर बटन को एक के नीचे एक 100% चौड़ाई में सेट करें */
+            .btn-group { flex-direction: column; gap: 12px; }
+            .login-prompt-btn { width: 100%; display: block; margin-top: 0 !important; }
         }
     </style>
 </head>
@@ -171,7 +97,6 @@
                 {% if has_plan %}
                     <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">Ready for your test? Enter the Test Code below:</p>
 
-                    <!-- 🚀 NAYA: Form में 'test-form' क्लास जोड़ी गई है -->
                     <form action="{% url 'start_test' %}" method="POST" class="test-form" style="display: flex; gap: 10px; justify-content: center;">
                         {% csrf_token %}
                         <input type="text" name="test_code" placeholder="Enter Test Code" required class="test-input">
@@ -181,17 +106,26 @@
                     <div style="background: rgba(255, 0, 0, 0.1); border: 1px dashed #ff4c4c; padding: 20px; border-radius: 10px; margin-top: 20px;">
                         <h3 style="color: #ff4c4c; margin-top: 0;">⚠️ आपका फ्री ट्रायल समाप्त हो गया है!</h3>
                         <p style="color: #ccc; font-size: 14px;">आगे टेस्ट देने के लिए कृपया अपना सब्सक्रिप्शन रिन्यू करें।</p>
-
-                        <a href="{% url 'initiate_payment' %}" class="login-prompt-btn">अभी पेमेंट करें (Pay Now)</a>
+                        <a href="{% url 'initiate_payment' %}" class="login-prompt-btn" style="margin-top: 15px;">अभी पेमेंट करें (Pay Now)</a>
                     </div>
                 {% endif %}
 
             {% else %}
                 <h2 style="color: #ffc107; margin-top: 0;">Welcome to Mock Test Portal</h2>
-                <p style="color: #ccc; font-size: 16px; margin-bottom: 25px;">टेस्ट शुरू करने के लिए कृपया अपने अकाउंट में लॉगिन करें।</p>
+                <p style="color: #ccc; font-size: 15px; margin-bottom: 30px; line-height: 1.5;">टेस्ट शुरू करने के लिए कृपया अपने अकाउंट में लॉगिन करें या डेमो टेस्ट दें।</p>
 
-                <a href="{% url 'login' %}" class="login-prompt-btn">लॉगिन (Login)</a>
-                <a href="{% url 'signup' %}" class="login-prompt-btn" style="background: #333; color: white;">रजिस्टर (Register)</a>
+                <!-- 🚀 NAYA: Button Group (Desktop par side-by-side, Mobile par upar-neeche) -->
+                <div class="btn-group">
+                    <a href="{% url 'login' %}" class="login-prompt-btn" style="flex: 1;">लॉगिन (Login)</a>
+                    <a href="{% url 'signup' %}" class="login-prompt-btn" style="background: #333; color: white; border: 1px solid #555; flex: 1;">रजिस्टर (Register)</a>
+                </div>
+
+                <!-- 🚀 NAYA: QUICK JOIN BUTTON (बिना फॉर्म के) -->
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'quick_join_test' %}" class="login-prompt-btn" style="display: block; width: 100%; background: linear-gradient(145deg, #00c6ff, #0072ff); color: white; border: none; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);">
+                        ⚡ Quick Join (Demo)
+                    </a>
+                </div>
             {% endif %}
 
         </div>

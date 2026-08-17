@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quick Join - Mock Test Portal</title>
+    <style>
+        body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
+        .header { background: linear-gradient(145deg, #10143a, #0b0d26); padding: 20px; text-align: center; border-bottom: 2px solid #00c6ff; }
+        .header h1 { color: #ffc107; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .container { padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .quick-join-box { background: rgba(255, 255, 255, 0.05); padding: 35px; border-radius: 15px; border: 1px dashed #00c6ff; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0, 198, 255, 0.1); }
+
+        .test-input { width: 100%; padding: 14px; margin-top: 5px; border-radius: 8px; border: 1px solid #444; background: #050714; color: white; font-size: 15px; box-sizing: border-box; outline: none; margin-bottom: 20px; transition: 0.3s; }
+        .test-input:focus { border-color: #00c6ff; box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); background: #0a0d20; }
+
+        .start-btn { width: 100%; padding: 15px; background: linear-gradient(145deg, #00c6ff, #0072ff); color: white; font-weight: bold; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .start-btn:hover { box-shadow: 0 0 15px rgba(0, 198, 255, 0.6); transform: translateY(-2px); }
+
+        /* 🚀 NAYA: Success और Error मैसेज के लिए अलग-अलग डिज़ाइन */
+        .msg-box { padding: 12px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; text-align: center; font-weight: bold; }
+        .msg-error { color: #ff4c4c; background: rgba(255, 76, 76, 0.1); border: 1px solid #ff4c4c; }
+        .msg-success { color: #00ff00; background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; }
+
+        .back-link { display: inline-block; width: 100%; text-align: center; margin-top: 25px; color: #aaa; text-decoration: none; font-size: 14px; transition: 0.3s; font-weight: bold; }
+        .back-link:hover { color: #ffc107; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Mock Test Portal</h1>
+    </div>
+
+    <div class="container">
+        <div class="quick-join-box">
+            <h2 style="color: #00c6ff; margin-top: 0; text-align: center; font-size: 26px; letter-spacing: 1px;">⚡ Quick Join</h2>
+            <p style="color: #aaa; font-size: 14px; margin-bottom: 25px; text-align: center;">बिना रजिस्टर किए सीधे डेमो टेस्ट दें!</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <!-- 🚀 डायनामिक मैसेज क्लास (हरा या लाल) -->
+                    <div class="msg-box {% if message.tags == 'success' %}msg-success{% else %}msg-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form action="{% url 'quick_join_test' %}" method="POST">
+                {% csrf_token %}
+
+                <label style="color: #ffc107; font-size: 13px; font-weight: bold;">👤 आपका नाम (Your Name)</label>
+                <input type="text" name="student_name" required placeholder="उदा: Rahul Kumar" class="test-input">
+
+                <label style="color: #ffc107; font-size: 13px; font-weight: bold;">🏢 कोचिंग कोड (Coaching Code)</label>
+                <input type="text" name="coaching_code" required placeholder="उदा: ASHISH10" class="test-input" style="text-transform: uppercase;">
+
+                <label style="color: #ffc107; font-size: 13px; font-weight: bold;">📝 टेस्ट कोड (Test Code)</label>
+                <input type="text" name="test_code" required placeholder="उदा: GK-01" class="test-input" style="text-transform: uppercase;">
+
+                <button type="submit" class="start-btn">🚀 Start Test Now</button>
+            </form>
+
+            <a href="{% url 'home' %}" class="back-link">🔙 वापस होमपेज पर जाएँ</a>
+        </div>
+    </div>
+</body>
+</html>
