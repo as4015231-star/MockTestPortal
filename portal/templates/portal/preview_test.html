@@ -77,8 +77,8 @@
         {% for q in questions %}
         <div class="question-card" id="question-{{ q.id }}">
 
-            <!-- 🚀 Custom Confirm on Delete Question -->
-            <a href="{% url 'delete_single_question' q.id %}"
+            <!-- 🚀 NAYA: test.id और q.id दोनों पास किये गए हैं -->
+            <a href="{% url 'delete_single_question' test.id q.id %}"
                onclick="event.preventDefault(); showCustomConfirm('क्या आप वाकई इस प्रश्न (Q{{ forloop.counter }}) को हटाना चाहते हैं?', this.href);"
                class="close-btn" title="Remove Question">✖</a>
 
@@ -87,7 +87,6 @@
             </div>
 
             {% if q.question_image %}
-            <!-- 🚀 Custom Confirm on Delete Image -->
             <a href="{% url 'delete_question_image' q.id %}"
                onclick="event.preventDefault(); showCustomConfirm('क्या आप वाकई इस इमेज को हटाना चाहते हैं?', this.href);"
                class="camera-remove-btn" title="Remove Image">📷 ➖</a>

@@ -40,7 +40,7 @@ urlpatterns = [
     # Question Bank & Questions
     path('choose-questions/', views.choose_questions, name='choose_questions'),
     path('api/add-bank-questions/', views.api_add_bank_questions, name='api_add_bank_questions'),
-    path('delete-single-question/<int:q_id>/', views.delete_single_question, name='delete_single_question'),
+    path('delete-single-question/<int:test_id>/<int:q_id>/', views.delete_single_question, name='delete_single_question'),
     path('upload-image/<int:q_id>/', views.upload_question_image, name='upload_question_image'),
     path('delete-image/<int:q_id>/', views.delete_question_image, name='delete_question_image'),
 

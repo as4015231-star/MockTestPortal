@@ -877,19 +877,26 @@ def delete_question_image(request, q_id):
 
 
 @login_required
-def delete_single_question(request, q_id):
+def delete_single_question(request, test_id, q_id):
     if request.user.role != 'TEACHER': return redirect('home')
     try:
-        mapping = TestQuestionMapping.objects.filter(question_id=q_id,
-                                                     test__teacher=request.user.teacher_profile).first()
+        # 🚀 NAYA: अब हम test_id और q_id दोनों को मैच करेंगे
+        mapping = TestQuestionMapping.objects.filter(
+            test_id=test_id,
+            question_id=q_id,
+            test__teacher=request.user.teacher_profile
+        ).first()
+
         if mapping:
-            test_id = mapping.test.id
             mapping.delete()
             messages.success(request, '🗑️ प्रश्न को इस टेस्ट से हटा दिया गया है!')
             return redirect('preview_test', test_id=test_id)
+
     except Exception:
         pass
-    return redirect('teacher_dashboard')
+
+    messages.error(request, '❌ यह प्रश्न इस टेस्ट में नहीं मिला!')
+    return redirect('preview_test', test_id=test_id)
 
 
 # ==========================================
