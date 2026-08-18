@@ -3,102 +3,198 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Scoreboard - {{ test.title }}</title>
+
+    <!-- 🚀 NAYA: Image Download Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         body { background: #0b0d26; color: white; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
-        .header { background: #10143a; padding: 15px; text-align: center; border-bottom: 2px solid #ffc107; position: sticky; top: 0; z-index: 10; }
-        .header h2 { color: #ffc107; margin: 0; }
-        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; background: #0b0d26; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; }
-        th, td { border: 1px solid #444; padding: 12px; text-align: center; font-size: 13px; vertical-align: middle; cursor: pointer; }
+
+        /* HEADER FLEXBOX LAYOUT */
+        .header {
+            background: #10143a; padding: 15px 20px; border-bottom: 2px solid #ffc107;
+            position: sticky; top: 0; z-index: 20; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .header-side { flex: 1; display: flex; }
+        .header-side.left { justify-content: flex-start; }
+        .header-side.right { justify-content: flex-end; }
+        .header-center { flex: 2; text-align: center; }
+        .header h2 { color: #ffc107; margin: 0; font-size: 24px; letter-spacing: 1px; }
+
+        /* BUTTONS */
+        .btn-cert {
+            background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700); background-size: 200% auto;
+            color: #000; padding: 10px 18px; border-radius: 30px; text-decoration: none;
+            font-weight: 900; font-size: 13px; text-transform: uppercase; border: 2px solid #fff;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5); display: inline-flex; align-items: center; gap: 8px;
+            animation: shine 3s linear infinite, floatBtn 3s ease-in-out infinite; transition: 0.3s;
+        }
+        .btn-cert:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8); }
+
+        .btn-home {
+            background: #2a2e5c; color: #fff; padding: 10px 18px; border-radius: 30px; text-decoration: none;
+            font-weight: bold; font-size: 13px; text-transform: uppercase; border: 1px solid #00c6ff;
+            box-shadow: 0 4px 10px rgba(0, 198, 255, 0.2); display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-home:hover { background: #00c6ff; color: #0b0d26; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.6); transform: scale(1.05); }
+
+        @keyframes shine { to { background-position: 200% center; } }
+        @keyframes floatBtn { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
+            .header-center { order: 1; }
+            .header-side { order: 2; width: 100%; justify-content: center !important; }
+            .header-side.right { order: 3; }
+            .btn-cert, .btn-home { width: 90%; justify-content: center; padding: 12px; font-size: 14px; }
+        }
+
+        /* SMART TABLE LAYOUT */
+        .table-container {
+            display: flex; justify-content: center; padding: 25px 15px; width: 100%; box-sizing: border-box;
+        }
+
+        .table-wrapper {
+            max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+            background: #10143a; border-radius: 12px; border: 2px solid #00c6ff;
+            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.2);
+        }
+
+        table { border-collapse: collapse; width: max-content; }
+        th, td { border: 1px solid #2a2e5c; padding: 15px; text-align: center; font-size: 13px; vertical-align: middle; cursor: pointer; }
+
+        th:not(.q-col), td:not(.q-col) { min-width: 130px; max-width: 180px; }
 
         .q-col {
-            background: #10143a;
-            width: 250px; min-width: 250px;
-            text-align: left;
-            white-space: normal;
-            word-wrap: break-word;
-            border-right: 2px solid #ffc107;
+            background: #0b0d26; width: 250px; max-width: 250px; text-align: left;
+            white-space: normal; word-wrap: break-word; border-right: 2px solid #00c6ff;
+            position: sticky; left: 0; z-index: 5;
         }
-        thead th { background: #10143a; color: #fff; vertical-align: middle; }
-        thead th.q-col { color: #ffc107; text-align: center; }
 
-        .btn-winner { display: block; background: #00ff00; color: black; padding: 15px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin: 20px; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,255,0,0.4); }
+        thead th {
+            background: #0b0d26; color: #fff; vertical-align: middle;
+            border-bottom: 2px solid #00c6ff; position: sticky; top: 0; z-index: 4;
+        }
 
-        /* Touch Popup (Bottom Sheet) Styles */
+        thead th.q-col { color: #ffc107; text-align: center; z-index: 6; }
+
+        /* 🚀 NAYA: Download Icon CSS */
+        .dl-icon-btn {
+            background: rgba(0, 198, 255, 0.1);
+            color: white;
+            border: 1px solid #00c6ff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dl-icon-btn:hover {
+            background: #00c6ff;
+            box-shadow: 0 0 10px #00c6ff;
+            transform: scale(1.1);
+        }
+
+        /* POPUP CSS */
         .toast-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 2999; display: none; }
-        #infoToast {
-            position: fixed; bottom: -100%; left: 0; width: 100%; max-height: 85vh; overflow-y: auto;
-            background: #10143a; border-top: 3px solid #00c6ff; border-radius: 20px 20px 0 0;
-            padding: 20px; box-sizing: border-box; z-index: 3000;
-            transition: 0.3s ease-in-out; box-shadow: 0 -10px 30px rgba(0,0,0,0.9);
-        }
+        #infoToast { position: fixed; bottom: -100%; left: 0; width: 100%; max-height: 85vh; overflow-y: auto; background: #10143a; border-top: 3px solid #00c6ff; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; z-index: 3000; transition: 0.3s ease-in-out; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); }
         #infoToast.show { bottom: 0; }
         .toast-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px; }
         .toast-header h3 { margin: 0; color: #ffc107; font-size: 16px; }
         .close-btn { background: none; border: none; color: #ff4c4c; font-size: 24px; font-weight: bold; cursor: pointer; padding: 0; }
         .toast-q-text { font-size: 15px; color: #fff; line-height: 1.5; margin-bottom: 15px; }
-
-        /* Options Styles in Popup */
         .toast-options-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
         .toast-opt { padding: 10px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid #444; font-size: 13px; color: #ddd; line-height: 1.4; }
         .toast-opt.correct { background: rgba(0, 255, 0, 0.15); border-color: #00ff00; color: #fff; font-weight: bold; }
         .toast-opt.wrong { background: rgba(255, 76, 76, 0.15); border-color: #ff4c4c; color: #fff; font-weight: bold; }
-
         .toast-ans { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; font-size: 14px; border-left: 4px solid #fff; }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <h2>🏆 Scoreboard</h2>
-        <p style="color:#ccc; margin:5px 0 0; font-size:12px;">Conducted By: <span style="color:#00c6ff;">{{ coaching_name }}</span></p>
+        <div class="header-side left">
+            {% if student_data %}
+            <a href="{% url 'test_answer_key' test.id %}" class="btn-cert">
+                📝 Rank 1 Certificate ⬇️
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="header-center">
+            <h2>🏆 Scoreboard</h2>
+            <p style="color:#ccc; margin:5px 0 0; font-size:12px;">Conducted By: <span style="color:#00c6ff; font-weight:bold; text-transform:uppercase;">{{ test.teacher.coaching_name }}</span></p>
+        </div>
+
+        <div class="header-side right">
+            {% if student_data %}
+            <a href="{% if request.user.role == 'TEACHER' %}{% url 'teacher_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn-home">
+                🏠 Back to Home
+            </a>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th class="q-col">📝 प्रश्न <br><span style="font-size:10px; color:#aaa;">(उत्तर पर टच करें)</span></th>
-                    {% for student in student_data %}
-                    <!-- 🚀 FIX: अब Rank 1 वाले सभी बच्चों को मेडल (🥇) मिलेगा -->
-                    <th>{% if student.rank == 1 %}🥇<br>{% endif %}{{ student.name }}<br><span style="color:#00c6ff;">({{ student.score }})</span></th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% if not student_data %}
-                <tr>
-                    <td colspan="100%" style="padding: 50px; font-size: 18px; color: #ffc107; text-align: center;">
-                        ⏳ टेस्ट अभी लाइव है और चल रहा है...<br>
-                        <span style="font-size: 14px; color: #ccc;">(अभी तक किसी भी छात्र ने अपना टेस्ट सबमिट नहीं किया है।)</span>
-                    </td>
-                </tr>
-                {% else %}
-                    {% for row in rows %}
+    <!-- Table Container -->
+    <div class="table-container">
+        <div class="table-wrapper" id="capture-table">
+            <table>
+                <thead>
                     <tr>
-                        <td class="q-col">
-                            <div style="font-weight:bold; color:#00c6ff; margin-bottom: 5px;">Q{{ row.q_number }}</div>
-                            <div style="font-size:12px; color:#ccc; line-height:1.4;">{{ row.q_text }}</div>
-                        </td>
+                        <th class="q-col">
+                            <!-- 🚀 NAYA: Flexbox for text on left and download icon on right -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
+                                <div>
+                                    📝 प्रश्न <br><span style="font-size:10px; color:#aaa;">(उत्तर पर टच करें)</span>
+                                </div>
 
-                        {% for cell in row.cells %}
-                        <!-- 9 Arguments Pass हो रहे हैं (सवाल, चारों ऑप्शन, सही उत्तर, बच्चे का उत्तर, बच्चे का नाम) -->
-                        <td onclick="showCellInfo('Q{{ row.q_number }}', '{{ row.q_text|escapejs }}', '{{ row.opt_a|escapejs }}', '{{ row.opt_b|escapejs }}', '{{ row.opt_c|escapejs }}', '{{ row.opt_d|escapejs }}', '{{ row.correct_ans|escapejs }}', '{{ cell.selected_letter|default:''|escapejs }}', '{{ cell.student_name|escapejs }}')"
-                            style="font-weight:bold; {% if cell.is_correct == True %}background:#28a745;{% elif cell.is_correct == False %}background:#dc3545;{% endif %}">
-                            {{ cell.text|default:"-"|truncatechars:15 }}
-                        </td>
+                                <!-- 🚀 NAYA: Download Icon Button -->
+                                {% if student_data %}
+                                <div class="dl-icon-btn" onclick="downloadScoreboard(this)" title="Download Scoreboard">
+                                    ⬇️
+                                </div>
+                                {% endif %}
+                            </div>
+                        </th>
+
+                        {% for student in student_data %}
+                        <th>{% if student.rank == 1 %}🥇<br>{% endif %}{{ student.name }}<br><span style="color:#00c6ff;">({{ student.score }})</span></th>
                         {% endfor %}
                     </tr>
-                    {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    {% if not student_data %}
+                    <tr>
+                        <td colspan="100%" style="padding: 50px; font-size: 18px; color: #ffc107; text-align: center; border: none;">
+                            ⏳ टेस्ट अभी लाइव है और चल रहा है...<br>
+                            <span style="font-size: 14px; color: #ccc;">(अभी तक किसी भी छात्र ने अपना टेस्ट सबमिट नहीं किया है।)</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                        {% for row in rows %}
+                        <tr>
+                            <td class="q-col">
+                                <div style="font-weight:bold; color:#00c6ff; margin-bottom: 5px;">Q{{ row.q_number }}</div>
+                                <div style="font-size:12px; color:#ccc; line-height:1.4;">{{ row.q_text }}</div>
+                            </td>
 
-    {% if student_data %}
-    <a href="{% url 'test_celebration' test.id %}" class="btn-winner">🎉 SEE RANK 1 WINNER ⏭️</a>
-    <a href="{% if request.user.role == 'TEACHER' %}{% url 'teacher_dashboard' %}{% else %}{% url 'home' %}{% endif %}" style="display: block; background: #333; color: white; padding: 15px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin: 0 20px 30px 20px; text-transform: uppercase; border: 1px solid #555; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-        🏠 Back to Home Page</a>
-    {% endif %}
+                            {% for cell in row.cells %}
+                            <td onclick="showCellInfo('Q{{ row.q_number }}', '{{ row.q_text|escapejs }}', '{{ row.opt_a|escapejs }}', '{{ row.opt_b|escapejs }}', '{{ row.opt_c|escapejs }}', '{{ row.opt_d|escapejs }}', '{{ row.correct_ans|escapejs }}', '{{ cell.selected_letter|default:''|escapejs }}', '{{ cell.student_name|escapejs }}')"
+                                style="font-weight:bold; color: white; {% if cell.is_correct == True %}background:#198754;{% elif cell.is_correct == False %}background:#dc3545;{% endif %}">
+                                {{ cell.text|default:"-"|truncatechars:15 }}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- POPUP HTML -->
     <div class="toast-overlay" id="infoOverlay" onclick="closeToast()"></div>
@@ -108,15 +204,12 @@
             <button class="close-btn" onclick="closeToast()">✖</button>
         </div>
         <div class="toast-q-text" id="toastQText">Loading question text...</div>
-
-        <!-- Options List Box -->
         <div class="toast-options-container">
             <div class="toast-opt" id="t_opt_A"></div>
             <div class="toast-opt" id="t_opt_B"></div>
             <div class="toast-opt" id="t_opt_C"></div>
             <div class="toast-opt" id="t_opt_D"></div>
         </div>
-
         <div class="toast-ans" id="toastAnsBox">
             <span id="toastAnsText">Loading answer...</span>
         </div>
@@ -127,26 +220,15 @@
             document.getElementById('toastQNum').innerHTML = `<span style="color:#fff;">${qNum}</span> - 🧑‍🎓 ${studentName}`;
             document.getElementById('toastQText').innerText = qText;
 
-            // Options को रिसेट और सेट करने का लॉजिक
             const options = ['A', 'B', 'C', 'D'];
             const optTexts = { 'A': optA, 'B': optB, 'C': optC, 'D': optD };
 
             options.forEach(opt => {
                 let el = document.getElementById('t_opt_' + opt);
                 el.innerHTML = `${opt}. ${optTexts[opt]}`;
-                el.className = 'toast-opt'; // पुरानी क्लास हटा रहे हैं
-
-                // अगर ये सही ऑप्शन है, तो हरा कर दो
-                if (opt === correctAns) {
-                    el.classList.add('correct');
-                    el.innerHTML += ' ✅ (Correct)';
-                }
-
-                // अगर बच्चे ने ये चुना था और ये गलत है, तो लाल कर दो
-                if (opt === studentAns && studentAns !== correctAns) {
-                    el.classList.add('wrong');
-                    el.innerHTML += ' ❌ (Your Choice)';
-                }
+                el.className = 'toast-opt';
+                if (opt === correctAns) { el.classList.add('correct'); el.innerHTML += ' ✅ (Correct)'; }
+                if (opt === studentAns && studentAns !== correctAns) { el.classList.add('wrong'); el.innerHTML += ' ❌ (Your Choice)'; }
             });
 
             let ansBox = document.getElementById('toastAnsBox');
@@ -164,16 +246,40 @@
             }
 
             document.getElementById('infoOverlay').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('infoToast').classList.add('show');
-            }, 10);
+            setTimeout(() => { document.getElementById('infoToast').classList.add('show'); }, 10);
         }
 
         function closeToast() {
             document.getElementById('infoToast').classList.remove('show');
-            setTimeout(() => {
-                document.getElementById('infoOverlay').style.display = 'none';
-            }, 300);
+            setTimeout(() => { document.getElementById('infoOverlay').style.display = 'none'; }, 300);
+        }
+
+        // 🚀 NAYA: Scoreboard Image Download Logic
+        function downloadScoreboard(btnElement) {
+            // बटन को लोडिंग स्टेट में डालें
+            var oldHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '⏳';
+
+            var tableNode = document.getElementById('capture-table');
+
+            // टेबल की फोटो कैप्चर करें
+            html2canvas(tableNode, {
+                scale: 2,
+                backgroundColor: '#0b0d26',
+                useCORS: true
+            }).then(function(canvas) {
+                // इमेज को डाउनलोड करें
+                var link = document.createElement('a');
+                link.download = 'Scoreboard_{{ test.test_code }}.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 1.0);
+                link.click();
+
+                // बटन वापस नार्मल करें
+                btnElement.innerHTML = oldHtml;
+            }).catch(function(error) {
+                alert("Download Failed! Please try again.");
+                btnElement.innerHTML = oldHtml;
+            });
         }
     </script>
 </body>

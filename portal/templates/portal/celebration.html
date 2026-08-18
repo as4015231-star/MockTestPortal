@@ -51,9 +51,7 @@
         }
 
         /* ✨ Glowing Typography */
-        .title-wrapper {
-            animation: slideDown 1s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+        .title-wrapper { animation: slideDown 1s cubic-bezier(0.25, 1, 0.5, 1); }
         .stars { color: #ffd700; font-size: 24px; letter-spacing: 10px; margin-bottom: 5px; animation: twinkle 1s infinite alternate; }
         .title {
             color: #ffc107; font-size: 32px; font-weight: 900; text-transform: uppercase;
@@ -67,29 +65,17 @@
         }
 
         /* 🚀 Joint Winners Box Style */
-        .winners-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 10px;
-            z-index: 20;
-        }
+        .winners-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 10px; z-index: 20; }
         .winner-box {
-            background: rgba(0, 255, 0, 0.1);
-            padding: 10px 25px;
-            border-radius: 50px;
-            border: 2px solid #00ff00;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            background: rgba(0, 255, 0, 0.1); padding: 10px 25px; border-radius: 50px;
+            border: 2px solid #00ff00; box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
             animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .winner-name {
             color: #00ff00; font-size: 35px; font-weight: 900; margin: 0;
-            text-transform: uppercase; letter-spacing: 2px;
-            animation: glowPulse 1.2s infinite alternate;
-            background: -webkit-linear-gradient(#00ff00, #008000);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+            text-transform: uppercase; letter-spacing: 2px; animation: glowPulse 1.2s infinite alternate;
+            background: -webkit-linear-gradient(#00ff00, #008000); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
         }
         .score-badge {
             color: #ccc; font-size: 16px; font-weight: bold; margin-top: 5px;
@@ -98,25 +84,12 @@
 
         /* 🖼️ Champion Graphic Container */
         .champion-graphic {
-            margin: 20px 0;
-            position: relative;
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
+            margin: 20px 0; position: relative; width: 250px; height: 250px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05); padding: 10px;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), inset 0 0 20px rgba(255, 215, 0, 0.3);
-            animation: floatGraphic 3s ease-in-out infinite;
-            border: 4px solid #ffd700;
+            animation: floatGraphic 3s ease-in-out infinite; border: 4px solid #ffd700;
         }
-
-        .champion-graphic img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-            filter: contrast(1.1) brightness(1.1);
-        }
+        .champion-graphic img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; filter: contrast(1.1) brightness(1.1); }
 
         /* 🎇 Floating Confetti Decor around Image */
         .decor { position: absolute; font-size: 24px; animation: popTwist 2s infinite alternate; }
@@ -125,29 +98,58 @@
         .d3 { bottom: 10px; left: -15px; font-size: 28px; animation-delay: 0.8s; }
         .d4 { bottom: -15px; right: 30px; animation-delay: 1.1s; }
 
-        /* 🔘 Action Buttons */
-        .btn-container {
-            display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center;
-            margin-top: 10px; z-index: 10;
-        }
-        .btn-act {
-            display: block; width: 85%; max-width: 320px; padding: 18px;
+        /* 🔘 Action Buttons Container */
+        .btn-container { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; margin-top: 10px; z-index: 10; }
+
+        /* 📊 Scoreboard Button (Cyan/Blue) */
+        .btn-scoreboard {
+            display: block; width: 85%; max-width: 320px; padding: 16px;
             border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 16px;
-            border: none; cursor: pointer; text-transform: uppercase; transition: all 0.3s ease;
-            letter-spacing: 1px;
+            text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease;
+            color: white !important; cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.3);
+            background-image: linear-gradient(90deg, #00c6ff, #0072ff, #00c6ff);
+            background-size: 300%;
+            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.6), inset 0 0 10px rgba(255,255,255,0.2);
+            animation: floatBtn 3s ease-in-out infinite, gradientMove 4s linear infinite;
         }
-        .btn-act:active { transform: scale(0.92); }
-        .btn-play {
-            background: linear-gradient(90deg, #ff007a, #a200ff);
+        .btn-scoreboard:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 15px 40px rgba(0, 198, 255, 0.9); border-color: white; }
+        .btn-scoreboard:active { transform: scale(0.95); }
+
+        /* 📝 Certificate Button */
+        .btn-ans { display: block; width: 85%; max-width: 320px; padding: 15px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; background: linear-gradient(90deg, #00f2fe, #4facfe); color: #0b0d26; box-shadow: 0 8px 25px rgba(0, 198, 255, 0.5); transition: 0.3s; }
+        .btn-ans:hover { transform: scale(1.03); }
+
+        /* =========================================
+           🚀 NAYA: THE MAGIC FLOATING BALL (PLAY BUTTON)
+           ========================================= */
+        .magic-ball {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 85px;
+            height: 85px;
+            /* 3D Ball Effect */
+            background: radial-gradient(circle at 30% 30%, #ff007f, #7928ca, #1a1543);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             color: white;
-            box-shadow: 0 8px 25px rgba(162, 0, 255, 0.6);
-            animation: pulseBtn 2s infinite;
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.6), inset -5px -5px 15px rgba(0,0,0,0.5), inset 5px 5px 15px rgba(255,255,255,0.6);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            /* गेंद को लगातार घुमाने और तैराने का एनीमेशन */
+            animation: ballDrift 6s infinite alternate ease-in-out;
+            transition: transform 0.2s;
         }
-        .btn-ans {
-            background: linear-gradient(90deg, #00f2fe, #4facfe);
-            color: #0b0d26;
-            box-shadow: 0 8px 25px rgba(0, 198, 255, 0.5);
-        }
+
+        .magic-ball span { font-size: 28px; margin-bottom: 2px; filter: drop-shadow(0 0 5px white); }
+        .magic-ball:active { transform: scale(0.85) !important; box-shadow: 0 5px 15px rgba(255, 0, 127, 0.8); }
 
         /* 🎬 Keyframes for Premium Animations */
         @keyframes slideDown { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -156,14 +158,25 @@
         @keyframes floatGraphic { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); box-shadow: 0 20px 40px rgba(255, 215, 0, 0.8); } 100% { transform: translateY(0px); } }
         @keyframes popTwist { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.3) rotate(15deg); } }
         @keyframes twinkle { 0% { opacity: 0.3; } 100% { opacity: 1; } }
-        @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(162,0,255,0.7); } 70% { box-shadow: 0 0 0 15px rgba(162,0,255,0); } 100% { box-shadow: 0 0 0 0 rgba(162,0,255,0); } }
+        @keyframes floatBtn { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+        @keyframes gradientMove { 0% { background-position: 0% center; } 100% { background-position: 300% center; } }
+
+        /* 🪄 Magic Ball Movement Animation (एक जगह स्थिर न रहने का इफ़ेक्ट) */
+        @keyframes ballDrift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-30px, -40px) scale(1.05); box-shadow: 0 15px 40px rgba(121, 40, 202, 0.8), inset -5px -5px 15px rgba(0,0,0,0.5), inset 5px 5px 15px rgba(255,255,255,0.8); }
+            66% { transform: translate(-10px, 20px) scale(0.95); }
+            100% { transform: translate(-40px, -10px) scale(1.1); }
+        }
 
         /* Mobile Adjustments */
         @media (max-width: 400px) {
             .title { font-size: 26px; }
             .winner-name { font-size: 28px; }
             .champion-graphic { width: 220px; height: 220px; }
-            .btn-act { font-size: 14px; padding: 15px; }
+            .btn-scoreboard, .btn-ans { font-size: 14px; padding: 14px; }
+            .magic-ball { width: 75px; height: 75px; bottom: 20px; right: 20px; }
+            .magic-ball span { font-size: 24px; }
         }
     </style>
 </head>
@@ -171,6 +184,12 @@
 
     <!-- 🔦 Rotating Background Lights -->
     <div class="rays-container"><div class="rays"></div></div>
+
+    <!-- 🪄 NAYA: MAGIC FLOATING BALL BUTTON -->
+    <div onclick="launchGrandCelebration()" class="magic-ball">
+        <span>🎉</span>
+        PLAY
+    </div>
 
     <div class="content-wrapper">
 
@@ -215,11 +234,11 @@
 
         <!-- 🔘 Action Buttons -->
         <div class="btn-container">
-            <button onclick="launchGrandCelebration()" class="btn-act btn-play">🎉 Play Celebration Again</button>
-            <a href="{% url 'test_answer_key' test.id %}" class="btn-act btn-ans">📝 Rank1 Certificate</a>
 
-            <a href="{% if request.user.role == 'TEACHER' %}{% url 'teacher_dashboard' %}{% else %}{% url 'home' %}{% endif %}" style="background: #333; color: white; border: 2px solid #555; padding: 15px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; width: 80%; max-width: 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-            🏠 Back to Home Page</a>
+            <!-- 📊 Scoreboard Button -->
+            <a href="{% url 'test_scoreboard' test.id %}" class="btn-scoreboard">📊 Show Scoreboard</a>
+
+
         </div>
 
     </div>
@@ -227,40 +246,34 @@
     <script>
         // 🎇 Mega Paper Bomb (Fireworks) Effect
         function launchGrandCelebration() {
-            var duration = 8 * 1000; // 8 Seconds of continuous heavy explosion
+            var duration = 8 * 1000;
             var animationEnd = Date.now() + duration;
-
-            // Cannon settings
             var defaults = { startVelocity: 45, spread: 360, ticks: 100, zIndex: 1000 };
-
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
-            // 1. Initial Massive Blast from Bottom Center
+            // 1. Initial Massive Blast
             confetti({
                 particleCount: 150, spread: 100, origin: { y: 1 }, startVelocity: 60,
                 colors: ['#ffd700', '#ff0000', '#00ff00', '#0000ff', '#ffffff']
             });
 
-            // 2. Continuous Crossfire from Left and Right
+            // 2. Continuous Crossfire
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
                 if (timeLeft <= 0) { return clearInterval(interval); }
-
                 var particleCount = 80 * (timeLeft / duration);
 
-                // Fire from Left
                 confetti(Object.assign({}, defaults, {
                     particleCount,
                     origin: { x: randomInRange(0.0, 0.2), y: Math.random() - 0.2 },
                     colors: ['#ffc107', '#ff007a', '#00c6ff', '#00ff00', '#ffffff']
                 }));
-                // Fire from Right
                 confetti(Object.assign({}, defaults, {
                     particleCount,
                     origin: { x: randomInRange(0.8, 1.0), y: Math.random() - 0.2 },
                     colors: ['#ffc107', '#ff007a', '#00c6ff', '#00ff00', '#ffffff']
                 }));
-            }, 300); // Firing every 300ms for 8 seconds
+            }, 300);
         }
     </script>
 </body>

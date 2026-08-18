@@ -118,9 +118,6 @@
             <!-- 🚀 नया बटन: Upload to Private Bank -->
             <li><a href="{% url 'upload_private_bank' %}" class="menu-link" style="border-left-color: #00ff00;">📤 Upload to Private Bank</a></li>
 
-            <li><a href="#" class="menu-link" style="border-left-color: #888;">➕ Add Single Question</a></li>
-            <li><a href="#" class="menu-link" style="border-left-color: #00ff00;">📊 View Test Reports</a></li>
-            <li><a href="#" class="menu-link" style="border-left-color: #ff4c4c;">⚙️ Dashboard Settings</a></li>
 
             {% if request.user.is_superuser %}
             <!-- 🌍 ग्लोबल बैंक (सिर्फ एडमिन के लिए) -->

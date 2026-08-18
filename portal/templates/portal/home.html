@@ -27,7 +27,7 @@
         .msg-box { color: #ffc107; background: rgba(255,193,7,0.1); padding: 10px; border-radius: 5px; border: 1px solid #ffc107; margin-bottom: 10px; font-size: 14px; }
         .error-msg { color: #ff4c4c; background: rgba(255,76,76,0.1); border-color: #ff4c4c; }
 
-        /* 🚀 NAYA: Button Styles */
+        /* Button Styles */
         .login-prompt-btn { background: linear-gradient(90deg, #ffc107, #ff9800); color: black; padding: 14px 20px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block; transition: 0.3s; text-align: center; }
         .login-prompt-btn:hover { transform: scale(1.02); box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3); }
         .btn-group { display: flex; gap: 15px; justify-content: center; }
@@ -42,7 +42,7 @@
         .dropdown-content a:hover { background-color: rgba(0, 198, 255, 0.1); color: #00c6ff; padding-left: 20px; }
         .show { display: block; }
 
-        /* 🚀 NAYA: Mobile Responsiveness (Perfect Button Stacking) */
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .header { flex-direction: column; padding: 15px; gap: 15px; text-align: center; }
             .header h1 { font-size: 20px; }
@@ -53,7 +53,6 @@
             .start-btn { width: 100%; }
             .dropdown-content { right: 50%; transform: translateX(50%); }
 
-            /* मोबाइल पर बटन को एक के नीचे एक 100% चौड़ाई में सेट करें */
             .btn-group { flex-direction: column; gap: 12px; }
             .login-prompt-btn { width: 100%; display: block; margin-top: 0 !important; }
         }
@@ -61,7 +60,17 @@
 </head>
 <body>
     <div class="header">
-        <h1>Mock Test Portal</h1>
+        <!-- 🚀 NAYA: Coaching Name Branding Logic -->
+        <h1>
+            {% if user.is_authenticated and user.role == 'STUDENT' and user.student_profile.enrolled_coaching %}
+                {{ user.student_profile.enrolled_coaching.coaching_name }}
+            {% elif user.is_authenticated and user.role == 'TEACHER' %}
+                {{ user.teacher_profile.coaching_name }}
+            {% else %}
+                Mock Test Portal
+            {% endif %}
+        </h1>
+
         <div class="user-info">
             {% if user.is_authenticated %}
                 <div class="profile-dropdown">
@@ -114,13 +123,11 @@
                 <h2 style="color: #ffc107; margin-top: 0;">Welcome to Mock Test Portal</h2>
                 <p style="color: #ccc; font-size: 15px; margin-bottom: 30px; line-height: 1.5;">टेस्ट शुरू करने के लिए कृपया अपने अकाउंट में लॉगिन करें या डेमो टेस्ट दें।</p>
 
-                <!-- 🚀 NAYA: Button Group (Desktop par side-by-side, Mobile par upar-neeche) -->
                 <div class="btn-group">
                     <a href="{% url 'login' %}" class="login-prompt-btn" style="flex: 1;">लॉगिन (Login)</a>
                     <a href="{% url 'signup' %}" class="login-prompt-btn" style="background: #333; color: white; border: 1px solid #555; flex: 1;">रजिस्टर (Register)</a>
                 </div>
 
-                <!-- 🚀 NAYA: QUICK JOIN BUTTON (बिना फॉर्म के) -->
                 <div style="margin-top: 15px;">
                     <a href="{% url 'quick_join_test' %}" class="login-prompt-btn" style="display: block; width: 100%; background: linear-gradient(145deg, #00c6ff, #0072ff); color: white; border: none; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);">
                         ⚡ Quick Join (Demo)

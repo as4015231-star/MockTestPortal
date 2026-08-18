@@ -1158,12 +1158,23 @@ def profile_view(request):
             if request.user.role == 'STUDENT':
                 request.user.student_profile.display_name = f"{new_name.strip().upper()}_{str(request.user.mobile_number)[-4:] if request.user.mobile_number else '0000'}"
                 request.user.student_profile.save()
+
         if request.user.role == 'TEACHER' and request.POST.get('coaching_name'):
             request.user.teacher_profile.coaching_name = request.POST.get('coaching_name')
             request.user.teacher_profile.save()
+
         messages.success(request, '✅ प्रोफाइल सफलतापूर्वक अपडेट हो गई!')
-        return redirect('profile')
+
+        # 🚀 NAYA: Save होते ही सीधे डैशबोर्ड पर भेजने का लॉजिक
+        if request.user.role == 'TEACHER':
+            return redirect('teacher_dashboard')
+        elif request.user.is_superuser or request.user.is_staff:
+            return redirect('upload_global_bank')
+        else:
+            return redirect('home')  # Student के लिए
+
     return render(request, 'portal/profile.html', {'user': request.user})
+
 
 
 @login_required

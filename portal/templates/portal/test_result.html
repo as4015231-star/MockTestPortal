@@ -22,7 +22,7 @@
 <body>
     <div class="header">
         <h2>🎉 Test Submitted!</h2>
-        <p>🧑‍🎓 {{ student_display_name }} | Conducted By: <span style="color:#ffc107;">{{ coaching_name }}</span></p>
+        <p>🧑‍🎓 {{ student_display_name }} | Conducted By: <span style="color:#ffc107;">{{ test.teacher.coaching_name }}</span></p>
     </div>
     <div class="container">
         <div class="score-box">
@@ -36,7 +36,8 @@
             </div>
         </div>
         <!-- यह बटन आपको Scoreboard पर ले जाएगा -->
-        <a href="{% url 'test_scoreboard' test.id %}" class="btn">📊 Show Scoreboard</a>
+
+        <a href="{% url 'test_celebration' test.id %}" class="btn">🎉 SEE RANK 1 WINNER ⏭️</a>
     </div>
 
     <script>
