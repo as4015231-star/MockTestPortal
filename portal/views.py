@@ -429,9 +429,11 @@ def delete_questions(request, test_id):
 # ==========================================
 # 3. SMART CHOOSE QUESTIONS & BANK LOGIC
 # ==========================================
+# ==========================================
+# 3. SMART CHOOSE QUESTIONS & BANK LOGIC
+# ==========================================
 @login_required
 def choose_questions(request):
-    # 🚀 FIX 1: एडमिन को भी पेज देखने की परमिशन दें
     if request.user.role != 'TEACHER' and not request.user.is_superuser:
         return redirect('home')
 
@@ -443,14 +445,14 @@ def choose_questions(request):
         bank_type = request.GET.get('bank_type', 'GLOBAL')
 
         if bank_type == 'PRIVATE':
-            # 🚀 FIX 2: एडमिन का प्राइवेट बैंक नहीं होता, इसलिए उसे खाली (None) दिखाएं
             if request.user.is_superuser:
                 questions = Question.objects.none()
             else:
-                questions = Question.objects.filter(assigned_coaching=request.user.teacher_profile).order_by(
-                    '-created_at')
+                # 🚀 NAYA: '-created_at' की जगह 'created_at' कर दिया है (यानी सीधे क्रम में)
+                questions = Question.objects.filter(assigned_coaching=request.user.teacher_profile).order_by('created_at')
         else:
-            questions = Question.objects.filter(assigned_coaching__isnull=True).order_by('-created_at')
+            # 🚀 NAYA: '-created_at' की जगह 'created_at' कर दिया है
+            questions = Question.objects.filter(assigned_coaching__isnull=True).order_by('created_at')
 
         if chap_id != 'ALL':
             questions = questions.filter(chapter_id=chap_id)
@@ -478,7 +480,6 @@ def choose_questions(request):
             })
         return JsonResponse({'questions': data, 'has_next': page_obj.has_next(), 'total_results': paginator.count})
 
-    # 🚀 FIX 3: एडमिन के पास teacher_profile नहीं होता, इसलिए एरर से बचाएं
     if request.user.is_superuser:
         private_exams = []
         draft_tests = []
@@ -494,6 +495,8 @@ def choose_questions(request):
         'global_exams': global_exams,
         'draft_tests': draft_tests
     })
+
+
 
 @login_required
 def api_add_bank_questions(request):
