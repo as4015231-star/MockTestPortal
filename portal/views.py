@@ -1359,3 +1359,94 @@ def upload_global_bank(request):
 
     exams = ExamCategory.objects.filter(created_by__isnull=True)
     return render(request, 'portal/upload_global_bank.html', {'exams': exams})
+
+
+# ==========================================
+# 🚀 BULK DELETE & CATEGORY MANAGEMENT (TEACHER)
+# ==========================================
+
+@login_required
+def api_empty_chapter_questions(request):
+    """अगर टीचर ने गलत एक्सेल अपलोड कर दी है, तो इस चैप्टर के सारे प्रश्न एक साथ डिलीट करने के लिए"""
+    if request.method == 'POST' and request.user.role == 'TEACHER':
+        try:
+            data = json.loads(request.body)
+            chapter_id = data.get('chapter_id')
+
+            # टीचर के प्राइवेट बैंक के उसी चैप्टर के सारे सवाल ढूँढें और डिलीट करें
+            questions_to_delete = Question.objects.filter(
+                chapter_id=chapter_id,
+                assigned_coaching=request.user.teacher_profile
+            )
+            deleted_count, _ = questions_to_delete.delete()
+
+            return JsonResponse({'status': 'success',
+                                 'message': f'🗑️ सफलता! इस चैप्टर के सभी {deleted_count} प्रश्न एक साथ डिलीट कर दिए गए हैं।'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid Request'})
+
+
+@login_required
+def api_delete_category(request):
+    """पूरे कोर्स (Exam), विषय (Subject) या सीरीज़ (Chapter) को हमेशा के लिए डिलीट करने के लिए"""
+    if request.method == 'POST' and request.user.role == 'TEACHER':
+        try:
+            data = json.loads(request.body)
+            cat_type = data.get('type')  # 'exam', 'subject', 'chapter'
+            cat_id = data.get('id')
+            teacher = request.user.teacher_profile
+
+            # Django का CASCADE लॉजिक अपने आप अंदर की सारी चीज़ें डिलीट कर देगा
+            if cat_type == 'exam':
+                ExamCategory.objects.get(id=cat_id, created_by=teacher).delete()
+            elif cat_type == 'subject':
+                SubjectCategory.objects.get(id=cat_id, created_by=teacher).delete()
+            elif cat_type == 'chapter':
+                ChapterCategory.objects.get(id=cat_id, created_by=teacher).delete()
+            else:
+                return JsonResponse({'status': 'error', 'message': 'गलत कैटेगरी टाइप!'})
+
+            return JsonResponse(
+                {'status': 'success', 'message': '🗑️ यह सीरीज़/कोर्स और इसके सारे प्रश्न हमेशा के लिए डिलीट हो गए हैं!'})
+
+        except Exception as e:
+            return JsonResponse(
+                {'status': 'error', 'message': 'एरर: यह फोल्डर नहीं मिला या आप इसे डिलीट नहीं कर सकते।'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid Request'})
+
+
+@login_required
+def api_rename_category(request):
+    """कोर्स, विषय या चैप्टर का नाम बदलने (Rename) के लिए"""
+    if request.method == 'POST' and request.user.role == 'TEACHER':
+        try:
+            data = json.loads(request.body)
+            cat_type = data.get('type')  # 'exam', 'subject', 'chapter'
+            cat_id = data.get('id')
+            new_name = data.get('new_name').strip()
+            teacher = request.user.teacher_profile
+
+            if not new_name:
+                return JsonResponse({'status': 'error', 'message': '⚠️ नया नाम खाली नहीं हो सकता!'})
+
+            if cat_type == 'exam':
+                obj = ExamCategory.objects.get(id=cat_id, created_by=teacher)
+            elif cat_type == 'subject':
+                obj = SubjectCategory.objects.get(id=cat_id, created_by=teacher)
+            elif cat_type == 'chapter':
+                obj = ChapterCategory.objects.get(id=cat_id, created_by=teacher)
+            else:
+                return JsonResponse({'status': 'error', 'message': '❌ गलत कैटेगरी टाइप!'})
+
+            obj.name = new_name
+            obj.save()
+            return JsonResponse(
+                {'status': 'success', 'message': f'✅ नाम सफलतापूर्वक बदलकर "{new_name}" कर दिया गया है!'})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': '❌ एरर: यह फोल्डर नहीं मिला या आप इसे बदल नहीं सकते।'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid Request'})

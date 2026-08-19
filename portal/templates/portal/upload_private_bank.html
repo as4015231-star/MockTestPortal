@@ -17,7 +17,6 @@
         .coaching-brand { text-align: center; flex-grow: 1; }
         .coaching-brand h1 { margin: 0; font-size: 26px; text-transform: uppercase; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .coaching-brand p { margin: 2px 0 0 0; font-size: 11px; color: #00c6ff; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; }
-
         .menu-btn { font-size: 28px; background: none; border: none; color: #ffc107; cursor: pointer; }
 
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; }
@@ -28,19 +27,26 @@
         .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #00c6ff; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
 
         .container { padding: 30px; max-width: 800px; margin: auto; }
-
-        /* Form Styles */
         .upload-card { background: #10143a; padding: 25px; border-radius: 10px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 14px; color: #ccc; margin-bottom: 8px; }
 
-        .input-group { display: flex; gap: 10px; align-items: center; }
-        .form-control { flex-grow: 1; padding: 12px; background: #050714; color: white; border: 1px solid #ffc107; border-radius: 5px; box-sizing: border-box; outline: none; }
+        .input-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .form-control { flex-grow: 1; min-width: 200px; padding: 12px; background: #050714; color: white; border: 1px solid #ffc107; border-radius: 5px; box-sizing: border-box; outline: none; }
         .form-control:focus { border-color: #00c6ff; box-shadow: 0 0 8px rgba(0, 198, 255, 0.5); }
 
-        /* Add New Button */
-        .btn-add-new { background: rgba(0, 198, 255, 0.1); border: 1px dashed #00c6ff; color: #00c6ff; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 44px; display: flex; align-items: center; }
-        .btn-add-new:hover { background: rgba(0, 198, 255, 0.2); }
+        /* 🚀 NAYA: Inline Buttons including Edit */
+        .btn-add-new { background: rgba(0, 198, 255, 0.1); border: 1px dashed #00c6ff; color: #00c6ff; padding: 0 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 42px; display: flex; align-items: center; justify-content: center; }
+        .btn-add-new:hover { background: #00c6ff; color: #0b0d26; }
+
+        .btn-edit-inline { background: rgba(255, 193, 7, 0.1); border: 1px dashed #ffc107; color: #ffc107; padding: 0 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 42px; display: flex; align-items: center; justify-content: center; }
+        .btn-edit-inline:hover { background: #ffc107; color: black; }
+
+        .btn-delete-inline { background: rgba(255, 76, 76, 0.1); border: 1px dashed #ff4c4c; color: #ff4c4c; padding: 0 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 42px; display: flex; align-items: center; justify-content: center; }
+        .btn-delete-inline:hover { background: #ff4c4c; color: white; }
+
+        .btn-empty-inline { background: rgba(255, 152, 0, 0.1); border: 1px dashed #ff9800; color: #ff9800; padding: 0 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 42px; display: flex; align-items: center; justify-content: center; }
+        .btn-empty-inline:hover { background: #ff9800; color: black; }
 
         .btn-upload { width: 100%; padding: 15px; font-size: 16px; font-weight: bold; background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn-upload:hover { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); transform: scale(1.02); }
@@ -49,10 +55,23 @@
         .alert-success { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; }
         .alert-error { background: rgba(255, 76, 76, 0.1); border: 1px solid #ff4c4c; color: #ff4c4c; }
 
-        /* Modal Styles */
+        /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid #00c6ff; }
+        .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid #00c6ff; animation: modalZoom 0.3s ease-out; }
         .btn-submit { width: 100%; background: #00c6ff; color: black; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+
+        .custom-confirm-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 3000; justify-content: center; align-items: center; }
+        .custom-confirm-content { background: #10143a; padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; border: 2px solid #ff4c4c; box-shadow: 0 10px 30px rgba(255, 76, 76, 0.4); text-align: center; animation: modalZoom 0.3s ease-out; }
+        .btn-confirm-yes { background: #ff4c4c; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
+        .btn-confirm-yes:hover { background: #d32f2f; }
+        .btn-confirm-no { background: transparent; color: white; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; transition: 0.3s; }
+        .btn-confirm-no:hover { background: rgba(255,255,255,0.1); }
+
+        @keyframes modalZoom { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .btn-add-new, .btn-edit-inline, .btn-delete-inline, .btn-empty-inline { flex: 1; padding: 0; font-size: 12px;}
+        }
     </style>
 </head>
 <body>
@@ -97,6 +116,7 @@
             <form method="POST" enctype="multipart/form-data" action="{% url 'upload_private_bank' %}">
                 {% csrf_token %}
 
+                <!-- 1. Exam Row -->
                 <div class="form-group">
                     <label>1. Select Course/Exam</label>
                     <div class="input-group">
@@ -106,33 +126,43 @@
                                 <option value="{{ exam.id }}">{{ exam.name }}</option>
                             {% endfor %}
                         </select>
-                        <button type="button" class="btn-add-new" onclick="openAddModal('exam')">➕ New</button>
+                        <button type="button" class="btn-add-new" onclick="openAddModal('exam')" title="Add New Exam">➕ New</button>
+                        <button type="button" class="btn-edit-inline" onclick="openRenameModal('exam')" title="Edit Selected Exam">✏️ </button>
+                        <button type="button" class="btn-delete-inline" onclick="deleteCategory('exam')" title="Delete Entire Exam">🗑️ </button>
                     </div>
                 </div>
 
+                <!-- 2. Subject Row -->
                 <div class="form-group">
                     <label>2. Select Subject</label>
                     <div class="input-group">
                         <select name="subject_id" id="subjectSelect" class="form-control" required>
                             <option value="">-- First Select Exam --</option>
                         </select>
-                        <button type="button" class="btn-add-new" onclick="openAddModal('subject')">➕ New</button>
+                        <button type="button" class="btn-add-new" onclick="openAddModal('subject')" title="Add New Subject">➕ New</button>
+                        <button type="button" class="btn-edit-inline" onclick="openRenameModal('subject')" title="Edit Selected Subject">✏️ </button>
+                        <button type="button" class="btn-delete-inline" onclick="deleteCategory('subject')" title="Delete Entire Subject">🗑️ </button>
                     </div>
                 </div>
 
+                <!-- 3. Chapter Row -->
                 <div class="form-group">
                     <label>3. Select Chapter</label>
                     <div class="input-group">
                         <select name="chapter_id" id="chapterSelect" class="form-control" required>
                             <option value="">-- First Select Subject --</option>
                         </select>
-                        <button type="button" class="btn-add-new" onclick="openAddModal('chapter')">➕ New</button>
+                        <button type="button" class="btn-add-new" onclick="openAddModal('chapter')" title="Add New Chapter">➕ New</button>
+                        <button type="button" class="btn-edit-inline" onclick="openRenameModal('chapter')" title="Edit Selected Chapter">✏️ </button>
+
+                        <button type="button" class="btn-delete-inline" onclick="deleteCategory('chapter')" title="Delete Entire Chapter">🗑️ </button>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <!-- 4. File Upload -->
+                <div class="form-group" style="margin-top: 30px;">
                     <label>4. Upload Excel File (.xlsx)</label>
-                    <input type="file" name="excel_file" class="form-control" accept=".xlsx, .xls" required style="padding: 9px;">
+                    <input type="file" name="excel_file" class="form-control" accept=".xlsx, .xls" required style="padding: 9px; width: 100%;">
                     <small style="color: #00c6ff; display: block; margin-top: 5px;">Format: Q | A | B | C | D | Correct Ans (A/B/C/D) | Explanation</small>
                 </div>
 
@@ -145,16 +175,40 @@
     <div class="modal" id="addCategoryModal">
         <div class="modal-content">
             <h3 id="modalTitle" style="color:#00c6ff; margin-top:0;">➕ Add New</h3>
-            <p id="modalDesc" style="font-size: 12px; color: #aaa;">नया नाम यहाँ टाइप करें:</p>
-
+            <p style="font-size: 12px; color: #aaa;">नया नाम यहाँ टाइप करें:</p>
             <input type="hidden" id="categoryType">
-
             <div class="form-group">
                 <input type="text" id="newCategoryName" class="form-control" placeholder="Enter name here..." autocomplete="off">
             </div>
-
             <button type="button" onclick="saveCategory()" class="btn-submit">💾 Save & Select</button>
-            <button type="button" onclick="closeModal()" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+            <button type="button" onclick="closeModal('addCategoryModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 🚀 RENAME CATEGORY MODAL -->
+    <div class="modal" id="renameCategoryModal">
+        <div class="modal-content" style="border-color: #ffc107;">
+            <h3 id="renameModalTitle" style="color:#ffc107; margin-top:0;">✏️ Rename</h3>
+            <p style="font-size: 12px; color: #aaa;">नया नाम टाइप करें:</p>
+            <input type="hidden" id="renameCategoryType">
+            <input type="hidden" id="renameCategoryId">
+            <div class="form-group">
+                <input type="text" id="renameCategoryName" class="form-control" style="border-color: #ffc107;" placeholder="Enter new name here..." autocomplete="off">
+            </div>
+            <button type="button" onclick="saveRenamedCategory()" class="btn-submit" style="background: #ffc107;">💾 Save Name</button>
+            <button type="button" onclick="closeModal('renameCategoryModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- THEME MATCHING CUSTOM CONFIRM MODAL -->
+    <div class="custom-confirm-modal" id="customConfirmOverlay">
+        <div class="custom-confirm-content">
+            <h3 id="ccTitle" style="color: #ff4c4c; margin-top: 0; font-size: 22px;">⚠️ Confirm</h3>
+            <p id="ccMessage" style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px;"></p>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn-confirm-no" onclick="closeCustomConfirm()">Cancel</button>
+                <button class="btn-confirm-yes" onclick="executeCustomConfirm()">Yes, Delete</button>
+            </div>
         </div>
     </div>
 
@@ -167,7 +221,7 @@
         }
 
         // ==========================================
-        // 🚀 AJAX Dropdown Logic (Old + Refined)
+        // 🚀 Dropdown Dependency Logic
         // ==========================================
         document.getElementById('examSelect').addEventListener('change', function() {
             let examId = this.value;
@@ -201,21 +255,17 @@
             });
         });
 
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
         // ==========================================
-        // 🚀 Add New Category Modal Logic
+        // 🚀 1. Add New Category Logic
         // ==========================================
         function openAddModal(type) {
             let title = '';
-
-            // Validation Before Opening
-            if(type === 'subject' && !document.getElementById('examSelect').value) {
-                alert('⚠️ कृपया पहले Exam/Course सेलेक्ट करें!');
-                return;
-            }
-            if(type === 'chapter' && !document.getElementById('subjectSelect').value) {
-                alert('⚠️ कृपया पहले Subject सेलेक्ट करें!');
-                return;
-            }
+            if(type === 'subject' && !document.getElementById('examSelect').value) { alert('⚠️ कृपया पहले Exam/Course सेलेक्ट करें!'); return; }
+            if(type === 'chapter' && !document.getElementById('subjectSelect').value) { alert('⚠️ कृपया पहले Subject सेलेक्ट करें!'); return; }
 
             if(type === 'exam') title = 'Add New Course / Exam';
             if(type === 'subject') title = 'Add New Subject';
@@ -229,58 +279,148 @@
             setTimeout(() => document.getElementById('newCategoryName').focus(), 100);
         }
 
-        function closeModal() {
-            document.getElementById('addCategoryModal').style.display = 'none';
-        }
-
         function saveCategory() {
             let type = document.getElementById('categoryType').value;
             let name = document.getElementById('newCategoryName').value.trim();
-
             if(!name) { alert("⚠️ कृपया नाम दर्ज करें!"); return; }
 
             let parent_id = '';
             if(type === 'subject') parent_id = document.getElementById('examSelect').value;
             if(type === 'chapter') parent_id = document.getElementById('subjectSelect').value;
 
-            // Submit Button Loading state
-            let btn = document.querySelector('.btn-submit');
-            btn.innerText = "⏳ Saving...";
-            btn.disabled = true;
-
             fetch("{% url 'api_create_category' %}", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                 body: JSON.stringify({ type: type, name: name, parent_id: parent_id })
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.innerText = "💾 Save & Select";
-                btn.disabled = false;
-
+            }).then(res => res.json()).then(data => {
                 if(data.status === 'success') {
-                    // Inject and Select the new Option dynamically!
-                    let selectBox;
-                    if(type === 'exam') selectBox = document.getElementById('examSelect');
-                    if(type === 'subject') selectBox = document.getElementById('subjectSelect');
-                    if(type === 'chapter') selectBox = document.getElementById('chapterSelect');
-
-                    let newOption = new Option(data.name, data.id, true, true);
-                    selectBox.add(newOption);
-
-                    // Trigger change event to load child dropdowns automatically
-                    let event = new Event('change');
-                    selectBox.dispatchEvent(event);
-
-                    closeModal();
-                } else {
-                    alert(data.message);
-                }
-            }).catch(err => {
-                alert("❌ Something went wrong!");
-                btn.innerText = "💾 Save & Select";
-                btn.disabled = false;
+                    let selectBox = document.getElementById(type + 'Select');
+                    selectBox.add(new Option(data.name, data.id, true, true));
+                    selectBox.dispatchEvent(new Event('change'));
+                    closeModal('addCategoryModal');
+                } else { alert(data.message); }
             });
+        }
+
+        // ==========================================
+        // 🚀 2. RENAME Category Logic
+        // ==========================================
+        function openRenameModal(type) {
+            let selectBox = document.getElementById(type + 'Select');
+            let selectedId = selectBox.value;
+
+            if (!selectedId) {
+                alert(`⚠️ कृपया पहले ड्रॉपडाउन में से किसी एक को चुनें जिसे आप बदलना चाहते हैं!`);
+                return;
+            }
+
+            // Get current name from dropdown
+            let currentName = selectBox.options[selectBox.selectedIndex].text;
+
+            let title = '';
+            if(type === 'exam') title = 'Rename Course / Exam';
+            if(type === 'subject') title = 'Rename Subject';
+            if(type === 'chapter') title = 'Rename Chapter';
+
+            document.getElementById('renameModalTitle').innerText = '✏️ ' + title;
+            document.getElementById('renameCategoryType').value = type;
+            document.getElementById('renameCategoryId').value = selectedId;
+            document.getElementById('renameCategoryName').value = currentName;
+
+            document.getElementById('renameCategoryModal').style.display = 'flex';
+            setTimeout(() => {
+                let input = document.getElementById('renameCategoryName');
+                input.focus();
+                input.select(); // Highlight the text automatically
+            }, 100);
+        }
+
+        function saveRenamedCategory() {
+            let type = document.getElementById('renameCategoryType').value;
+            let id = document.getElementById('renameCategoryId').value;
+            let newName = document.getElementById('renameCategoryName').value.trim();
+
+            if(!newName) { alert("⚠️ नया नाम खाली नहीं हो सकता!"); return; }
+
+            fetch("{% url 'api_rename_category' %}", {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ 'type': type, 'id': id, 'new_name': newName })
+            }).then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    // Update dropdown option text instantly without reloading
+                    let selectBox = document.getElementById(type + 'Select');
+                    selectBox.options[selectBox.selectedIndex].text = newName;
+
+                    alert(data.message);
+                    closeModal('renameCategoryModal');
+                } else { alert(data.message); }
+            });
+        }
+
+        // ==========================================
+        // 🚀 3. Delete Logic Using Custom Modal
+        // ==========================================
+        let pendingDeleteCallback = null;
+
+        function showCustomConfirm(title, message, callback) {
+            document.getElementById('ccTitle').innerHTML = title;
+            document.getElementById('ccMessage').innerText = message;
+            pendingDeleteCallback = callback;
+            document.getElementById('customConfirmOverlay').style.display = 'flex';
+        }
+
+        function closeCustomConfirm() {
+            document.getElementById('customConfirmOverlay').style.display = 'none';
+            pendingDeleteCallback = null;
+        }
+
+        function executeCustomConfirm() {
+            if (pendingDeleteCallback) pendingDeleteCallback();
+            closeCustomConfirm();
+        }
+
+        function emptySelectedChapter() {
+            let chapterId = document.getElementById('chapterSelect').value;
+            if (!chapterId) { alert("⚠️ कृपया पहले ड्रॉपडाउन में से एक चैप्टर चुनें!"); return; }
+
+            showCustomConfirm(
+                "🚨 प्रश्न डिलीट करें",
+                "क्या आप वाकई इस चैप्टर के अपलोड किए गए सारे प्रश्न डिलीट करना चाहते हैं?\n\nचैप्टर का नाम बना रहेगा, लेकिन अंदर के सारे प्रश्न डिलीट हो जाएंगे!",
+                function() {
+                    fetch('/api/empty-chapter/', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                        body: JSON.stringify({ 'chapter_id': chapterId })
+                    }).then(res => res.json()).then(data => {
+                        if (data.status === 'success') { alert(data.message); location.reload(); } else { alert(data.message); }
+                    });
+                }
+            );
+        }
+
+        function deleteCategory(type) {
+            let categoryId = null; let categoryName = "";
+            let selectBox = document.getElementById(type + 'Select');
+
+            if (type === 'exam') { categoryId = selectBox.value; categoryName = "कोर्स (Exam)"; }
+            else if (type === 'subject') { categoryId = selectBox.value; categoryName = "विषय (Subject)"; }
+            else if (type === 'chapter') { categoryId = selectBox.value; categoryName = "चैप्टर (Series)"; }
+
+            if (!categoryId) { alert(`⚠️ कृपया पहले ड्रॉपडाउन में से एक ${categoryName} चुनें!`); return; }
+
+            showCustomConfirm(
+                `🚨 ${categoryName} डिलीट करें`,
+                `खतरा! क्या आप वाकई इस पूरे ${categoryName} को हमेशा के लिए डिलीट करना चाहते हैं?\n\nइसके अंदर मौजूद सभी सब्जेक्ट, चैप्टर और प्रश्न हमेशा के लिए डिलीट हो जाएंगे!`,
+                function() {
+                    fetch('/api/delete-category/', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                        body: JSON.stringify({ 'type': type, 'id': categoryId })
+                    }).then(res => res.json()).then(data => {
+                        if (data.status === 'success') {
+                            alert(data.message);
+                            location.reload();
+                        } else { alert(data.message); }
+                    });
+                }
+            );
         }
     </script>
 </body>
