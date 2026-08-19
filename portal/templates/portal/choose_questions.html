@@ -10,7 +10,6 @@
         .top-bar { background: #10143a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00c6ff; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .top-bar h2 { margin: 0; color: #00c6ff; font-size: 20px; }
 
-        /* 🚀 NAYA: Sidebar Styles */
         .menu-btn { font-size: 24px; background: none; border: none; color: #ffc107; cursor: pointer; margin-right: 15px; padding: 0; display: flex; align-items: center; justify-content: center; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 4000; display: none; backdrop-filter: blur(2px); }
         .sidebar { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: #10143a; z-index: 4001; transition: left 0.3s ease-out; border-right: 2px solid #ffc107; box-shadow: 5px 0 20px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
@@ -44,7 +43,7 @@
         .btn-load-more { background: transparent; border: 1px solid #00c6ff; color: #00c6ff; width: 100%; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; display: none; }
         .btn-load-more:hover { background: rgba(0, 198, 255, 0.1); }
 
-        /* Drawer & Filter Styles */
+        /* Filter Drawer */
         .filter-side-btn { position: fixed; left: 0; top: 50%; transform: translateY(-50%); background: #00c6ff; color: #000; border: none; padding: 15px 8px; font-weight: bold; font-size: 14px; cursor: pointer; border-radius: 0 8px 8px 0; z-index: 900; box-shadow: 2px 0 10px rgba(0, 198, 255, 0.4); writing-mode: vertical-rl; text-orientation: mixed; transform: translateY(-50%) rotate(180deg); letter-spacing: 2px; transition: 0.3s; }
         .filter-side-btn:hover { background: #ffc107; box-shadow: 2px 0 15px rgba(255, 193, 7, 0.6); }
 
@@ -75,13 +74,22 @@
         .btn-proceed { background: linear-gradient(145deg, #4caf50, #2e7d32); color: white; padding: 10px 20px; border: none; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;}
-        .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; border: 1px solid #00c6ff; }
+        .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; border: 1px solid #00c6ff; animation: modalZoom 0.3s ease-out; }
         .btn-submit { width: 100%; background: #00c6ff; color: black; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* 🚀 NAYA: Custom Alert & Confirm Modals CSS */
+        .custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;}
+        .custom-alert-box { background: #10143a; padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; border: 1px solid #00c6ff; text-align: center; box-shadow: 0 10px 30px rgba(0, 198, 255, 0.3); animation: modalZoom 0.3s ease-out; }
+        .custom-alert-box.confirm-box { border-color: #ff4c4c; box-shadow: 0 10px 30px rgba(255, 76, 76, 0.3); }
+        .info-icon-btn { color: #00c6ff; cursor: pointer; background: rgba(0,198,255,0.1); border: 1px solid #00c6ff; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; transition: 0.3s; }
+        .info-icon-btn:active { transform: scale(0.9); background: #00c6ff; color: black; }
+
+        @keyframes modalZoom { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <!-- 🚀 NAYA: Sidebar HTML -->
+    <!-- Sidebar HTML -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="teacherSidebar">
         <div class="sidebar-header">
@@ -96,7 +104,6 @@
     </div>
 
     <div class="top-bar">
-        <!-- 🚀 NAYA: Hamburger Menu Button inside Flex Container -->
         <div style="display: flex; align-items: center;">
             <button class="menu-btn" onclick="toggleSidebar()">☰</button>
             <h2>📚 Question Bank</h2>
@@ -113,37 +120,27 @@
             <button class="drawer-close" onclick="closeFilter()">✖</button>
         </div>
         <div class="drawer-body">
-
             <div class="bank-toggle-container">
                 <button class="bank-btn active" id="btnPrivate" onclick="setBankType('PRIVATE')">🔒 Private Bank</button>
                 <button class="bank-btn" id="btnGlobal" onclick="setBankType('GLOBAL')">🌍 Global Bank</button>
             </div>
-
             <div class="form-group">
                 <label>1. Category (Course/Exam)</label>
-                <select id="filterExam" class="form-control" onchange="loadSubjects(this.value)">
-                    <option value="">-- Select Exam --</option>
-                </select>
+                <select id="filterExam" class="form-control" onchange="loadSubjects(this.value)"><option value="">-- Select Exam --</option></select>
             </div>
             <div class="form-group">
                 <label>2. Subject</label>
-                <select id="filterSubject" class="form-control" onchange="loadChapters(this.value)">
-                    <option value="">-- First Select Exam --</option>
-                </select>
+                <select id="filterSubject" class="form-control" onchange="loadChapters(this.value)"><option value="">-- First Select Exam --</option></select>
             </div>
             <div class="form-group">
                 <label>3. Chapter</label>
-                <select id="filterChapter" class="form-control">
-                    <option value="">-- First Select Subject --</option>
-                </select>
+                <select id="filterChapter" class="form-control"><option value="">-- First Select Subject --</option></select>
             </div>
-
             <button class="btn-apply" onclick="applyFilter()">🔍 Load Questions</button>
         </div>
     </div>
 
     <div class="main-container">
-
         <div class="search-container">
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
@@ -163,7 +160,6 @@
         </div>
 
         <button id="loadMoreBtn" class="btn-load-more" onclick="loadMore()">⬇️ Load More Questions</button>
-
     </div>
 
     <div class="floating-cart">
@@ -183,26 +179,45 @@
         </div>
     </div>
 
+    <!-- 🚀 NAYA: Redesigned Add to Test Modal -->
     <div class="modal" id="submitModal">
         <div class="modal-content">
             <h3 style="color:#ffc107; margin-top:0;">Add to Test</h3>
             <p style="font-size: 12px; color: #aaa;">Selected: <span id="modalQCount" style="color:#00ff00; font-weight:bold;">0</span> questions.</p>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; margin-top: 15px;">
+                <button type="button" id="btnSelectCard" onclick="toggleTestMode('select')" style="flex:1; padding:12px; background:#00c6ff; color:#000; border:none; border-radius:5px; font-weight:bold; cursor:pointer; transition:0.3s;">Select Test Card</button>
+                <button type="button" id="btnCreateCard" onclick="toggleTestMode('create')" style="flex:1; padding:12px; background:transparent; color:#00c6ff; border:1px solid #00c6ff; border-radius:5px; font-weight:bold; cursor:pointer; transition:0.3s;">Create New Card</button>
+            </div>
+
             <form id="saveTestForm" onsubmit="submitQuestions(event)">
-                <div class="form-group">
-                    <label style="color:#ccc; font-size:12px;">Select Draft Test</label>
-                    <select id="existingTest" class="form-control">
-                        <option value="">-- Create New Test --</option>
+
+                <div id="selectTestDiv" class="form-group">
+                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                        Select Draft Test
+                        <span class="info-icon-btn" onclick="showCustomAlert('ℹ️ जानकारी', 'अपने पहले से बने टेस्ट कार्ड में क्वेश्चन ऐड करने के लिए उस टेस्ट कार्ड को सेलेक्ट करें।')">i</span>
+                    </label>
+                    <select id="existingTest" class="form-control" style="padding: 12px; font-size: 14px;">
+                        <option value="">-- Select Test --</option>
                         {% for test in draft_tests %}
                             <option value="{{ test.id }}">{{ test.title }} ({{ test.test_code }})</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div id="newTestFields">
-                    <div class="form-group"><input type="text" id="newTitle" class="form-control" placeholder="Test Title"></div>
-                    <div class="form-group"><input type="text" id="newCode" class="form-control" placeholder="Test Code"></div>
+
+                <div id="newTestDiv" style="display:none;">
+                    <div class="form-group" style="position:relative;">
+                        <input type="text" id="newTitle" class="form-control" placeholder="Test Title" style="padding: 12px 40px 12px 12px; font-size: 14px;">
+                        <span class="info-icon-btn" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);" onclick="showCustomAlert('ℹ️ जानकारी', 'अपने नए टेस्ट का नाम लिखें (जैसे: Weekly Mock Test 1)')">i</span>
+                    </div>
+                    <div class="form-group" style="position:relative;">
+                        <input type="text" id="newCode" class="form-control" placeholder="Test Code" style="padding: 12px 40px 12px 12px; font-size: 14px;">
+                        <span class="info-icon-btn" style="position:absolute; right:10px; top:50%; transform:translateY(-50%);" onclick="showCustomAlert('ℹ️ जानकारी', 'टेस्ट का एक छोटा कोड लिखें जो छात्रों को दिया जा सके (जैसे: 312)')">i</span>
+                    </div>
                 </div>
+
                 <button type="submit" class="btn-submit">💾 Save & Map Questions</button>
-                <button type="button" onclick="closeModal('submitModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+                <button type="button" onclick="closeModal('submitModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer; margin-top: 10px;">Cancel</button>
             </form>
         </div>
     </div>
@@ -214,24 +229,56 @@
             <div class="form-group">
                 <select id="moveExamSelect" class="form-control" onchange="fetchMoveSubjects(this.value)">
                     <option value="">-- 1. Select Course --</option>
-                    {% for exam in private_exams %}
-                        <option value="{{ exam.id }}">{{ exam.name }}</option>
-                    {% endfor %}
+                    {% for exam in private_exams %}<option value="{{ exam.id }}">{{ exam.name }}</option>{% endfor %}
                 </select>
             </div>
-            <div class="form-group">
-                <select id="moveSubjectSelect" class="form-control" onchange="fetchMoveChapters(this.value)">
-                    <option value="">-- 2. Select Subject --</option>
-                </select>
-            </div>
+            <div class="form-group"><select id="moveSubjectSelect" class="form-control" onchange="fetchMoveChapters(this.value)"><option value="">-- 2. Select Subject --</option></select></div>
             <div class="form-group"><select id="moveChapterSelect" class="form-control"><option value="">-- 3. Select Chapter --</option></select></div>
             <button type="button" onclick="executeMove()" class="btn-submit">🚀 Move Now</button>
-            <button type="button" onclick="closeModal('moveModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
+            <button type="button" onclick="closeModal('moveModal')" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer; margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 🚀 NAYA: Custom Alert & Confirm Modals -->
+    <div class="custom-alert-overlay" id="customAlertOverlay">
+        <div class="custom-alert-box">
+            <h3 id="caTitle" style="color: #00c6ff; margin-top: 0; font-size: 20px;">ℹ️ Message</h3>
+            <p id="caMessage" style="color: #ccc; font-size: 15px; line-height: 1.5; margin-bottom: 25px;"></p>
+            <button onclick="closeCustomAlert()" class="btn-submit" style="margin-top: 0;">OK</button>
+        </div>
+    </div>
+
+    <div class="custom-alert-overlay" id="customConfirmOverlay">
+        <div class="custom-alert-box confirm-box">
+            <h3 id="ccTitle" style="color: #ff4c4c; margin-top: 0; font-size: 20px;">⚠️ Confirm</h3>
+            <p id="ccMessage" style="color: #ccc; font-size: 15px; line-height: 1.5; margin-bottom: 25px;"></p>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeCustomConfirm()" style="flex:1; background:transparent; border:1px solid #ccc; color:white; padding:12px; border-radius:5px; font-weight:bold; cursor:pointer;">Cancel</button>
+                <button onclick="executeCustomConfirm()" style="flex:1; background:#ff4c4c; border:none; color:white; padding:12px; border-radius:5px; font-weight:bold; cursor:pointer;">Yes, Delete</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 🚀 NAYA: Sidebar Toggle Logic
+        // 🚀 Custom Alert Functions
+        function showCustomAlert(title, message) {
+            document.getElementById('caTitle').innerHTML = title;
+            document.getElementById('caMessage').innerText = message;
+            document.getElementById('customAlertOverlay').style.display = 'flex';
+        }
+        function closeCustomAlert() { document.getElementById('customAlertOverlay').style.display = 'none'; }
+
+        // 🚀 Custom Confirm Functions
+        let pendingConfirmCallback = null;
+        function showCustomConfirm(title, message, callback) {
+            document.getElementById('ccTitle').innerHTML = title;
+            document.getElementById('ccMessage').innerText = message;
+            pendingConfirmCallback = callback;
+            document.getElementById('customConfirmOverlay').style.display = 'flex';
+        }
+        function closeCustomConfirm() { document.getElementById('customConfirmOverlay').style.display = 'none'; pendingConfirmCallback = null; }
+        function executeCustomConfirm() { if(pendingConfirmCallback) pendingConfirmCallback(); closeCustomConfirm(); }
+
         function toggleSidebar() {
             let s = document.getElementById('teacherSidebar');
             let o = document.getElementById('sidebarOverlay');
@@ -243,58 +290,37 @@
         const globalExams = [ {% for e in global_exams %}{ id: {{e.id}}, name: "{{e.name}}" },{% endfor %} ];
 
         let selectedQuestions = new Map();
-
         let currentBankType = 'PRIVATE';
         let currentFilterChapter = 'ALL';
         let currentSearchQuery = '';
         let currentPage = 1;
 
-        // Drawer Logic & Swipe to Close
-        function openFilter() {
-            document.getElementById('filterDrawer').classList.add('open');
-            document.getElementById('filterOverlay').style.display = 'block';
-            if(document.getElementById('filterExam').options.length <= 1) setBankType(currentBankType);
-        }
-
-        function closeFilter() {
-            document.getElementById('filterDrawer').classList.remove('open');
-            document.getElementById('filterOverlay').style.display = 'none';
-        }
+        function openFilter() { document.getElementById('filterDrawer').classList.add('open'); document.getElementById('filterOverlay').style.display = 'block'; if(document.getElementById('filterExam').options.length <= 1) setBankType(currentBankType); }
+        function closeFilter() { document.getElementById('filterDrawer').classList.remove('open'); document.getElementById('filterOverlay').style.display = 'none'; }
 
         let touchstartX = 0; let touchendX = 0;
         const filterDrawer = document.getElementById('filterDrawer');
         filterDrawer.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; });
-        filterDrawer.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            if (touchendX < touchstartX - 50) closeFilter();
-        });
+        filterDrawer.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; if (touchendX < touchstartX - 50) closeFilter(); });
 
         function setBankType(type) {
             currentBankType = type;
-            document.getElementById('btnPrivate').classList.remove('active');
-            document.getElementById('btnGlobal').classList.remove('active');
-
+            document.getElementById('btnPrivate').classList.remove('active'); document.getElementById('btnGlobal').classList.remove('active');
             let examSelect = document.getElementById('filterExam');
             examSelect.innerHTML = '<option value="">-- Select Exam --</option>';
             document.getElementById('filterSubject').innerHTML = '<option value="">-- First Select Exam --</option>';
             document.getElementById('filterChapter').innerHTML = '<option value="">-- First Select Subject --</option>';
 
             let exams = (type === 'PRIVATE') ? privateExams : globalExams;
-            if (type === 'PRIVATE') document.getElementById('btnPrivate').classList.add('active');
-            else document.getElementById('btnGlobal').classList.add('active');
-
+            if (type === 'PRIVATE') document.getElementById('btnPrivate').classList.add('active'); else document.getElementById('btnGlobal').classList.add('active');
             exams.forEach(e => { examSelect.innerHTML += `<option value="${e.id}">${e.name}</option>`; });
 
-            currentFilterChapter = 'ALL';
-            currentSearchQuery = '';
-            document.getElementById('searchInput').value = '';
-            currentPage = 1;
+            currentFilterChapter = 'ALL'; currentSearchQuery = ''; document.getElementById('searchInput').value = ''; currentPage = 1;
             fetchData(false);
         }
 
         function loadSubjects(examId) {
-            let subSelect = document.getElementById('filterSubject');
-            let chapSelect = document.getElementById('filterChapter');
+            let subSelect = document.getElementById('filterSubject'); let chapSelect = document.getElementById('filterChapter');
             if(!examId) { subSelect.innerHTML = '<option value="">-- First Select Exam --</option>'; chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>'; return; }
             subSelect.innerHTML = '<option value="">Loading...</option>';
             fetch(`/api/get-subjects/?exam_id=${examId}`).then(res => res.json()).then(data => {
@@ -316,190 +342,130 @@
 
         function applyFilter() {
             let chapterId = document.getElementById('filterChapter').value;
-            if(!chapterId) { alert("⚠️ कृपया कोई Chapter चुनें!"); return; }
-
-            closeFilter();
-            currentFilterChapter = chapterId;
-            currentSearchQuery = '';
-            document.getElementById('searchInput').value = ''; // Search clear
-            currentPage = 1;
-            fetchData(false);
+            if(!chapterId) { showCustomAlert('⚠️ ध्यान दें', 'कृपया कोई Chapter चुनें!'); return; }
+            closeFilter(); currentFilterChapter = chapterId; currentSearchQuery = ''; document.getElementById('searchInput').value = ''; currentPage = 1; fetchData(false);
         }
 
         let searchTimer;
         document.getElementById('searchInput').addEventListener('input', function(e) {
-            clearTimeout(searchTimer);
-            let val = e.target.value.trim();
-
+            clearTimeout(searchTimer); let val = e.target.value.trim();
             if(val.length >= 3) {
-                searchTimer = setTimeout(() => {
-                    currentSearchQuery = val;
-                    currentFilterChapter = 'ALL'; // 🚀 सर्च करते ही पूरे गोदाम (Bank) में सर्च होगा
-                    currentPage = 1;
-                    fetchData(false);
-                }, 500); // 500ms wait
+                searchTimer = setTimeout(() => { currentSearchQuery = val; currentFilterChapter = 'ALL'; currentPage = 1; fetchData(false); }, 500);
             } else if (val.length === 0 && currentSearchQuery.length >= 3) {
-                currentSearchQuery = '';
-                currentPage = 1;
-                if(document.getElementById('filterChapter').value) {
-                    currentFilterChapter = document.getElementById('filterChapter').value;
-                }
+                currentSearchQuery = ''; currentPage = 1;
+                if(document.getElementById('filterChapter').value) { currentFilterChapter = document.getElementById('filterChapter').value; }
                 fetchData(false);
             }
         });
 
-        function loadMore() {
-            currentPage++;
-            let btn = document.getElementById('loadMoreBtn');
-            btn.innerText = '⏳ Loading...';
-            btn.disabled = true;
-            fetchData(true);
-        }
+        function loadMore() { currentPage++; let btn = document.getElementById('loadMoreBtn'); btn.innerText = '⏳ Loading...'; btn.disabled = true; fetchData(true); }
 
         function fetchData(append) {
-            let listContainer = document.getElementById('questionsList');
-            let loadBtn = document.getElementById('loadMoreBtn');
-            let heading = document.getElementById('currentFilterText');
-
-            if(!append) {
-                listContainer.innerHTML = '<div style="text-align:center; padding:50px;"><h2 style="color:#00c6ff;">⏳ प्रश्न लोड हो रहे हैं...</h2></div>';
-                document.getElementById('welcomeMsg')?.remove();
-            }
+            let listContainer = document.getElementById('questionsList'); let loadBtn = document.getElementById('loadMoreBtn'); let heading = document.getElementById('currentFilterText');
+            if(!append) { listContainer.innerHTML = '<div style="text-align:center; padding:50px;"><h2 style="color:#00c6ff;">⏳ प्रश्न लोड हो रहे हैं...</h2></div>'; document.getElementById('welcomeMsg')?.remove(); }
 
             fetch(`?ajax=1&bank_type=${currentBankType}&chapter=${currentFilterChapter}&search=${currentSearchQuery}&page=${currentPage}`)
             .then(response => response.json())
             .then(data => {
                 if(!append) listContainer.innerHTML = '';
-
-                // Update Results Count
                 document.getElementById('resultsCount').innerText = `Results: ${data.total_results || 0}`;
 
                 if (data.questions.length === 0 && !append) {
                     listContainer.innerHTML = '<div style="text-align:center; padding:50px;"><h3 style="color:#ff4c4c;">कोई प्रश्न नहीं मिला।</h3></div>';
-                    loadBtn.style.display = 'none';
-                    heading.style.display = 'none';
-                    return;
+                    loadBtn.style.display = 'none'; heading.style.display = 'none'; return;
                 }
 
                 let bankBadge = currentBankType === 'PRIVATE' ? '<span style="background:#ffc107; color:black; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:bold; vertical-align:middle;">🔒 Private</span>' : '<span style="background:#00c6ff; color:black; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:bold; vertical-align:middle;">🌍 Global</span>';
-                heading.style.display = 'block';
-                heading.innerHTML = currentSearchQuery ? `सर्च रिज़ल्ट्स: "${currentSearchQuery}" ${bankBadge}` : `प्रश्नों की सूची ${bankBadge}`;
+                heading.style.display = 'block'; heading.innerHTML = currentSearchQuery ? `सर्च रिज़ल्ट्स: "${currentSearchQuery}" ${bankBadge}` : `प्रश्नों की सूची ${bankBadge}`;
 
                 data.questions.forEach(q => {
                     let isChecked = selectedQuestions.has(q.id) ? 'checked' : '';
                     let actionButtons = '';
-
                     if(currentBankType === 'PRIVATE'){
-                        actionButtons = `
-                        <div style="margin-top:10px; padding-left: 35px;">
-                            <button type="button" onclick="openMoveModal(${q.id})" style="background: rgba(0,198,255,0.2); color:#00c6ff; border:1px solid #00c6ff; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:12px;">✏️ Move</button>
-                            <button type="button" onclick="deleteQuestion(${q.id})" style="background: rgba(255,76,76,0.2); color:#ff4c4c; border:1px solid #ff4c4c; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:12px; margin-left:8px;">🗑️ Delete</button>
-                        </div>`;
+                        actionButtons = `<div style="margin-top:10px; padding-left: 35px;"><button type="button" onclick="openMoveModal(${q.id})" style="background: rgba(0,198,255,0.2); color:#00c6ff; border:1px solid #00c6ff; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:12px;">✏️ Move</button><button type="button" onclick="deleteQuestion(${q.id})" style="background: rgba(255,76,76,0.2); color:#ff4c4c; border:1px solid #ff4c4c; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:12px; margin-left:8px;">🗑️ Delete</button></div>`;
                     }
-
                     let tagsHtml = `<div class="q-tags">`;
                     if(q.exam) tagsHtml += `<span class="tag-exam">${q.exam}</span>`;
                     if(q.subject) tagsHtml += `<span class="tag-subject">${q.subject}</span>`;
                     tagsHtml += `</div>`;
-
-                    let html = `
-                        <div class="question-item" id="q-box-${q.id}">
-                            ${tagsHtml}
-                            <div class="q-header">
-                                <label style="display:flex; gap:15px; cursor:pointer; flex-grow:1;">
-                                    <input type="checkbox" class="checkbox-custom" value="${q.id}" onchange="toggleCart(this, ${q.id})" ${isChecked}>
-                                    <div class="q-text" id="q-text-${q.id}">
-                                        <b>Q:</b> ${q.question_text}
-                                        <div class="q-options">
-                                            A. ${q.option_a} <br>
-                                            B. ${q.option_b} <br>
-                                            C. ${q.option_c} <br>
-                                            D. ${q.option_d} <br>
-                                            <span style="color:#00ff00; font-weight:bold; display:inline-block; margin-top:5px;">Ans: ${q.correct_answer}</span>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                            ${actionButtons}
-                        </div>
-                    `;
+                    let html = `<div class="question-item" id="q-box-${q.id}">${tagsHtml}<div class="q-header"><label style="display:flex; gap:15px; cursor:pointer; flex-grow:1;"><input type="checkbox" class="checkbox-custom" value="${q.id}" onchange="toggleCart(this, ${q.id})" ${isChecked}><div class="q-text" id="q-text-${q.id}"><b>Q:</b> ${q.question_text}<div class="q-options">A. ${q.option_a} <br>B. ${q.option_b} <br>C. ${q.option_c} <br>D. ${q.option_d} <br><span style="color:#00ff00; font-weight:bold; display:inline-block; margin-top:5px;">Ans: ${q.correct_answer}</span></div></div></label></div>${actionButtons}</div>`;
                     listContainer.insertAdjacentHTML('beforeend', html);
                 });
-
-                if (data.has_next) {
-                    loadBtn.style.display = 'block';
-                    loadBtn.innerText = '⬇️ Load More Questions';
-                    loadBtn.disabled = false;
-                } else {
-                    loadBtn.style.display = 'none';
-                }
+                if (data.has_next) { loadBtn.style.display = 'block'; loadBtn.innerText = '⬇️ Load More Questions'; loadBtn.disabled = false; } else { loadBtn.style.display = 'none'; }
             });
         }
 
-        // CART LOGIC
         function toggleCart(checkbox, qId) {
-            if (checkbox.checked) {
-                let qTextHtml = document.getElementById(`q-text-${qId}`).innerHTML;
-                selectedQuestions.set(qId, qTextHtml);
-            } else {
-                selectedQuestions.delete(qId);
-            }
-            document.getElementById('cartCount').innerText = selectedQuestions.size;
-            document.getElementById('modalQCount').innerText = selectedQuestions.size;
+            if (checkbox.checked) { let qTextHtml = document.getElementById(`q-text-${qId}`).innerHTML; selectedQuestions.set(qId, qTextHtml); }
+            else { selectedQuestions.delete(qId); }
+            document.getElementById('cartCount').innerText = selectedQuestions.size; document.getElementById('modalQCount').innerText = selectedQuestions.size;
         }
 
         function previewCartModal() {
-            if (selectedQuestions.size === 0) { alert("⚠️ Please select questions first."); return; }
-            let previewBox = document.getElementById('cartPreviewBody');
-            previewBox.innerHTML = '';
-            let counter = 1;
-            selectedQuestions.forEach((qHtml, qId) => {
-                previewBox.insertAdjacentHTML('beforeend', `<div style="background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444;"><span style="color: #ffc107; font-weight: bold;">Q${counter}:</span> ${qHtml}</div>`);
-                counter++;
-            });
+            if (selectedQuestions.size === 0) { showCustomAlert('⚠️ ध्यान दें', 'Please select questions first.'); return; }
+            let previewBox = document.getElementById('cartPreviewBody'); previewBox.innerHTML = ''; let counter = 1;
+            selectedQuestions.forEach((qHtml, qId) => { previewBox.insertAdjacentHTML('beforeend', `<div style="background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444;"><span style="color: #ffc107; font-weight: bold;">Q${counter}:</span> ${qHtml}</div>`); counter++; });
             document.getElementById('cartPreviewModal').style.display = 'flex';
         }
 
         function openModal() {
-            if(selectedQuestions.size === 0) { alert("⚠️ Please select questions first."); return; }
+            if(selectedQuestions.size === 0) { showCustomAlert('⚠️ ध्यान दें', 'Please select questions first.'); return; }
             document.getElementById('submitModal').style.display = 'flex';
         }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
-        document.getElementById('existingTest').addEventListener('change', function() {
-            document.getElementById('newTestFields').style.display = this.value ? 'none' : 'block';
-        });
+        // 🚀 NAYA: Test Mode Toggle Logic
+        let activeTestMode = 'select';
+        function toggleTestMode(mode) {
+            activeTestMode = mode;
+            let btnSelect = document.getElementById('btnSelectCard'); let btnCreate = document.getElementById('btnCreateCard');
+            let divSelect = document.getElementById('selectTestDiv'); let divCreate = document.getElementById('newTestDiv');
+
+            if (mode === 'select') {
+                btnSelect.style.background = '#00c6ff'; btnSelect.style.color = '#000';
+                btnCreate.style.background = 'transparent'; btnCreate.style.color = '#00c6ff';
+                divSelect.style.display = 'block'; divCreate.style.display = 'none';
+            } else {
+                btnCreate.style.background = '#00c6ff'; btnCreate.style.color = '#000';
+                btnSelect.style.background = 'transparent'; btnSelect.style.color = '#00c6ff';
+                divCreate.style.display = 'block'; divSelect.style.display = 'none';
+            }
+        }
 
         function submitQuestions(e) {
             e.preventDefault();
-            let test_id = document.getElementById('existingTest').value;
-            let title = document.getElementById('newTitle').value;
-            let code = document.getElementById('newCode').value;
-            let qIdsArray = Array.from(selectedQuestions.keys());
+            let test_id = "", title = "", code = "";
 
-            let btn = document.querySelector('.btn-submit');
+            if (activeTestMode === 'select') {
+                test_id = document.getElementById('existingTest').value;
+                if(!test_id) { showCustomAlert('⚠️ ध्यान दें', 'कृपया पहले एक ड्राफ्ट टेस्ट सेलेक्ट करें!'); return; }
+            } else {
+                title = document.getElementById('newTitle').value.trim();
+                code = document.getElementById('newCode').value.trim();
+                if(!title || !code) { showCustomAlert('⚠️ ध्यान दें', 'कृपया नए टेस्ट का नाम और कोड भरें!'); return; }
+            }
+
+            let qIdsArray = Array.from(selectedQuestions.keys());
+            let btn = document.querySelector('#submitModal .btn-submit');
             btn.innerText = "⏳ Saving..."; btn.disabled = true;
 
             fetch("{% url 'api_add_bank_questions' %}", {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                 body: JSON.stringify({ test_id: test_id, title: title, test_code: code, q_ids: qIdsArray })
             }).then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert(data.message); window.location.href = "{% url 'teacher_dashboard' %}"; }
-                else { alert(data.message); btn.innerText = "💾 Save & Map Questions"; btn.disabled = false; }
+                if(data.status === 'success') { showCustomAlert('✅ सफलता', data.message); setTimeout(() => { window.location.href = "{% url 'teacher_dashboard' %}"; }, 1500); }
+                else { showCustomAlert('❌ त्रुटि', data.message); btn.innerText = "💾 Save & Map Questions"; btn.disabled = false; }
             });
         }
 
-        // MOVE & DELETE LOGIC
         function deleteQuestion(qId) {
-            if(confirm('⚠️ क्या आप वाकई इस प्रश्न को प्राइवेट बैंक से डिलीट करना चाहते हैं?')) {
+            showCustomConfirm('🚨 प्रश्न डिलीट करें', 'क्या आप वाकई इस प्रश्न को प्राइवेट बैंक से हमेशा के लिए डिलीट करना चाहते हैं?', function() {
                 fetch(`/api/delete-private-question/${qId}/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
                 .then(res => res.json()).then(data => {
-                    if(data.status === 'success') {
-                        document.getElementById(`q-box-${qId}`).remove();
-                        if (selectedQuestions.has(qId)) { selectedQuestions.delete(qId); document.getElementById('cartCount').innerText = selectedQuestions.size; }
-                    } else alert(data.message);
+                    if(data.status === 'success') { document.getElementById(`q-box-${qId}`).remove(); if (selectedQuestions.has(qId)) { selectedQuestions.delete(qId); document.getElementById('cartCount').innerText = selectedQuestions.size; } }
+                    else showCustomAlert('❌ त्रुटि', data.message);
                 });
-            }
+            });
         }
 
         function openMoveModal(qId) { document.getElementById('moveQuestionId').value = qId; document.getElementById('moveModal').style.display = 'flex'; }
@@ -507,23 +473,17 @@
         function fetchMoveChapters(subId) { fetch(`/api/get-chapters/?subject_id=${subId}`).then(res => res.json()).then(data => { let chapSelect = document.getElementById('moveChapterSelect'); chapSelect.innerHTML = '<option value="">-- 3. Select Chapter --</option>'; data.chapters.forEach(c => chapSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`); }); }
 
         function executeMove() {
-            let qId = document.getElementById('moveQuestionId').value;
-            let chapId = document.getElementById('moveChapterSelect').value;
-            if(!chapId) { alert("⚠️ कृपया चैप्टर सेलेक्ट करें!"); return; }
+            let qId = document.getElementById('moveQuestionId').value; let chapId = document.getElementById('moveChapterSelect').value;
+            if(!chapId) { showCustomAlert('⚠️ ध्यान दें', "कृपया चैप्टर सेलेक्ट करें!"); return; }
 
-            fetch("{% url 'api_move_private_question' %}", {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-                body: JSON.stringify({ q_id: qId, chapter_id: chapId })
+            fetch("{% url 'api_move_private_question' %}", { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }, body: JSON.stringify({ q_id: qId, chapter_id: chapId })
             }).then(res => res.json()).then(data => {
-                if(data.status === 'success') { alert(data.message); document.getElementById(`q-box-${qId}`).remove(); closeModal('moveModal'); }
-                else alert(data.message);
+                if(data.status === 'success') { showCustomAlert('✅ सफलता', data.message); document.getElementById(`q-box-${qId}`).remove(); closeModal('moveModal'); }
+                else showCustomAlert('❌ त्रुटि', data.message);
             });
         }
 
-        // On Page Load: Load initial private bank questions automatically
-        window.onload = function() {
-            setBankType('PRIVATE');
-        };
+        window.onload = function() { setBankType('PRIVATE'); };
     </script>
 </body>
 </html>

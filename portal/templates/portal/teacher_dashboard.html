@@ -20,7 +20,8 @@
             background: linear-gradient(90deg, #ffc107, #ff9800, #ffc107);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 15px rgba(255, 193, 7, 0.3);
         }
-        .coaching-brand p { margin: 2px 0 0 0; font-size: 11px; color: #00c6ff; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; }
+        /* 🚀 NAYA: Coaching Code Styling */
+        .coaching-brand p { margin: 2px 0 0 0; font-size: 13px; color: #00ff00; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; }
 
         .profile-menu-container { position: relative; }
         .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #00c6ff, #0072ff); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; border: 2px solid #ffc107; box-shadow: 0 0 10px rgba(0, 198, 255, 0.5); transition: 0.3s; color: white; }
@@ -53,8 +54,6 @@
         .status-text { font-size: 12px; font-weight: bold; margin-left: 6px; text-transform: uppercase; }
 
         .card-top-actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; align-items: center; }
-        .btn-preview-top { background: #a200ff; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 10px rgba(162, 0, 255, 0.4); transition: 0.3s; }
-        .btn-preview-top:hover { background: #8a00d8; transform: scale(1.05); }
         .btn-delete-top { background: #ff4c4c; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 76, 76, 0.4); transition: 0.3s; cursor: pointer;}
         .btn-delete-top:hover { background: #d32f2f; transform: scale(1.1); }
 
@@ -63,8 +62,13 @@
 
         .create-form { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border: 1px dashed #00c6ff; margin-bottom: 30px; transition: 0.3s; }
         .create-form-header { color: #00c6ff; margin: 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 18px; user-select: none; }
+
         .form-inputs { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
-        .form-inputs input { background: rgba(255,255,255,0.1); border: 1px solid #ffc107; color: white; padding: 10px; border-radius: 5px; outline: none; box-sizing: border-box; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-wrapper input { width: 100% !important; padding-right: 35px !important; background: rgba(255,255,255,0.1); border: 1px solid #ffc107; color: white; padding: 10px; border-radius: 5px; outline: none; box-sizing: border-box; }
+        .info-icon { position: absolute; right: 10px; font-family: 'Times New Roman', serif; font-style: italic; font-weight: bold; font-size: 13px; color: #10143a; background: #00c6ff; border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; z-index: 10; box-shadow: 0 0 5px rgba(0, 198, 255, 0.5); }
+        .info-icon:hover { background: #ffc107; box-shadow: 0 0 10px rgba(255, 193, 7, 0.8); transform: scale(1.1); }
+
         input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
         .menu-btn { font-size: 28px; background: none; border: none; color: #ffc107; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -75,7 +79,6 @@
         .sidebar-menu { padding: 15px; list-style: none; margin: 0; }
         .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #00c6ff; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
 
-        /* Custom Modal Styles */
         .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 3000; display: none; justify-content: center; align-items: center; }
         .custom-modal-box { background: #10143a; border: 1px solid #00c6ff; border-radius: 10px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: modalZoom 0.3s ease-out; }
         @keyframes modalZoom { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -90,16 +93,17 @@
         @media (max-width: 768px) {
             .header { padding: 10px 15px; }
             .coaching-brand h1 { font-size: 18px; }
-            .coaching-brand p { font-size: 9px; }
+            .coaching-brand p { font-size: 11px; }
             .avatar { width: 35px; height: 35px; font-size: 16px; }
             .menu-btn { font-size: 24px; }
-            .title-area { padding-right: 100px; }
-            .form-inputs input, .form-inputs div, .form-inputs button { width: 100% !important; margin-top: 5px !important; }
+            .title-area { padding-right: 40px !important; }
+            .form-inputs .input-wrapper, .form-inputs div, .form-inputs button { width: 100% !important; margin-top: 5px !important; }
             .actions form { flex-direction: column !important; }
             .actions form div { width: 100% !important; }
             .actions form input { width: 100% !important; }
             .actions form button { width: 100% !important; align-self: stretch !important; margin-top: 10px; }
             .hybrid-btns { flex-direction: column; }
+            .btn-live { margin-top: 8px; margin-left: 0; }
         }
     </style>
 </head>
@@ -115,12 +119,9 @@
         <ul class="sidebar-menu">
             <li><a href="{% url 'choose_questions' %}" class="menu-link" style="border-left-color: #00c6ff;">📚 Choose & Add Questions</a></li>
 
-            <!-- 🚀 नया बटन: Upload to Private Bank -->
             <li><a href="{% url 'upload_private_bank' %}" class="menu-link" style="border-left-color: #00ff00;">📤 Upload to Private Bank</a></li>
 
-
             {% if request.user.is_superuser %}
-            <!-- 🌍 ग्लोबल बैंक (सिर्फ एडमिन के लिए) -->
             <li><a href="{% url 'upload_global_bank' %}" class="menu-link" style="border-left-color: #00c6ff;">🌍 Upload to Global Bank</a></li>
             {% endif %}
         </ul>
@@ -131,7 +132,8 @@
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <div class="coaching-brand">
             <h1>{{ request.user.teacher_profile.coaching_name|default:"TEACHER DASHBOARD" }}</h1>
-            <p>Online Test Portal</p>
+            <!-- 🚀 NAYA: Coaching Code Display -->
+            <p>CODE: {{ request.user.teacher_profile.coaching_code|default:"NOT SET" }}</p>
         </div>
         <div class="profile-menu-container">
             <div class="avatar" onclick="toggleProfileMenu()" title="Open Profile Menu">
@@ -160,15 +162,40 @@
                 <form method="POST" class="form-inputs">
                     {% csrf_token %}
                     <input type="hidden" name="create_test" value="1">
-                    <input type="text" name="title" placeholder="Test Title" required style="width: 30%;">
-                    <input type="text" name="test_code" placeholder="Test Code" required style="width: 20%;">
-                    <input type="number" name="total_time" placeholder="Time (Mins)" required style="width: 15%;">
-                    <input type="number" step="0.01" name="correct_marks" value="4.00" required style="width: 12%;">
-                    <input type="number" step="0.01" name="negative_marks" value="1.00" required style="width: 12%;">
+
+                    <div class="input-wrapper" style="width: 30%;">
+                        <input type="text" name="title" placeholder="Test Title" required>
+                        <span class="info-icon" onclick="showInfo('Test Title', 'यहाँ आप अपने टेस्ट का नाम डाल सकते हैं।<br><br><b>जैसे:</b> SSC CGL Mock Test 1 या GK Quiz')">i</span>
+                    </div>
+
+                    <div class="input-wrapper" style="width: 20%;">
+                        <input type="text" name="test_code" placeholder="Test Code" required>
+                        <span class="info-icon" onclick="showInfo('Test Code', 'यह आपके टेस्ट का एक छोटा और यूनिक कोड होगा जिससे बच्चे इसे आसानी से खोज सकेंगे।<br><br><b>जैसे:</b> 356 या 101')">i</span>
+                    </div>
+
+                    <div class="input-wrapper" style="width: 15%;">
+                        <input type="number" name="total_time" placeholder="Time (Mins)" required>
+                        <span class="info-icon" onclick="showInfo('Time (Mins)', 'टेस्ट का कुल समय <b>मिनटों</b> में भरें।<br><br>जैसे 1 घंटे के टेस्ट के लिए <b>60</b> भरें।')">i</span>
+                    </div>
+
+                    <div class="input-wrapper" style="width: 12%;">
+                        <input type="number" step="0.01" name="correct_marks" value="4.00" placeholder="+Ve" required>
+                        <span class="info-icon" onclick="showInfo('+Ve Marks', 'हर सही उत्तर देने पर बच्चों को कितने अंक मिलेंगे, वह यहाँ भरें।<br><br><b>जैसे:</b> 4.00 या 2.00')">i</span>
+                    </div>
+
+                    <div class="input-wrapper" style="width: 12%;">
+                        <input type="number" step="0.01" name="negative_marks" value="1.00" placeholder="-Ve" required>
+                        <span class="info-icon" onclick="showInfo('-Ve Marks', 'हर गलत उत्तर देने पर कितने अंक कटेंगे (Negative Marking), वह यहाँ भरें।<br><br><b>जैसे:</b> 1.00 या 0.25')">i</span>
+                    </div>
+
                     <div style="width: 30%;">
                         <label style="font-size: 11px; color: #ccc;">Start Time (Optional)</label>
-                        <input type="datetime-local" name="scheduled_time" style="width: 100%;">
+                        <div class="input-wrapper" style="width: 100%;">
+                            <input type="datetime-local" name="scheduled_time">
+                            <span class="info-icon" onclick="showInfo('Start Time', 'अगर आप चाहते हैं कि टेस्ट किसी <b>तय समय</b> पर ही शुरू हो, तो यहाँ वह समय सेट करें।<br><br><b>नोट:</b> इसे खाली भी छोड़ सकते हैं।')">i</span>
+                        </div>
                     </div>
+
                     <button type="submit" class="btn" style="background: linear-gradient(to right, #00c6ff, #0072ff); color: white; width: 20%;">Create Test</button>
                 </form>
             </div>
@@ -179,14 +206,12 @@
         <div class="test-card">
 
             <div class="card-top-actions">
-                {% if test.mapped_questions.count > 0 %}
-                <a href="{% url 'preview_test' test.id %}" class="btn-preview-top" title="Preview Test">👀 Preview</a>
-                {% endif %}
                 <a href="{% url 'delete_test' test.id %}" onclick="event.preventDefault(); showCustomConfirm('क्या आप वाकई इस टेस्ट को डिलीट करना चाहते हैं?', this.href);" class="btn-delete-top" title="Delete Test">✖</a>
             </div>
 
             <div class="test-info">
-                <div class="title-area" style="display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 12px; padding-right: 110px;">
+                <!-- 🚀 NAYA: Title area padding adjusted since preview button is moved -->
+                <div class="title-area" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; padding-right: 40px;">
                     <h3 style="margin: 0;">{{ test.title }}</h3>
 
                     <div class="switch-wrapper" onclick="checkTimeAndToggle(event, {{ test.id }}, '{{ test.status }}', '{{ test.scheduled_time|date:'c' }}', '{% url 'toggle_publish_status' test.id %}')" title="Click to change status">
@@ -197,12 +222,16 @@
                         <span class="status-text" style="color: {% if test.status == 'PUBLISHED' %}#00ff00{% else %}#ff4c4c{% endif %}">{{ test.status }}</span>
                     </div>
 
-                    <!-- 🚀 NEW: Dynamic Live Room / View Results logic -->
+                    <!-- Live / View Results Button -->
                     {% if test.status == 'PUBLISHED' %}
                         <a href="{% url 'live_test_monitor' test.id %}" class="btn-live">🔴 Live Room</a>
                     {% else %}
-                        <!-- 🚀 Draft/Off mode sends teacher to the test_result page -->
                         <a href="{% url 'test_scoreboard' test.id %}" class="btn-live" style="background: linear-gradient(90deg, #00c6ff, #0072ff); color: white !important; box-shadow: 0 4px 10px rgba(0, 198, 255, 0.4);">🏆 View Results</a>
+                    {% endif %}
+
+                    <!-- 🚀 NAYA: Preview Button Moved Here -->
+                    {% if test.mapped_questions.count > 0 %}
+                        <a href="{% url 'preview_test' test.id %}" class="btn-live" style="background: #a200ff; color: white !important; box-shadow: 0 4px 10px rgba(162, 0, 255, 0.4);">👀 Preview</a>
                     {% endif %}
                 </div>
 
@@ -222,8 +251,6 @@
                 {% if test.status == 'DRAFT' %}
                 <div class="hybrid-btns" style="display: flex; gap: 10px; width: 100%; padding-bottom: 15px; margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                     <a href="{% url 'upload_excel' test.id %}" class="btn" style="background: #28a745; color: white; flex: 1;">📥 Upload Excel</a>
-
-                    <!-- 🚀 नया बटन: Choose from Bank -->
                     <a href="{% url 'choose_questions' %}?test_id={{ test.id }}" class="btn" style="background: #00c6ff; color: black; flex: 1;">🛒 Choose from Bank</a>
                 </div>
                 {% endif %}
@@ -249,13 +276,13 @@
         {% endfor %}
     </div>
 
-    <!-- Custom Alert Modal -->
+    <!-- Custom Alert / Info Modal -->
     <div id="customAlertModal" class="custom-modal-overlay">
-        <div class="custom-modal-box">
-            <h3 style="color: #ffc107; margin-top: 0; font-size: 18px;">⚠️ Alert</h3>
-            <p id="customAlertMsg" style="color: #ccc; font-size: 14px; line-height: 1.5;"></p>
+        <div class="custom-modal-box" style="border-color: #ffc107; box-shadow: 0 10px 30px rgba(255, 193, 7, 0.2);">
+            <h3 id="customAlertTitle" style="color: #ffc107; margin-top: 0; font-size: 20px;">⚠️ Alert</h3>
+            <p id="customAlertMsg" style="color: #ccc; font-size: 15px; line-height: 1.6;"></p>
             <div style="text-align: right; margin-top: 20px;">
-                <button onclick="closeCustomAlert()" class="btn-modal btn-ok">OK</button>
+                <button onclick="closeCustomAlert()" class="btn-modal btn-ok" style="background: #ffc107; color: black;">OK</button>
             </div>
         </div>
     </div>
@@ -276,9 +303,17 @@
         let confirmActionUrl = "";
 
         function showCustomAlert(message) {
-            document.getElementById('customAlertMsg').innerText = message;
+            document.getElementById('customAlertTitle').innerHTML = '⚠️ Alert';
+            document.getElementById('customAlertMsg').innerHTML = message;
             document.getElementById('customAlertModal').style.display = 'flex';
         }
+
+        function showInfo(title, message) {
+            document.getElementById('customAlertTitle').innerHTML = 'ℹ️ ' + title;
+            document.getElementById('customAlertMsg').innerHTML = message;
+            document.getElementById('customAlertModal').style.display = 'flex';
+        }
+
         function closeCustomAlert() {
             document.getElementById('customAlertModal').style.display = 'none';
         }
@@ -303,7 +338,6 @@
             o.style.display = s.classList.contains('open') ? 'block' : 'none';
         }
 
-        // 🚀 NAYA: Sidebar Swipe to Close Logic (Touch Events)
         let sidebarTouchStartX = 0;
         let sidebarTouchEndX = 0;
         const sidebarElement = document.getElementById('teacherSidebar');
@@ -314,7 +348,6 @@
 
         sidebarElement.addEventListener('touchend', e => {
             sidebarTouchEndX = e.changedTouches[0].screenX;
-            // अगर उंगली 50px से ज्यादा बाईं ओर (Left) स्लाइड हुई है
             if (sidebarTouchEndX < sidebarTouchStartX - 50) {
                 let s = document.getElementById('teacherSidebar');
                 let o = document.getElementById('sidebarOverlay');
