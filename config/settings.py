@@ -82,6 +82,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # यह कोड लोकल कंप्यूटर पर SQLite चलाएगा, लेकिन Render (लाइव) पर ऑटोमैटिक PostgreSQL चलाएगा
+# सिर्फ 5 मिनट के लिए इस कोड को ऐसे बदल दें:
+# काम हो जाने के बाद इसे वापस ऐसा कर दें:
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),

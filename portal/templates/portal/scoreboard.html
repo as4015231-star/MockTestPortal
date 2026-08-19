@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 🚀 NAYA: user-scalable=no हटा दिया है ताकि बच्चे 2 उँगलियों से भी ज़ूम कर सकें -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scoreboard - {{ test.title }}</title>
 
-    <!-- 🚀 NAYA: Image Download Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         body { background: #0b0d26; color: white; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
 
-        /* HEADER FLEXBOX LAYOUT */
         .header {
             background: #10143a; padding: 15px 20px; border-bottom: 2px solid #ffc107;
             position: sticky; top: 0; z-index: 20; display: flex;
@@ -22,7 +21,6 @@
         .header-center { flex: 2; text-align: center; }
         .header h2 { color: #ffc107; margin: 0; font-size: 24px; letter-spacing: 1px; }
 
-        /* BUTTONS */
         .btn-cert {
             background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700); background-size: 200% auto;
             color: #000; padding: 10px 18px; border-radius: 30px; text-decoration: none;
@@ -30,78 +28,64 @@
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5); display: inline-flex; align-items: center; gap: 8px;
             animation: shine 3s linear infinite, floatBtn 3s ease-in-out infinite; transition: 0.3s;
         }
-        .btn-cert:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8); }
-
         .btn-home {
             background: #2a2e5c; color: #fff; padding: 10px 18px; border-radius: 30px; text-decoration: none;
-            font-weight: bold; font-size: 13px; text-transform: uppercase; border: 1px solid #00c6ff;
-            box-shadow: 0 4px 10px rgba(0, 198, 255, 0.2); display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+            font-weight: bold; font-size: 13px; text-transform: uppercase; border: 1px solid #00c6ff; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
         }
-        .btn-home:hover { background: #00c6ff; color: #0b0d26; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.6); transform: scale(1.05); }
 
         @keyframes shine { to { background-position: 200% center; } }
         @keyframes floatBtn { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
+        /* 🚀 NAYA: Fullscreen Popup Button */
+        .btn-zoom-popup {
+            background: linear-gradient(135deg, #00c6ff, #0072ff); color: white; border: none;
+            padding: 12px 25px; border-radius: 30px; font-weight: bold; font-size: 15px;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4); transition: 0.3s;
+            margin: 20px auto; display: block; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-zoom-popup:active { transform: scale(0.95); }
+
+        .table-container { display: flex; justify-content: center; padding: 10px 15px; width: 100%; box-sizing: border-box; }
+        .table-wrapper { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; background: #10143a; border-radius: 12px; border: 2px solid #00c6ff; box-shadow: 0 10px 30px rgba(0, 198, 255, 0.2); }
+        table { border-collapse: collapse; width: max-content; }
+        th, td { border: 1px solid #2a2e5c; padding: 15px; text-align: center; font-size: 13px; vertical-align: middle; cursor: pointer; }
+        th:not(.q-col), td:not(.q-col) { min-width: 130px; max-width: 180px; }
+
+        .q-col { background: #0b0d26; width: 250px; max-width: 250px; text-align: left; white-space: normal; word-wrap: break-word; border-right: 2px solid #00c6ff; position: sticky; left: 0; z-index: 5; }
+        thead th { background: #0b0d26; color: #fff; vertical-align: middle; border-bottom: 2px solid #00c6ff; position: sticky; top: 0; z-index: 4; }
+        thead th.q-col { color: #ffc107; text-align: center; z-index: 6; }
+
+        .dl-icon-btn { background: rgba(0, 198, 255, 0.1); color: white; border: 1px solid #00c6ff; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 16px; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; }
+
+        /* ==========================================
+           🔥 MOBILE VIEW FIX (आपकी पिछली समस्या का हल)
+           ========================================== */
         @media (max-width: 768px) {
             .header { flex-direction: column; gap: 12px; padding: 15px 10px; }
             .header-center { order: 1; }
             .header-side { order: 2; width: 100%; justify-content: center !important; }
             .header-side.right { order: 3; }
-            .btn-cert, .btn-home { width: 90%; justify-content: center; padding: 12px; font-size: 14px; }
+
+            .q-col { width: 140px !important; max-width: 140px !important; padding: 10px 8px !important; }
+            .q-col div { font-size: 11px !important; line-height: 1.3 !important; }
+            .q-col .dl-icon-btn { padding: 4px 6px; font-size: 12px; }
+            th:not(.q-col), td:not(.q-col) { min-width: 90px !important; max-width: 120px !important; padding: 10px !important; font-size: 12px !important; }
         }
 
-        /* SMART TABLE LAYOUT */
-        .table-container {
-            display: flex; justify-content: center; padding: 25px 15px; width: 100%; box-sizing: border-box;
-        }
+        /* ==========================================
+           🚀 NAYA: FULLSCREEN ZOOM MODAL CSS
+           ========================================== */
+        .zoom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020111; z-index: 9999; flex-direction: column; }
+        .zoom-modal-header { background: #10143a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00c6ff; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .zoom-controls { display: flex; gap: 10px; }
+        .btn-zoom { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-zoom:active { background: #00ff00; color: #000; }
+        .btn-close-modal { background: rgba(255, 76, 76, 0.2); color: #ff4c4c; border: 1px solid #ff4c4c; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .zoom-modal-body { flex: 1; overflow: auto; padding: 15px; display: flex; justify-content: center; align-items: flex-start; }
 
-        .table-wrapper {
-            max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-            background: #10143a; border-radius: 12px; border: 2px solid #00c6ff;
-            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.2);
-        }
-
-        table { border-collapse: collapse; width: max-content; }
-        th, td { border: 1px solid #2a2e5c; padding: 15px; text-align: center; font-size: 13px; vertical-align: middle; cursor: pointer; }
-
-        th:not(.q-col), td:not(.q-col) { min-width: 130px; max-width: 180px; }
-
-        .q-col {
-            background: #0b0d26; width: 250px; max-width: 250px; text-align: left;
-            white-space: normal; word-wrap: break-word; border-right: 2px solid #00c6ff;
-            position: sticky; left: 0; z-index: 5;
-        }
-
-        thead th {
-            background: #0b0d26; color: #fff; vertical-align: middle;
-            border-bottom: 2px solid #00c6ff; position: sticky; top: 0; z-index: 4;
-        }
-
-        thead th.q-col { color: #ffc107; text-align: center; z-index: 6; }
-
-        /* 🚀 NAYA: Download Icon CSS */
-        .dl-icon-btn {
-            background: rgba(0, 198, 255, 0.1);
-            color: white;
-            border: 1px solid #00c6ff;
-            border-radius: 6px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .dl-icon-btn:hover {
-            background: #00c6ff;
-            box-shadow: 0 0 10px #00c6ff;
-            transform: scale(1.1);
-        }
-
-        /* POPUP CSS */
-        .toast-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 2999; display: none; }
-        #infoToast { position: fixed; bottom: -100%; left: 0; width: 100%; max-height: 85vh; overflow-y: auto; background: #10143a; border-top: 3px solid #00c6ff; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; z-index: 3000; transition: 0.3s ease-in-out; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); }
+        /* Answer Popup CSS (Old) */
+        .toast-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 10000; display: none; }
+        #infoToast { position: fixed; bottom: -100%; left: 0; width: 100%; max-height: 85vh; overflow-y: auto; background: #10143a; border-top: 3px solid #00c6ff; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; z-index: 10001; transition: 0.3s ease-in-out; }
         #infoToast.show { bottom: 0; }
         .toast-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px; }
         .toast-header h3 { margin: 0; color: #ffc107; font-size: 16px; }
@@ -119,48 +103,37 @@
     <div class="header">
         <div class="header-side left">
             {% if student_data %}
-            <a href="{% url 'test_answer_key' test.id %}" class="btn-cert">
-                📝 Rank 1 Certificate ⬇️
-            </a>
+            <a href="{% url 'test_answer_key' test.id %}" class="btn-cert">📝 Rank 1 Certificate ⬇️</a>
             {% endif %}
         </div>
-
         <div class="header-center">
             <h2>🏆 Scoreboard</h2>
             <p style="color:#ccc; margin:5px 0 0; font-size:12px;">Conducted By: <span style="color:#00c6ff; font-weight:bold; text-transform:uppercase;">{{ test.teacher.coaching_name }}</span></p>
         </div>
-
         <div class="header-side right">
             {% if student_data %}
-            <a href="{% if request.user.role == 'TEACHER' %}{% url 'teacher_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn-home">
-                🏠 Back to Home
-            </a>
+            <a href="{% if request.user.role == 'TEACHER' %}{% url 'teacher_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn-home">🏠 Back to Home</a>
             {% endif %}
         </div>
     </div>
 
-    <!-- Table Container -->
-    <div class="table-container">
+    <!-- 🚀 NAYA: बटन जो टेबल को पॉपअप में खोलेगा -->
+    <button class="btn-zoom-popup" onclick="openZoomModal()">🔍 View in Fullscreen (Zoom)</button>
+
+    <!-- Normal Table Container -->
+    <div class="table-container" id="normal-table-container">
         <div class="table-wrapper" id="capture-table">
             <table>
                 <thead>
                     <tr>
                         <th class="q-col">
-                            <!-- 🚀 NAYA: Flexbox for text on left and download icon on right -->
                             <div style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
-                                <div>
-                                    📝 प्रश्न <br><span style="font-size:10px; color:#aaa;">(उत्तर पर टच करें)</span>
-                                </div>
-
-                                <!-- 🚀 NAYA: Download Icon Button -->
+                                <div>📝 प्रश्न <br><span style="font-size:10px; color:#aaa;">(उत्तर पर टच करें)</span></div>
                                 {% if student_data %}
-                                <div class="dl-icon-btn" onclick="downloadScoreboard(this)" title="Download Scoreboard">
-                                    ⬇️
-                                </div>
+                                <div class="dl-icon-btn" onclick="downloadScoreboard(this)" title="Download Scoreboard">⬇️</div>
                                 {% endif %}
                             </div>
                         </th>
-
                         {% for student in student_data %}
                         <th>{% if student.rank == 1 %}🥇<br>{% endif %}{{ student.name }}<br><span style="color:#00c6ff;">({{ student.score }})</span></th>
                         {% endfor %}
@@ -168,12 +141,7 @@
                 </thead>
                 <tbody>
                     {% if not student_data %}
-                    <tr>
-                        <td colspan="100%" style="padding: 50px; font-size: 18px; color: #ffc107; text-align: center; border: none;">
-                            ⏳ टेस्ट अभी लाइव है और चल रहा है...<br>
-                            <span style="font-size: 14px; color: #ccc;">(अभी तक किसी भी छात्र ने अपना टेस्ट सबमिट नहीं किया है।)</span>
-                        </td>
-                    </tr>
+                    <tr><td colspan="100%" style="padding: 50px; font-size: 18px; color: #ffc107; text-align: center; border: none;">⏳ टेस्ट अभी लाइव है...<br><span style="font-size: 14px; color: #ccc;">(अभी तक किसी ने सबमिट नहीं किया है।)</span></td></tr>
                     {% else %}
                         {% for row in rows %}
                         <tr>
@@ -181,7 +149,6 @@
                                 <div style="font-weight:bold; color:#00c6ff; margin-bottom: 5px;">Q{{ row.q_number }}</div>
                                 <div style="font-size:12px; color:#ccc; line-height:1.4;">{{ row.q_text }}</div>
                             </td>
-
                             {% for cell in row.cells %}
                             <td onclick="showCellInfo('Q{{ row.q_number }}', '{{ row.q_text|escapejs }}', '{{ row.opt_a|escapejs }}', '{{ row.opt_b|escapejs }}', '{{ row.opt_c|escapejs }}', '{{ row.opt_d|escapejs }}', '{{ row.correct_ans|escapejs }}', '{{ cell.selected_letter|default:''|escapejs }}', '{{ cell.student_name|escapejs }}')"
                                 style="font-weight:bold; color: white; {% if cell.is_correct == True %}background:#198754;{% elif cell.is_correct == False %}background:#dc3545;{% endif %}">
@@ -196,55 +163,78 @@
         </div>
     </div>
 
-    <!-- POPUP HTML -->
+    <!-- 🚀 NAYA: THE FULLSCREEN ZOOM MODAL -->
+    <div id="zoomScoreboardModal" class="zoom-modal">
+        <div class="zoom-modal-header">
+            <h3 style="color:#ffc107; margin:0; font-size:18px;">🔍 Zoom Mode</h3>
+            <div class="zoom-controls">
+                <button class="btn-zoom" onclick="zoomTable(0.2)">➕ In</button>
+                <button class="btn-zoom" onclick="zoomTable(-0.2)">➖ Out</button>
+                <button class="btn-close-modal" onclick="closeZoomModal()">✖ Close</button>
+            </div>
+        </div>
+        <!-- Table will be dynamically moved here when opened -->
+        <div class="zoom-modal-body" id="zoomModalBody"></div>
+    </div>
+
+    <!-- Info Popup (Answer details) -->
     <div class="toast-overlay" id="infoOverlay" onclick="closeToast()"></div>
     <div id="infoToast">
-        <div class="toast-header">
-            <h3 id="toastQNum">Question 1</h3>
-            <button class="close-btn" onclick="closeToast()">✖</button>
-        </div>
-        <div class="toast-q-text" id="toastQText">Loading question text...</div>
+        <div class="toast-header"><h3 id="toastQNum">Question 1</h3><button class="close-btn" onclick="closeToast()">✖</button></div>
+        <div class="toast-q-text" id="toastQText">Loading...</div>
         <div class="toast-options-container">
-            <div class="toast-opt" id="t_opt_A"></div>
-            <div class="toast-opt" id="t_opt_B"></div>
-            <div class="toast-opt" id="t_opt_C"></div>
-            <div class="toast-opt" id="t_opt_D"></div>
+            <div class="toast-opt" id="t_opt_A"></div><div class="toast-opt" id="t_opt_B"></div>
+            <div class="toast-opt" id="t_opt_C"></div><div class="toast-opt" id="t_opt_D"></div>
         </div>
-        <div class="toast-ans" id="toastAnsBox">
-            <span id="toastAnsText">Loading answer...</span>
-        </div>
+        <div class="toast-ans" id="toastAnsBox"><span id="toastAnsText">Loading answer...</span></div>
     </div>
 
     <script>
+        // 🚀 NAYA: Zoom Modal Logic
+        let currentZoom = 1;
+
+        function openZoomModal() {
+            // Move the table from the page into the Modal
+            let table = document.getElementById('capture-table');
+            document.getElementById('zoomModalBody').appendChild(table);
+            document.getElementById('zoomScoreboardModal').style.display = 'flex';
+
+            // Reset Zoom
+            currentZoom = 1;
+            table.style.zoom = currentZoom;
+        }
+
+        function closeZoomModal() {
+            // Move the table back to the normal page
+            let table = document.getElementById('capture-table');
+            table.style.zoom = 1; // Reset before putting it back
+            document.getElementById('normal-table-container').appendChild(table);
+            document.getElementById('zoomScoreboardModal').style.display = 'none';
+        }
+
+        function zoomTable(step) {
+            currentZoom += step;
+            // Limit zoom scale (0.5x to 2.5x)
+            if (currentZoom < 0.5) currentZoom = 0.5;
+            if (currentZoom > 2.5) currentZoom = 2.5;
+            document.getElementById('capture-table').style.zoom = currentZoom;
+        }
+
+        // Old info logic
         function showCellInfo(qNum, qText, optA, optB, optC, optD, correctAns, studentAns, studentName) {
             document.getElementById('toastQNum').innerHTML = `<span style="color:#fff;">${qNum}</span> - 🧑‍🎓 ${studentName}`;
             document.getElementById('toastQText').innerText = qText;
-
-            const options = ['A', 'B', 'C', 'D'];
-            const optTexts = { 'A': optA, 'B': optB, 'C': optC, 'D': optD };
-
+            const options = ['A', 'B', 'C', 'D']; const optTexts = { 'A': optA, 'B': optB, 'C': optC, 'D': optD };
             options.forEach(opt => {
                 let el = document.getElementById('t_opt_' + opt);
-                el.innerHTML = `${opt}. ${optTexts[opt]}`;
-                el.className = 'toast-opt';
+                el.innerHTML = `${opt}. ${optTexts[opt]}`; el.className = 'toast-opt';
                 if (opt === correctAns) { el.classList.add('correct'); el.innerHTML += ' ✅ (Correct)'; }
                 if (opt === studentAns && studentAns !== correctAns) { el.classList.add('wrong'); el.innerHTML += ' ❌ (Your Choice)'; }
             });
-
-            let ansBox = document.getElementById('toastAnsBox');
-            let ansText = document.getElementById('toastAnsText');
-
-            if (studentAns === correctAns) {
-                ansBox.style.borderLeftColor = "#00ff00";
-                ansText.innerHTML = `Student Answer: <strong style="color:#00ff00;">Option ${studentAns}</strong> (✅ Correct)`;
-            } else if (studentAns && studentAns !== correctAns) {
-                ansBox.style.borderLeftColor = "#ff4c4c";
-                ansText.innerHTML = `Student Answer: <strong style="color:#ff4c4c;">Option ${studentAns}</strong> (❌ Wrong)`;
-            } else {
-                ansBox.style.borderLeftColor = "#ffc107";
-                ansText.innerHTML = `Student Answer: <strong style="color:#ffc107;">Skipped / Not Attempted</strong> (⚠️)`;
-            }
-
+            let ansBox = document.getElementById('toastAnsBox'); let ansText = document.getElementById('toastAnsText');
+            if (studentAns === correctAns) { ansBox.style.borderLeftColor = "#00ff00"; ansText.innerHTML = `Student Answer: <strong style="color:#00ff00;">Option ${studentAns}</strong> (✅)`; }
+            else if (studentAns && studentAns !== correctAns) { ansBox.style.borderLeftColor = "#ff4c4c"; ansText.innerHTML = `Student Answer: <strong style="color:#ff4c4c;">Option ${studentAns}</strong> (❌)`; }
+            else { ansBox.style.borderLeftColor = "#ffc107"; ansText.innerHTML = `Student Answer: <strong style="color:#ffc107;">Skipped</strong> (⚠️)`; }
             document.getElementById('infoOverlay').style.display = 'block';
             setTimeout(() => { document.getElementById('infoToast').classList.add('show'); }, 10);
         }
@@ -254,32 +244,20 @@
             setTimeout(() => { document.getElementById('infoOverlay').style.display = 'none'; }, 300);
         }
 
-        // 🚀 NAYA: Scoreboard Image Download Logic
         function downloadScoreboard(btnElement) {
-            // बटन को लोडिंग स्टेट में डालें
-            var oldHtml = btnElement.innerHTML;
-            btnElement.innerHTML = '⏳';
-
+            var oldHtml = btnElement.innerHTML; btnElement.innerHTML = '⏳';
             var tableNode = document.getElementById('capture-table');
 
-            // टेबल की फोटो कैप्चर करें
-            html2canvas(tableNode, {
-                scale: 2,
-                backgroundColor: '#0b0d26',
-                useCORS: true
-            }).then(function(canvas) {
-                // इमेज को डाउनलोड करें
-                var link = document.createElement('a');
-                link.download = 'Scoreboard_{{ test.test_code }}.jpg';
-                link.href = canvas.toDataURL('image/jpeg', 1.0);
-                link.click();
+            // अगर ज़ूम मोड में डाउनलोड हो रहा है तो ज़ूम हटाकर फोटो लें
+            let tempZoom = tableNode.style.zoom;
+            tableNode.style.zoom = 1;
 
-                // बटन वापस नार्मल करें
+            html2canvas(tableNode, { scale: 2, backgroundColor: '#0b0d26', useCORS: true }).then(function(canvas) {
+                var link = document.createElement('a'); link.download = 'Scoreboard_{{ test.test_code }}.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 1.0); link.click();
                 btnElement.innerHTML = oldHtml;
-            }).catch(function(error) {
-                alert("Download Failed! Please try again.");
-                btnElement.innerHTML = oldHtml;
-            });
+                tableNode.style.zoom = tempZoom; // वापस ज़ूम सेट करें
+            }).catch(function(error) { alert("Download Failed!"); btnElement.innerHTML = oldHtml; });
         }
     </script>
 </body>
