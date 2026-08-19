@@ -35,7 +35,7 @@
         .form-control { flex-grow: 1; min-width: 200px; padding: 12px; background: #050714; color: white; border: 1px solid #ffc107; border-radius: 5px; box-sizing: border-box; outline: none; }
         .form-control:focus { border-color: #00c6ff; box-shadow: 0 0 8px rgba(0, 198, 255, 0.5); }
 
-        /* 🚀 NAYA: Inline Buttons including Edit */
+        /* Inline Buttons including Edit */
         .btn-add-new { background: rgba(0, 198, 255, 0.1); border: 1px dashed #00c6ff; color: #00c6ff; padding: 0 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 42px; display: flex; align-items: center; justify-content: center; }
         .btn-add-new:hover { background: #00c6ff; color: #0b0d26; }
 
@@ -212,12 +212,61 @@
         </div>
     </div>
 
+    <!-- THEME MATCHING CUSTOM ALERT MODAL -->
+    <div class="custom-confirm-modal" id="customAlertOverlay">
+        <div class="custom-confirm-content" style="border-color: #00c6ff; box-shadow: 0 10px 30px rgba(0, 198, 255, 0.4);">
+            <h3 id="caTitle" style="color: #00c6ff; margin-top: 0; font-size: 22px;">ℹ️ Message</h3>
+            <p id="caMessage" style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px;"></p>
+            <button class="btn-submit" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
     <script>
         function toggleSidebar() {
             let s = document.getElementById('teacherSidebar');
             let o = document.getElementById('sidebarOverlay');
             s.classList.toggle('open');
             o.style.display = s.classList.contains('open') ? 'block' : 'none';
+        }
+
+        // ==========================================
+        // 🚀 Custom Alert & Confirm Modals
+        // ==========================================
+        function showCustomAlert(title, message, reloadOnClose = false) {
+            document.getElementById('caTitle').innerHTML = title;
+            document.getElementById('caMessage').innerText = message;
+            document.getElementById('customAlertOverlay').style.display = 'flex';
+            document.getElementById('customAlertOverlay').dataset.reload = reloadOnClose;
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('customAlertOverlay').style.display = 'none';
+            if(document.getElementById('customAlertOverlay').dataset.reload === 'true') {
+                location.reload();
+            }
+        }
+
+        let pendingDeleteCallback = null;
+
+        function showCustomConfirm(title, message, callback) {
+            document.getElementById('ccTitle').innerHTML = title;
+            document.getElementById('ccMessage').innerText = message;
+            pendingDeleteCallback = callback;
+            document.getElementById('customConfirmOverlay').style.display = 'flex';
+        }
+
+        function closeCustomConfirm() {
+            document.getElementById('customConfirmOverlay').style.display = 'none';
+            pendingDeleteCallback = null;
+        }
+
+        function executeCustomConfirm() {
+            if (pendingDeleteCallback) pendingDeleteCallback();
+            closeCustomConfirm();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         // ==========================================
@@ -255,17 +304,13 @@
             });
         });
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
         // ==========================================
         // 🚀 1. Add New Category Logic
         // ==========================================
         function openAddModal(type) {
             let title = '';
-            if(type === 'subject' && !document.getElementById('examSelect').value) { alert('⚠️ कृपया पहले Exam/Course सेलेक्ट करें!'); return; }
-            if(type === 'chapter' && !document.getElementById('subjectSelect').value) { alert('⚠️ कृपया पहले Subject सेलेक्ट करें!'); return; }
+            if(type === 'subject' && !document.getElementById('examSelect').value) { showCustomAlert('⚠️ ध्यान दें', 'कृपया पहले Exam/Course सेलेक्ट करें!'); return; }
+            if(type === 'chapter' && !document.getElementById('subjectSelect').value) { showCustomAlert('⚠️ ध्यान दें', 'कृपया पहले Subject सेलेक्ट करें!'); return; }
 
             if(type === 'exam') title = 'Add New Course / Exam';
             if(type === 'subject') title = 'Add New Subject';
@@ -282,7 +327,7 @@
         function saveCategory() {
             let type = document.getElementById('categoryType').value;
             let name = document.getElementById('newCategoryName').value.trim();
-            if(!name) { alert("⚠️ कृपया नाम दर्ज करें!"); return; }
+            if(!name) { showCustomAlert('⚠️ ध्यान दें', 'कृपया नाम दर्ज करें!'); return; }
 
             let parent_id = '';
             if(type === 'subject') parent_id = document.getElementById('examSelect').value;
@@ -297,7 +342,7 @@
                     selectBox.add(new Option(data.name, data.id, true, true));
                     selectBox.dispatchEvent(new Event('change'));
                     closeModal('addCategoryModal');
-                } else { alert(data.message); }
+                } else { showCustomAlert('❌ त्रुटि', data.message); }
             });
         }
 
@@ -309,11 +354,10 @@
             let selectedId = selectBox.value;
 
             if (!selectedId) {
-                alert(`⚠️ कृपया पहले ड्रॉपडाउन में से किसी एक को चुनें जिसे आप बदलना चाहते हैं!`);
+                showCustomAlert('⚠️ ध्यान दें', 'कृपया पहले ड्रॉपडाउन में से किसी एक को चुनें जिसे आप बदलना चाहते हैं!');
                 return;
             }
 
-            // Get current name from dropdown
             let currentName = selectBox.options[selectBox.selectedIndex].text;
 
             let title = '';
@@ -330,7 +374,7 @@
             setTimeout(() => {
                 let input = document.getElementById('renameCategoryName');
                 input.focus();
-                input.select(); // Highlight the text automatically
+                input.select();
             }, 100);
         }
 
@@ -339,48 +383,27 @@
             let id = document.getElementById('renameCategoryId').value;
             let newName = document.getElementById('renameCategoryName').value.trim();
 
-            if(!newName) { alert("⚠️ नया नाम खाली नहीं हो सकता!"); return; }
+            if(!newName) { showCustomAlert('⚠️ ध्यान दें', 'नया नाम खाली नहीं हो सकता!'); return; }
 
             fetch("{% url 'api_rename_category' %}", {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                 body: JSON.stringify({ 'type': type, 'id': id, 'new_name': newName })
             }).then(res => res.json()).then(data => {
                 if(data.status === 'success') {
-                    // Update dropdown option text instantly without reloading
                     let selectBox = document.getElementById(type + 'Select');
                     selectBox.options[selectBox.selectedIndex].text = newName;
-
-                    alert(data.message);
                     closeModal('renameCategoryModal');
-                } else { alert(data.message); }
+                    showCustomAlert('✅ सफलता', data.message);
+                } else { showCustomAlert('❌ त्रुटि', data.message); }
             });
         }
 
         // ==========================================
-        // 🚀 3. Delete Logic Using Custom Modal
+        // 🚀 3. Delete Logic
         // ==========================================
-        let pendingDeleteCallback = null;
-
-        function showCustomConfirm(title, message, callback) {
-            document.getElementById('ccTitle').innerHTML = title;
-            document.getElementById('ccMessage').innerText = message;
-            pendingDeleteCallback = callback;
-            document.getElementById('customConfirmOverlay').style.display = 'flex';
-        }
-
-        function closeCustomConfirm() {
-            document.getElementById('customConfirmOverlay').style.display = 'none';
-            pendingDeleteCallback = null;
-        }
-
-        function executeCustomConfirm() {
-            if (pendingDeleteCallback) pendingDeleteCallback();
-            closeCustomConfirm();
-        }
-
         function emptySelectedChapter() {
             let chapterId = document.getElementById('chapterSelect').value;
-            if (!chapterId) { alert("⚠️ कृपया पहले ड्रॉपडाउन में से एक चैप्टर चुनें!"); return; }
+            if (!chapterId) { showCustomAlert('⚠️ ध्यान दें', 'कृपया पहले ड्रॉपडाउन में से एक चैप्टर चुनें!'); return; }
 
             showCustomConfirm(
                 "🚨 प्रश्न डिलीट करें",
@@ -390,7 +413,8 @@
                         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                         body: JSON.stringify({ 'chapter_id': chapterId })
                     }).then(res => res.json()).then(data => {
-                        if (data.status === 'success') { alert(data.message); location.reload(); } else { alert(data.message); }
+                        if (data.status === 'success') { showCustomAlert('✅ सफलता', data.message, true); }
+                        else { showCustomAlert('❌ त्रुटि', data.message); }
                     });
                 }
             );
@@ -404,20 +428,19 @@
             else if (type === 'subject') { categoryId = selectBox.value; categoryName = "विषय (Subject)"; }
             else if (type === 'chapter') { categoryId = selectBox.value; categoryName = "चैप्टर (Series)"; }
 
-            if (!categoryId) { alert(`⚠️ कृपया पहले ड्रॉपडाउन में से एक ${categoryName} चुनें!`); return; }
+            if (!categoryId) { showCustomAlert('⚠️ ध्यान दें', `कृपया पहले ड्रॉपडाउन में से एक ${categoryName} चुनें!`); return; }
 
             showCustomConfirm(
                 `🚨 ${categoryName} डिलीट करें`,
-                `खतरा! क्या आप वाकई इस पूरे ${categoryName} को हमेशा के लिए डिलीट करना चाहते हैं?\n\nइसके अंदर मौजूद सभी सब्जेक्ट, चैप्टर और प्रश्न हमेशा के लिए डिलीट हो जाएंगे!`,
+                `क्या आप वाकई इस पूरे ${categoryName} को हमेशा के लिए डिलीट करना चाहते हैं?\n\nइसके अंदर मौजूद सभी सब्जेक्ट, चैप्टर और प्रश्न हमेशा के लिए डिलीट हो जाएंगे!`,
                 function() {
                     fetch('/api/delete-category/', {
                         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
                         body: JSON.stringify({ 'type': type, 'id': categoryId })
                     }).then(res => res.json()).then(data => {
                         if (data.status === 'success') {
-                            alert(data.message);
-                            location.reload();
-                        } else { alert(data.message); }
+                            showCustomAlert('✅ सफलता', data.message, true);
+                        } else { showCustomAlert('❌ त्रुटि', data.message); }
                     });
                 }
             );

@@ -10,9 +10,18 @@
         .top-bar { background: #10143a; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00c6ff; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .top-bar h2 { margin: 0; color: #00c6ff; font-size: 20px; }
 
+        /* 🚀 NAYA: Sidebar Styles */
+        .menu-btn { font-size: 24px; background: none; border: none; color: #ffc107; cursor: pointer; margin-right: 15px; padding: 0; display: flex; align-items: center; justify-content: center; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 4000; display: none; backdrop-filter: blur(2px); }
+        .sidebar { position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: #10143a; z-index: 4001; transition: left 0.3s ease-out; border-right: 2px solid #ffc107; box-shadow: 5px 0 20px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 15px 20px; background: #0b0d26; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; }
+        .sidebar-menu { padding: 15px; list-style: none; margin: 0; }
+        .menu-link { display: block; padding: 12px; background: rgba(255,255,255,0.05); color: white; text-decoration: none; border-radius: 5px; border-left: 4px solid #00c6ff; margin-bottom: 10px; font-size: 14px; font-weight: bold; transition: 0.3s; }
+        .menu-link:hover { background: rgba(255,255,255,0.1); }
+
         .main-container { padding: 20px; max-width: 900px; margin: auto; }
 
-        /* 🚀 NAYA: Search Bar Styles */
         .search-container { position: sticky; top: 60px; background: #0b0d26; padding: 15px 0; z-index: 90; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .search-input-wrapper { flex-grow: 1; position: relative; }
         .search-input { width: 100%; padding: 12px 20px 12px 40px; border-radius: 25px; border: 1px solid #ffc107; background: #050714; color: white; outline: none; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
@@ -23,7 +32,6 @@
         .question-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #444; display: flex; gap: 15px; align-items: flex-start; flex-direction: column; transition: 0.3s; }
         .question-item:hover { background: rgba(255,255,255,0.1); border-color: #ffc107; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.1); }
 
-        /* 🚀 NAYA: Tags Style */
         .q-tags { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         .tag-exam { border: 1px solid #00c6ff; color: #00c6ff; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .tag-subject { border: 1px solid #ffc107; color: #ffc107; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
@@ -33,7 +41,6 @@
         .q-text { font-size: 15px; line-height: 1.5; flex-grow: 1; }
         .q-options { font-size: 13px; color: #aaa; margin-top: 8px; line-height: 1.6; }
 
-        /* 🚀 NAYA: Load More Button */
         .btn-load-more { background: transparent; border: 1px solid #00c6ff; color: #00c6ff; width: 100%; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; display: none; }
         .btn-load-more:hover { background: rgba(0, 198, 255, 0.1); }
 
@@ -74,8 +81,26 @@
 </head>
 <body>
 
+    <!-- 🚀 NAYA: Sidebar HTML -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="teacherSidebar">
+        <div class="sidebar-header">
+            <h2 style="color: #ffc107; margin: 0; font-size: 16px;">⚙️ QUICK TOOLS</h2>
+            <button onclick="toggleSidebar()" style="background: none; border: none; color: #ff4c4c; font-size: 20px; cursor: pointer;">✖</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'teacher_dashboard' %}" class="menu-link" style="border-left-color: #ffc107;">🏠 Back to Dashboard</a></li>
+            <li><a href="{% url 'choose_questions' %}" class="menu-link" style="border-left-color: #00c6ff; background: rgba(0, 198, 255, 0.1);">📚 Choose & Add Questions</a></li>
+            <li><a href="{% url 'upload_private_bank' %}" class="menu-link" style="border-left-color: #00ff00;">📤 Upload to Private Bank</a></li>
+        </ul>
+    </div>
+
     <div class="top-bar">
-        <h2>📚 Question Bank</h2>
+        <!-- 🚀 NAYA: Hamburger Menu Button inside Flex Container -->
+        <div style="display: flex; align-items: center;">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2>📚 Question Bank</h2>
+        </div>
         <a href="{% url 'teacher_dashboard' %}" style="color: #ccc; text-decoration: none; font-size: 24px;">✖</a>
     </div>
 
@@ -206,12 +231,19 @@
     </div>
 
     <script>
+        // 🚀 NAYA: Sidebar Toggle Logic
+        function toggleSidebar() {
+            let s = document.getElementById('teacherSidebar');
+            let o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('open');
+            o.style.display = s.classList.contains('open') ? 'block' : 'none';
+        }
+
         const privateExams = [ {% for e in private_exams %}{ id: {{e.id}}, name: "{{e.name}}" },{% endfor %} ];
         const globalExams = [ {% for e in global_exams %}{ id: {{e.id}}, name: "{{e.name}}" },{% endfor %} ];
 
         let selectedQuestions = new Map();
 
-        // 🚀 NAYA: Pagination & Search State Variables
         let currentBankType = 'PRIVATE';
         let currentFilterChapter = 'ALL';
         let currentSearchQuery = '';
@@ -253,7 +285,6 @@
 
             exams.forEach(e => { examSelect.innerHTML += `<option value="${e.id}">${e.name}</option>`; });
 
-            // 🚀 NAYA: Bank Switch करते ही डेटा रीसेट करें
             currentFilterChapter = 'ALL';
             currentSearchQuery = '';
             document.getElementById('searchInput').value = '';
@@ -295,7 +326,6 @@
             fetchData(false);
         }
 
-        // 🚀 NAYA: Search Bar Event Listener (Debouncing)
         let searchTimer;
         document.getElementById('searchInput').addEventListener('input', function(e) {
             clearTimeout(searchTimer);
@@ -309,10 +339,8 @@
                     fetchData(false);
                 }, 500); // 500ms wait
             } else if (val.length === 0 && currentSearchQuery.length >= 3) {
-                // अगर सर्च बॉक्स खाली कर दिया
                 currentSearchQuery = '';
                 currentPage = 1;
-                // अगर पहले से कोई फिल्टर लगा था, तो उसे वापस लगा दें
                 if(document.getElementById('filterChapter').value) {
                     currentFilterChapter = document.getElementById('filterChapter').value;
                 }
@@ -320,7 +348,6 @@
             }
         });
 
-        // 🚀 NAYA: Load More Button Click
         function loadMore() {
             currentPage++;
             let btn = document.getElementById('loadMoreBtn');
@@ -329,7 +356,6 @@
             fetchData(true);
         }
 
-        // 🚀 NAYA: Master Fetch Function (Handles Pagination & Search)
         function fetchData(append) {
             let listContainer = document.getElementById('questionsList');
             let loadBtn = document.getElementById('loadMoreBtn');
@@ -355,10 +381,9 @@
                     return;
                 }
 
-                // Show Heading
                 let bankBadge = currentBankType === 'PRIVATE' ? '<span style="background:#ffc107; color:black; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:bold; vertical-align:middle;">🔒 Private</span>' : '<span style="background:#00c6ff; color:black; padding:2px 8px; border-radius:5px; font-size:10px; font-weight:bold; vertical-align:middle;">🌍 Global</span>';
                 heading.style.display = 'block';
-                heading.innerHTML = currentSearchQuery ? `सर्च रिज़ल्ट्स: "${currentSearchQuery}" ${bankBadge}` : `प्रश्नों की सूची ${bankBadge}`;
+                heading.innerHTML = currentSearchQuery ? `सर्च रिज़ल्ट्स: "${currentSearchQuery}" ${bankBadge}` : `प्रश्नों की सूची ${bankBadge}`;
 
                 data.questions.forEach(q => {
                     let isChecked = selectedQuestions.has(q.id) ? 'checked' : '';
@@ -372,7 +397,6 @@
                         </div>`;
                     }
 
-                    // 🚀 NAYA: Category Tags (Like SANSKRIT, SOCIAL SCIENCE)
                     let tagsHtml = `<div class="q-tags">`;
                     if(q.exam) tagsHtml += `<span class="tag-exam">${q.exam}</span>`;
                     if(q.subject) tagsHtml += `<span class="tag-subject">${q.subject}</span>`;
@@ -402,7 +426,6 @@
                     listContainer.insertAdjacentHTML('beforeend', html);
                 });
 
-                // Pagination Logic
                 if (data.has_next) {
                     loadBtn.style.display = 'block';
                     loadBtn.innerText = '⬇️ Load More Questions';
