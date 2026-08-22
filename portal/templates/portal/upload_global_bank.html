@@ -7,7 +7,6 @@
     <style>
         body { background-color: #020111; color: white; font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
 
-        /* Header & Sidebar Styles */
         .header { position: sticky; top: 0; z-index: 999; background: rgba(11, 13, 38, 0.85); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00c6ff; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .coaching-brand { text-align: center; flex-grow: 1; }
         .coaching-brand h1 { margin: 0; font-size: 26px; text-transform: uppercase; font-weight: 900; background: linear-gradient(90deg, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -24,7 +23,6 @@
 
         .container { padding: 30px; max-width: 800px; margin: auto; }
 
-        /* Form Styles */
         .upload-card { background: #10143a; padding: 25px; border-radius: 10px; border: 1px solid #00c6ff; box-shadow: 0 10px 30px rgba(0, 198, 255, 0.2); }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 14px; color: #ccc; margin-bottom: 8px; }
@@ -32,7 +30,7 @@
         .form-control { flex-grow: 1; padding: 12px; background: #050714; color: white; border: 1px solid #00c6ff; border-radius: 5px; box-sizing: border-box; outline: none; }
         .form-control:focus { box-shadow: 0 0 8px rgba(0, 198, 255, 0.5); }
 
-        .btn-add-new { background: rgba(255, 193, 7, 0.1); border: 1px dashed #ffc107; color: #ffc107; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 44px; display: flex; align-items: center; }
+        .btn-add-new { background: rgba(255, 193, 7, 0.1); border: 1px dashed #ffc107; color: #ffc107; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; height: 44px; display: flex; align-items: center; flex-shrink: 0; }
         .btn-add-new:hover { background: rgba(255, 193, 7, 0.2); }
 
         .btn-upload { width: 100%; padding: 15px; font-size: 16px; font-weight: bold; background: linear-gradient(145deg, #00c6ff, #0072ff); color: white; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
@@ -42,7 +40,29 @@
         .alert-success { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; }
         .alert-error { background: rgba(255, 76, 76, 0.1); border: 1px solid #ff4c4c; color: #ff4c4c; }
 
-        /* Modal Styles */
+        .custom-select-wrapper { position: relative; flex: 1; min-width: 0; }
+        .custom-select {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; background: #050714; color: white; border: 1px solid #00c6ff;
+            border-radius: 5px; cursor: pointer; user-select: none; height: 44px; box-sizing: border-box;
+        }
+        .custom-select:focus, .custom-select.active { box-shadow: 0 0 8px rgba(0, 198, 255, 0.5); border-color: #00c6ff; }
+
+        .custom-select span.text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: block; flex: 1; margin-right: 10px; font-size: 14px;}
+        .custom-select span.icon { font-size: 12px; transition: transform 0.3s; color: #00c6ff; }
+        .custom-select.active span.icon { transform: rotate(180deg); }
+
+        .custom-options {
+            position: absolute; top: 100%; left: 0; right: 0; background: #0b0d26;
+            border: 1px solid #00c6ff; border-top: none; border-radius: 0 0 5px 5px;
+            max-height: 220px; overflow-y: auto; display: none; z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        }
+        .custom-options.show { display: block; }
+        .custom-option { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; transition: 0.2s; color: #ddd;}
+        .custom-option:hover { background: rgba(0, 198, 255, 0.2); padding-left: 20px; color: #ffc107; font-weight: bold;}
+        .custom-option:last-child { border-bottom: none; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: #10143a; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid #ffc107; }
         .btn-submit { width: 100%; background: #ffc107; color: black; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px; }
@@ -50,7 +70,6 @@
 </head>
 <body>
 
-    <!-- Sidebar HTML -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="teacherSidebar">
         <div class="sidebar-header">
@@ -61,15 +80,12 @@
             <li><a href="{% url 'teacher_dashboard' %}" class="menu-link">🏠 Back to Dashboard</a></li>
             <li><a href="{% url 'choose_questions' %}" class="menu-link">📚 View Question Bank</a></li>
             <li><a href="{% url 'upload_global_bank' %}" class="menu-link" style="border-left-color: #00c6ff; background: rgba(0, 198, 255, 0.1);">🌍 Upload to Global Bank</a></li>
-
-            <!-- 🚀 NEW: Logout Button -->
             <li style="margin-top: 30px;">
                 <a href="{% url 'logout' %}" class="menu-link" style="border-left-color: #ff4c4c; color: #ff4c4c; background: rgba(255, 76, 76, 0.05);">🚪 Logout</a>
             </li>
         </ul>
     </div>
 
-    <!-- Header -->
     <div class="header">
         <button class="menu-btn" onclick="toggleSidebar()">☰</button>
         <div class="coaching-brand">
@@ -92,18 +108,25 @@
         {% endif %}
 
         <div class="upload-card">
-            <form method="POST" enctype="multipart/form-data" action="{% url 'upload_global_bank' %}">
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" action="{% url 'upload_global_bank' %}">
                 {% csrf_token %}
 
                 <div class="form-group">
                     <label>1. Select Course/Exam</label>
                     <div class="input-group">
-                        <select name="exam_id" id="examSelect" class="form-control" required>
-                            <option value="">-- Select Exam --</option>
-                            {% for exam in exams %}
-                                <option value="{{ exam.id }}">{{ exam.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="custom-select-wrapper" id="examWrapper">
+                            <div class="custom-select" onclick="toggleDropdown('examDropdown', this)">
+                                <span class="text" id="examSelectedText">-- Select Exam --</span>
+                                <span class="icon">▼</span>
+                            </div>
+                            <div class="custom-options" id="examDropdown">
+                                <div class="custom-option" onclick="selectOption('exam', '', '-- Select Exam --')">-- Select Exam --</div>
+                                {% for exam in exams %}
+                                    <div class="custom-option" onclick="selectOption('exam', '{{ exam.id }}', '{{ exam.name|escapejs }}')">{{ exam.name }}</div>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="exam_id" id="examSelect">
+                        </div>
                         <button type="button" class="btn-add-new" onclick="openAddModal('exam')">➕ New</button>
                     </div>
                 </div>
@@ -111,9 +134,16 @@
                 <div class="form-group">
                     <label>2. Select Subject</label>
                     <div class="input-group">
-                        <select name="subject_id" id="subjectSelect" class="form-control" required>
-                            <option value="">-- First Select Exam --</option>
-                        </select>
+                        <div class="custom-select-wrapper" id="subjectWrapper">
+                            <div class="custom-select" onclick="toggleDropdown('subjectDropdown', this)">
+                                <span class="text" id="subjectSelectedText">-- First Select Exam --</span>
+                                <span class="icon">▼</span>
+                            </div>
+                            <div class="custom-options" id="subjectDropdown">
+                                <div class="custom-option" onclick="selectOption('subject', '', '-- First Select Exam --')">-- First Select Exam --</div>
+                            </div>
+                            <input type="hidden" name="subject_id" id="subjectSelect">
+                        </div>
                         <button type="button" class="btn-add-new" onclick="openAddModal('subject')">➕ New</button>
                     </div>
                 </div>
@@ -121,9 +151,16 @@
                 <div class="form-group">
                     <label>3. Select Chapter</label>
                     <div class="input-group">
-                        <select name="chapter_id" id="chapterSelect" class="form-control" required>
-                            <option value="">-- First Select Subject --</option>
-                        </select>
+                        <div class="custom-select-wrapper" id="chapterWrapper">
+                            <div class="custom-select" onclick="toggleDropdown('chapterDropdown', this)">
+                                <span class="text" id="chapterSelectedText">-- First Select Subject --</span>
+                                <span class="icon">▼</span>
+                            </div>
+                            <div class="custom-options" id="chapterDropdown">
+                                <div class="custom-option" onclick="selectOption('chapter', '', '-- First Select Subject --')">-- First Select Subject --</div>
+                            </div>
+                            <input type="hidden" name="chapter_id" id="chapterSelect">
+                        </div>
                         <button type="button" class="btn-add-new" onclick="openAddModal('chapter')">➕ New</button>
                     </div>
                 </div>
@@ -139,24 +176,19 @@
         </div>
     </div>
 
-    <!-- 🚀 ADD NEW CATEGORY MODAL -->
     <div class="modal" id="addCategoryModal">
         <div class="modal-content">
             <h3 id="modalTitle" style="color:#ffc107; margin-top:0;">➕ Add New</h3>
             <p id="modalDesc" style="font-size: 12px; color: #aaa;">नया नाम यहाँ टाइप करें:</p>
-
             <input type="hidden" id="categoryType">
-
             <div class="form-group">
                 <input type="text" id="newCategoryName" class="form-control" placeholder="Enter name here..." autocomplete="off">
             </div>
-
             <button type="button" onclick="saveCategory()" class="btn-submit">💾 Save & Select</button>
             <button type="button" onclick="closeModal()" style="width:100%; background:transparent; border:none; color:#ff4c4c; padding:10px; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
-    <!-- SCRIPT (SAME AS PRIVATE UPLOAD) -->
     <script>
         function toggleSidebar() {
             let s = document.getElementById('teacherSidebar');
@@ -165,36 +197,76 @@
             o.style.display = s.classList.contains('open') ? 'block' : 'none';
         }
 
-        document.getElementById('examSelect').addEventListener('change', function() {
-            let examId = this.value;
-            let subSelect = document.getElementById('subjectSelect');
-            let chapSelect = document.getElementById('chapterSelect');
+        function toggleDropdown(dropdownId, selectElement) {
+            document.querySelectorAll('.custom-options').forEach(el => { if(el.id !== dropdownId) el.classList.remove('show'); });
+            document.querySelectorAll('.custom-select').forEach(el => { if(el !== selectElement) el.classList.remove('active'); });
 
-            if(!examId) {
-                subSelect.innerHTML = '<option value="">-- First Select Exam --</option>';
-                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
-                return;
+            document.getElementById(dropdownId).classList.toggle('show');
+            selectElement.classList.toggle('active');
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.custom-options').forEach(el => el.classList.remove('show'));
+                document.querySelectorAll('.custom-select').forEach(el => el.classList.remove('active'));
             }
-            subSelect.innerHTML = '<option value="">Loading...</option>';
-            fetch(`/api/get-subjects/?exam_id=${examId}`).then(res => res.json()).then(data => {
-                subSelect.innerHTML = '<option value="">-- Select Subject --</option>';
-                data.subjects.forEach(s => subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
-                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
-            });
         });
 
-        document.getElementById('subjectSelect').addEventListener('change', function() {
-            let subId = this.value;
-            let chapSelect = document.getElementById('chapterSelect');
-            if(!subId) {
-                chapSelect.innerHTML = '<option value="">-- First Select Subject --</option>';
-                return;
+        function selectOption(type, id, text) {
+            document.getElementById(type + 'SelectedText').innerText = text;
+            document.getElementById(type + 'Select').value = id;
+            document.getElementById(type + 'Dropdown').classList.remove('show');
+            document.querySelector('#' + type + 'Wrapper .custom-select').classList.remove('active');
+
+            if (type === 'exam') {
+                document.getElementById('subjectSelectedText').innerText = id ? 'Loading...' : '-- First Select Exam --';
+                document.getElementById('subjectSelect').value = '';
+                document.getElementById('chapterSelectedText').innerText = '-- First Select Subject --';
+                document.getElementById('chapterSelect').value = '';
+                document.getElementById('chapterDropdown').innerHTML = '<div class="custom-option" onclick="selectOption(\'chapter\', \'\', \'-- First Select Subject --\')">-- First Select Subject --</div>';
+
+                if (id) {
+                    fetch(`/api/get-subjects/?exam_id=${id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('subjectSelectedText').innerText = '-- Select Subject --';
+                            let html = '<div class="custom-option" onclick="selectOption(\'subject\', \'\', \'-- Select Subject --\')">-- Select Subject --</div>';
+                            data.subjects.forEach(s => {
+                                let escapedName = s.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                                html += `<div class="custom-option" onclick="selectOption('subject', '${s.id}', '${escapedName}')">${s.name}</div>`;
+                            });
+                            document.getElementById('subjectDropdown').innerHTML = html;
+                        });
+                } else {
+                    document.getElementById('subjectDropdown').innerHTML = '<div class="custom-option" onclick="selectOption(\'subject\', \'\', \'-- First Select Exam --\')">-- First Select Exam --</div>';
+                }
             }
-            chapSelect.innerHTML = '<option value="">Loading...</option>';
-            fetch(`/api/get-chapters/?subject_id=${subId}`).then(res => res.json()).then(data => {
-                chapSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
-                data.chapters.forEach(c => chapSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`);
-            });
+            else if (type === 'subject') {
+                document.getElementById('chapterSelectedText').innerText = id ? 'Loading...' : '-- First Select Subject --';
+                document.getElementById('chapterSelect').value = '';
+
+                if (id) {
+                    fetch(`/api/get-chapters/?subject_id=${id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('chapterSelectedText').innerText = '-- Select Chapter --';
+                            let html = '<div class="custom-option" onclick="selectOption(\'chapter\', \'\', \'-- Select Chapter --\')">-- Select Chapter --</div>';
+                            data.chapters.forEach(c => {
+                                let escapedName = c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                                html += `<div class="custom-option" onclick="selectOption('chapter', '${c.id}', '${escapedName}')">${c.name}</div>`;
+                            });
+                            document.getElementById('chapterDropdown').innerHTML = html;
+                        });
+                } else {
+                    document.getElementById('chapterDropdown').innerHTML = '<div class="custom-option" onclick="selectOption(\'chapter\', \'\', \'-- First Select Subject --\')">-- First Select Subject --</div>';
+                }
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            if (!document.getElementById('examSelect').value) { e.preventDefault(); alert('⚠️ कृपया Course/Exam चुनें!'); return; }
+            if (!document.getElementById('subjectSelect').value) { e.preventDefault(); alert('⚠️ कृपया Subject चुनें!'); return; }
+            if (!document.getElementById('chapterSelect').value) { e.preventDefault(); alert('⚠️ कृपया Chapter चुनें!'); return; }
         });
 
         function openAddModal(type) {
@@ -235,14 +307,11 @@
             }).then(res => res.json()).then(data => {
                 btn.innerText = "💾 Save & Select"; btn.disabled = false;
                 if(data.status === 'success') {
-                    let selectBox;
-                    if(type === 'exam') selectBox = document.getElementById('examSelect');
-                    if(type === 'subject') selectBox = document.getElementById('subjectSelect');
-                    if(type === 'chapter') selectBox = document.getElementById('chapterSelect');
+                    let escapedName = data.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-                    let newOption = new Option(data.name, data.id, true, true);
-                    selectBox.add(newOption);
-                    selectBox.dispatchEvent(new Event('change'));
+                    document.getElementById(type + 'Dropdown').insertAdjacentHTML('beforeend', `<div class="custom-option" onclick="selectOption('${type}', '${data.id}', '${escapedName}')">${data.name}</div>`);
+
+                    selectOption(type, data.id, data.name);
                     closeModal();
                 } else alert(data.message);
             }).catch(err => {
