@@ -5,7 +5,7 @@ from django import forms
 import openpyxl
 from django.contrib.auth.hashers import make_password
 
-# 🚀 नए डेटाबेस डिज़ाइन के अनुसार सारे मॉडल्स इम्पोर्ट किए गए हैं
+# 🚀 नए डेटाबेस डिज़ाइन के अनुसार सारे मॉडल्स इम्पोर्ट किए गए हैं
 from .models import (
     CustomUser, TeacherProfile, StudentProfile,
     ExamCategory, SubjectCategory, ChapterCategory,
@@ -13,6 +13,7 @@ from .models import (
     TestAttempt, StudentAnswer,
     PaymentTransaction, WalletTransaction, WithdrawalRequest
 )
+
 
 # ==========================================
 # 1. USERS & PROFILES
@@ -29,10 +30,12 @@ class CustomUserAdmin(admin.ModelAdmin):
             obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
 
+
 @admin.register(TeacherProfile)
 class TeacherProfileAdmin(admin.ModelAdmin):
     list_display = ('coaching_name', 'coaching_code', 'user', 'wallet_balance')
     search_fields = ('coaching_name', 'coaching_code', 'user__full_name')
+
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
@@ -49,17 +52,24 @@ class ExamCategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'created_by', 'created_at']
     search_fields = ['name']
 
+
 @admin.register(SubjectCategory)
 class SubjectCategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'exam', 'created_by']
     list_filter = ['exam']
     search_fields = ['name']
 
+
 @admin.register(ChapterCategory)
 class ChapterCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'subject', 'created_by']
+    # 👇 NAYA: sequence को लिस्ट में जोड़ दिया गया है
+    list_display = ['name', 'subject', 'created_by', 'sequence']
     list_filter = ['subject__exam', 'subject']
     search_fields = ['name']
+
+    # 👇 NAYA: अब आप एडमिन पैनल की लिस्ट से ही sequence एडिट कर पाएंगे
+    list_editable = ['sequence']
+    ordering = ['sequence']
 
 
 # ==========================================
@@ -71,6 +81,7 @@ class ExcelUploadForm(forms.Form):
     subject = forms.ModelChoiceField(queryset=SubjectCategory.objects.all(), label="2. Select Subject")
     chapter = forms.ModelChoiceField(queryset=ChapterCategory.objects.all(), label="3. Select Chapter")
     excel_file = forms.FileField(label="4. Upload Excel File")
+
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -141,6 +152,7 @@ class MockTestAdmin(admin.ModelAdmin):
     list_display = ('title', 'test_code', 'teacher', 'status', 'created_at')
     list_filter = ('status', 'teacher')
 
+
 @admin.register(TestQuestionMapping)
 class TestQuestionMappingAdmin(admin.ModelAdmin):
     list_display = ('test', 'question', 'order')
@@ -155,6 +167,7 @@ class TestAttemptAdmin(admin.ModelAdmin):
     list_display = ('student', 'test', 'is_completed', 'score', 'start_time')
     list_filter = ('is_completed',)
 
+
 @admin.register(StudentAnswer)
 class StudentAnswerAdmin(admin.ModelAdmin):
     list_display = ('attempt', 'question', 'selected_option')
@@ -168,10 +181,12 @@ class PaymentTransactionAdmin(admin.ModelAdmin):
     list_display = ('user', 'payment_type', 'amount', 'status', 'created_at')
     list_filter = ('status', 'payment_type')
 
+
 @admin.register(WalletTransaction)
 class WalletTransactionAdmin(admin.ModelAdmin):
     list_display = ('user', 'transaction_type', 'amount', 'created_at')
     list_filter = ('transaction_type',)
+
 
 @admin.register(WithdrawalRequest)
 class WithdrawalRequestAdmin(admin.ModelAdmin):

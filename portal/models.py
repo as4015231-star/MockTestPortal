@@ -55,9 +55,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 # ==========================================
 # 2. PROFILES (TEACHER & STUDENT)
 # ==========================================
-# ==========================================
-# 2. PROFILES (TEACHER & STUDENT)
-# ==========================================
 class TeacherProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='teacher_profile')
     coaching_code = models.CharField(max_length=10, unique=True)
@@ -70,19 +67,17 @@ class TeacherProfile(models.Model):
                                            help_text="इस फीस में एडमिन का हिस्सा")
     subscription_validity_days = models.IntegerField(default=30, help_text="यह पैकेज कितने दिन चलेगा?")
 
-    # 🚀 NAYA: Demo Control System (Admin Control)
-    demo_expiry_date = models.DateTimeField(null=True, blank=True, help_text="डेमो समाप्त होने की तारीख (एडमिन कंट्रोल)")
+    demo_expiry_date = models.DateTimeField(null=True, blank=True,
+                                            help_text="डेमो समाप्त होने की तारीख (एडमिन कंट्रोल)")
 
     def __str__(self):
         return self.coaching_name
 
-    # 🪄 स्मार्ट फंक्शन: यह चेक करेगा कि कोचिंग का डेमो अभी चालू है या खत्म हो गया
     def is_demo_active(self):
         from django.utils import timezone
         if self.demo_expiry_date and timezone.now() <= self.demo_expiry_date:
             return True
         return False
-
 
 
 class StudentProfile(models.Model):
@@ -120,10 +115,10 @@ class StudentProfile(models.Model):
 
 
 # ==========================================
-# 📂 3. THE 3-LAYER CATEGORY SYSTEM (NEW)
+# 📂 3. THE 3-LAYER CATEGORY SYSTEM
 # ==========================================
 class ExamCategory(models.Model):
-    name = models.CharField(max_length=100)  # e.g., SSC CGL, UP Police
+    name = models.CharField(max_length=100)
     created_by = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name='created_exams')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -137,7 +132,7 @@ class ExamCategory(models.Model):
 
 class SubjectCategory(models.Model):
     exam = models.ForeignKey(ExamCategory, on_delete=models.CASCADE, related_name='subjects')
-    name = models.CharField(max_length=100)  # e.g., Physics, Math
+    name = models.CharField(max_length=100)
     created_by = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name='created_subjects')
 
@@ -150,27 +145,27 @@ class SubjectCategory(models.Model):
 
 class ChapterCategory(models.Model):
     subject = models.ForeignKey(SubjectCategory, on_delete=models.CASCADE, related_name='chapters')
-    name = models.CharField(max_length=100)  # e.g., Vector, Motion
+    name = models.CharField(max_length=100)
     created_by = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name='created_chapters')
+
+    # 👇 NAYA: Sequence field added for correct ordering
+    sequence = models.IntegerField(default=0, help_text="चैप्टर का सही क्रम डालें (जैसे 1, 2, 3)")
 
     def __str__(self):
         return f"{self.subject.name} - {self.name}"
 
     class Meta:
         verbose_name_plural = "Chapter Categories"
+        ordering = ['sequence']  # 👇 NAYA: This ensures chapters always show in correct order
 
 
 # ==========================================
-# 🏦 4. MASTER QUESTION BANK (Global + Private) (NEW)
+# 🏦 4. MASTER QUESTION BANK
 # ==========================================
 class Question(models.Model):
-    # Category Link (Linked to Chapter)
     chapter = models.ForeignKey(ChapterCategory, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='questions')
-
-    # 🌟 The Magic Column (Private vs Global)
-    # Null = Global (Everyone), TeacherProfile = Private (Only that teacher)
     assigned_coaching = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, null=True, blank=True,
                                           related_name='private_questions')
 
@@ -180,9 +175,11 @@ class Question(models.Model):
     option_b = models.CharField(max_length=255)
     option_c = models.CharField(max_length=255)
     option_d = models.CharField(max_length=255)
-    correct_answer = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
-    explanation = models.TextField(blank=True, null=True)
 
+    # 👇 NAYA: Changed max_length to 255 to prevent varying(1) upload error
+    correct_answer = models.CharField(max_length=255, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+
+    explanation = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -212,7 +209,7 @@ class MockTest(models.Model):
 
 
 # ==========================================
-# 🛒 6. TEST-QUESTION MAPPING (The Shopping Cart) (NEW)
+# 🛒 6. TEST-QUESTION MAPPING
 # ==========================================
 class TestQuestionMapping(models.Model):
     test = models.ForeignKey(MockTest, on_delete=models.CASCADE, related_name='mapped_questions')
@@ -221,7 +218,7 @@ class TestQuestionMapping(models.Model):
 
     class Meta:
         ordering = ['order']
-        unique_together = ('test', 'question')  # एक टेस्ट में एक प्रश्न दो बार नहीं आ सकता
+        unique_together = ('test', 'question')
 
     def __str__(self):
         return f"{self.test.title} -> {self.question.id}"
@@ -268,7 +265,6 @@ class PaymentTransaction(models.Model):
     payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='SUBSCRIPTION')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
-    # Razorpay Details
     razorpay_order_id = models.CharField(max_length=100, unique=True)
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
